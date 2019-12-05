@@ -3,13 +3,54 @@ title: "Adding data to the Triple-D database"
 output: html_document
 ---
 
-The Triple-D database is also meant to allow inclusion of future Triple-D data. If you want to collect, or have already collected Triple-D data that you would like to contribute to this database, please follow these steps.
+The Triple-D database is also meant to allow inclusion of future Triple-D data. If you want to collect, or have already collected Triple-D data that you would like to contribute to this database, please follow these steps. Please note the following important information:  
+- The data imported into the database should be original data, e.g. measured or derived during the cruise. If data is missing it should not be taken from another source to complete the database. For example, when water depth at the sampling stations could not be collected, these fields should remain empty. You should not try to derive water depth at the sampling stations from, for example, bathymetry maps created by other parties.  
+- It is, of course, useful to fix missing data by using alternative datasets. The package also includes data and functions to complete the database where original data is missing, so that it can be readily used for analysis. Feel free to add such a fix to the package. For example, if you have data and code to derive missing water depths, you can add this to the package.  
+- A station is defined as a **unique sampling event** (so not a sampling region). Therefore, if two samples are taken at the same geographical location, they are defined as two distinct stations.  
 
-# 1. Collecting data
-- Go to the TripleD database repository on GitHub.  
-- Go to the folder: "folder > folder" and download "attributes.csv". This file contains a description of all variable names used in the database, their unit, and a clear description of the type of data that is required.  
+# 1. Collect data
+1. Go to the TripleD database repository on GitHub.  
+2. Go to the folder: "folder > folder" and download "attributes.csv". This file contains a description of all variable names used in the database, their unit, and a clear description of the type of data that is required.  
 
-# 2. Contributing raw data
-- The package is not meant for inclusion of the raw data, only a cleaned up version that can be readily incorporated into the database. If you have raw data, please consider adding it to DAS so it can be found by other users of the database if they really need to go all the way back to the raw data.  
-- Open the file "data_sources.csv" in "inst > extdata" and add the filename, your name, a description of the contents of the file, and whether or not you have deposited this raw data in DAS (yes / no).
-- 
+# 2. Raw data in DAS
+1. The package is not meant for inclusion of the raw data, only a cleaned up version that can be readily incorporated into the database. If you have raw data, please consider adding it to DAS so it can be found by other users of the database if they really need to go all the way back to the raw data.  
+
+# 3. Pull-request
+1. Go the the TripleD repository on GitHub and make a pull-request.  
+2. Once it is confirmed you can change the package as described below.    
+
+# 4. Add source of raw data
+1. Open the file "data_sources.csv" in "inst/extdata". 
+2 For each file that you used to add data to the database (excel sheets, casino data, cruise reports, lab book scans, etc.) add a row with the filename, your name, a description of the contents of the file, and whether or not you have deposited this raw data in DAS (yes / no).  
+
+# 5. Sampling stations
+Note: A station is defined as a **unique sampling event** (so not a sampling region). Therefore, if two samples are taken at the same geographical location, they are defined as two distinct stations.  
+
+1. Data about the sampled stations should be added as a separate csv file to the folder **"data-raw/Stations"**. Preferably named as **"year_cruiseID_cruisename.csv"**, for example: 2019_64PE438_NICO10.csv
+2. The column names in the csv file should comply with the variable names as described in **"inst/extdata/attributes_stations.csv"**. The values in each column should be the type of data (e.g. same unit) described for each variable in "attributes_stations.csv". The order of the columns is not important.
+4. If your raw data is not exactly similar to the required data types, you should document how you altered your raw data (as stored in DAS) in order to arrived at this cleaned csv file (stored in this package). Go to **"vignettes/cleaning_data.Rmd"** and for each variable provide information how you arrived at the data you contributed. This can be either a description if you did this manually, or documentation of data and scripts used to automatically alter data. For example, you could include data and code used to derive the location of the dredge using GPS coordinates of the ship, information on the positioning of the GPS antenna on the ship, and the angle and length of the veered cable.  
+5. The following columns are at least required in your csv file:  
+- *StationID*: A unique ID for the sampling event, preferably as "<cruiseID>#<event number>". For example: 64PE438#21.  
+- *Date*: The date when the sampling event took place in the format "DD/MM/YYYY". For example: 12/01/1994.  
+- *Lat_start(DD)*, *Lon_start(DD)*, *Lat_stop(DD)* and *Lon_stop(DD)*: The start and stop coordinates in decimal degrees of when the dredge itself (so not the ship) touched the bottom and was heaved respectively. If this information is for some reason not available the fields *Lat(DD)* and *Lon(DD)* should be filled. *Lat(DD)* and *Lon(DD)* should approximate the midpoint of the dredge track as closely as possible. Document in the "cleaning_data.Rmd" as detailed as possible how you obtained and/or calculated the coordinates.   
+- *Track_dist(m)*: Track length as measured by the odometer. Required especially when the start and stop coordinates of the track are not known and thus only Lat(DD) and Lon(DD) are provided.  
+- *Blade_depth(m)*: The depth in cm of the exised strip of sediment by the blade.  
+- *Blade_width(m)*: The width in cm of the exised strip of sediment by the blade.  
+6. The other column variables are optional but the more data the better. Again, if your raw data does not exactly match the unit and/or description of the data types from the "attributes_station.csv" file, please provide a detailed description in "cleaning_data.Rmd" about how you derived the required data.   
+7. If you have station data that is not included in the current list of variables and includes relevant information, you can request addition of this column to the database as follows:  
+- In the "attributes_station.csv" file add a row that includes the variable name, its unit, and a detailed description of your new variable you would like to add.  
+- Include a column with the new variable in the csv you are contributing. It will automatically be added to the database if the new variable is accepted by the database moderator. All other entries will get a value of NA for this new variable, unless their original csv files are changed so that it also includes a column with this new variable.  
+
+# Add to database
+It is automatically checked  
+- If you provided the required fields for stations and species.  
+- If the data types in each column are correct (integers, doubles, text, date, time etc.).  
+- If there are any suspicious values (very deep water depths, very large organisms).  
+- A log text dump is created with the date and newly added data.
+
+
+The moderator checks:
+- If you provided documentation on how you cleaned your raw data and derived your clean csv.  
+- Whether or not your new variable will be added (requirements: the variable is not redundant i.e. cannot be derived from the already available variables.)
+
+# Fix for missing data
