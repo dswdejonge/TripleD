@@ -1,0 +1,92 @@
+---
+title: "Triple-D data formatting"
+output: html_document
+---
+
+# Stations
+
+## StationID
+For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.
+
+## Date
+For the NICO10 cruise (64PE438) the date for all samples is taken from the cruise report.
+
+## Lat_start(DD) and Lon_start(DD)
+For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge touched bottom. Taken from CASINO extract in cruise report.
+
+## Lat_stop(DD) and Lon_stop(DD)
+For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge was heaved. Taken from CASINO extract in cruise report.
+
+## Lat(DD) and Lon(DD)
+The Lat(DD) and Lon(DD) for the NICO10 cruise (64PE438) are calculated from the position of the ship, the position of the antenna on the ship, the estimated angle of the veered cable, and the length of the veered cable as follows:  
+**CODE BY ROB**
+Taken from the excel file provided by Rob Witbaard.
+
+## Track_dist(m)
+For the NICO10 cruise (64PE438) these correspond to the odometer. Taken from CASINO extract in cruise report.
+
+## Blade_depth(cm)
+During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
+
+## Blade_width(cm)
+During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
+
+## Vessel
+NICO10 cruise (64PE438): RV Pelagia
+
+## CruiseID
+NICO10 cruise (64PE438)
+
+## Cruise_name
+NICO10 cruise (64PE438)
+
+## Station_name
+NICO10 cruise (64PE438): station names can be used to relate to other samples taken at these locations (boxcores, nutrient samples, etc.) as reported in the cruise report.
+
+## Region
+NICO10 cruise (64PE438): not included
+
+## Time_start
+NICO10 cruise (64PE438): Time when dredge touched bottom, taken from CASINO extract in cruise report.
+
+## Time_stop
+NICO10 cruise (64PE438): Time when dredge was heaved, taken from CASINO extract in cruise report.
+
+## Tow_speed(knots)
+NICO10 cruise (64PE438): not included.
+
+## Water_depth_start(m)
+NICO10 cruise (64PE438): not included.
+
+## Water_depth_stop(m)
+NICO10 cruise (64PE438): not included.
+
+## Water_depth(m)
+NICO10 cruise (64PE438): how is this measured? Taken from CASINO extract in cruise report.
+
+## Pre-run_setting
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## Cable_length(m)
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## SB(count)
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## BB(count)
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## Plate
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## Buffer(bar)
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## Sucker(bar)
+NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+
+## Quality
+NICO10 cruise (64PE438): included, based on the performance parameters of the dredge track. Taken from CASINO extract in cruise report.
+
+# Species
+
