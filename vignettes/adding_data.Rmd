@@ -1,8 +1,15 @@
 ---
-title: "Adding data to the TripleD database"
+title: "Adding data to the Triple-D database"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+The Triple-D database is also meant to allow inclusion of future Triple-D data. If you want to collect, or have already collected Triple-D data that you would like to contribute to this database, please follow these steps.
+
+# 1. Collecting data
+- Go to the TripleD database repository on GitHub.  
+- Go to the folder: "folder > folder" and download "attributes.csv". This file contains a description of all variable names used in the database, their unit, and a clear description of the type of data that is required.  
+
+# 2. Contributing raw data
+- The package is not meant for inclusion of the raw data, only a cleaned up version that can be readily incorporated into the database. If you have raw data, please consider adding it to DAS so it can be found by other users of the database if they really need to go all the way back to the raw data.  
+- Open the file "data_sources.csv" in "inst > extdata" and add the filename, your name, a description of the contents of the file, and whether or not you have deposited this raw data in DAS (yes / no).
+- 
