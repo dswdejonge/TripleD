@@ -1,0 +1,25 @@
+﻿Attribute,Unit,Description
+StationID,NA,"A unique ID for the sampling event, preferably as ""<cruiseID>#<event number>"". For example: 64PE438#21.  "
+Date,NA,"The date when the sampling event took place in the format ""DD/MM/YYYY"". For example: 12/01/1994."
+Lat_start(DD),Decimal degrees,Latitude of the dredge when the dredge touched bottom.
+Lon_start(DD),Decimal degrees,Longitude of the dredge when the dredge touched bottom.
+Lat_stop(DD),Decimal degrees,Latitude of the dredge when the dredge was heaved from the bottom.
+Lon_stop(DD),Decimal degrees,Longitude of the dredge when the dredge was heaved from the bottom.
+Lat(DD),Decimal degrees,Closest approximation possible of the latitude of the midpoint of the dredge track.
+Lon(DD),Decimal degrees,Closest approximation possible of the longitude of the midpoint of the dredge track.
+Track_dist(m),Meters,Track length as measured by the odometer.
+Station_name,NA,Generic name of the station where the sample is taken.
+Time_start,HH:MM:SS,Time when the dredge touched bottom.
+Time_stop,HH:MM:SS,Time when the dredge was heaved from the bottom.
+Water_depth(m),Meters,Water depth at the start (??) of the dredge track.
+Pre-run_setting,?,?
+Cable_length(m),Meters,Length of cable veered from ship to the dredge.
+SB(count),Count,?
+BB(count),Count,?
+Plate,?,?
+Buffer(bar),Bar,Pressure of buffer?
+Sucker(bar),Bar,Pressure of sucker? (zuiger)?
+Quality,Good / Failed / Doubt,Qualitative description of the quality of the dredge.
+Cruise,,
+Vessel,,
+PI,,
