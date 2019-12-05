@@ -1,5 +1,5 @@
 ---
-title: "Using the TripleD database"
+title: "Using the Triple-D database"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{vignette}
@@ -20,7 +20,9 @@ knitr::opts_chunk$set(
 library(TripleD)
 ```
 
-The TripleD package includes the collected Triple-D data by the NIOZ Royal Netherlands Institute for Sea Research. The Triple-D is a dredge designed by NIOZ that can easily sample relatively large areas of seabed in order to better quantitatively study the distribution of megafauna that has generally low abundances. The Triple-D is mostly used on the Dutch Continental Shelf, North Sea. It was chosen to collect the data in an R package in order to allow easy sharing of the data, its description in elaborate documentation, and the code used to clean, mutate, and explore the data. The package also includes a template that can be used when more Triple-D is collected to allow easy later incorporation into this database. How to add data to the database is included in a seperate vignette.  
+The TripleD package includes the collected Triple-D data by the NIOZ Royal Netherlands Institute for Sea Research. The Triple-D is a dredge designed by NIOZ that can easily sample relatively large areas of seabed in order to better quantitatively study the distribution of megafauna that has generally low abundances. The Triple-D is mostly used on the Dutch Continental Shelf, North Sea.   
+
+It was chosen to collect the data in an R package in order to allow easy sharing of the data, its description in elaborate documentation, and the code used to clean, mutate, and explore the data. The package also includes a template that can be used when more Triple-D is collected to allow easy later incorporation into this database. How to add data to the database is included in a seperate vignette. The package is hosted on GitHub to allow version control.  
 
 The Triple-D data is collected over a great many years, over which methodology changed gradually. In order to allow comparison data collected in different years by different people, elaborate documentation has been added to the database. It allows the user of the database to review the assumptions underlying the data.
 
@@ -30,6 +32,9 @@ This vignette includes the following chapters:
 3. Quality control: Elaborate documentation of how the raw data was used to construct the final database,  
 4. Database: How to use the Triple-D database,  
 5. Bibliography: The papers referred to in this vignette.
+
+Database dashboard:  
+Summary of current database. 
 
 # Acknowledgements
 Magda Bergman  
