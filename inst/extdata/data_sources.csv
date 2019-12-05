@@ -1,4 +1,7 @@
-﻿Document,Source,Contents
-nico_10_report_edits_emil.docx,Emil de Borger ,"Cruise report of NICO 10, extract of casino data."
-Schaafdata 64PE438.xlsx,Rob Witbaard,"Biological data of TripleD during NICO 10. Species, counts, wet weights, and comments. Also some preparations for import in R, and station information."
-Access database,Marc Lavaleye,Biological data of TripleD.
+﻿Document,Name of contributer,Description of contents,In DAS?
+nico_10_report_edits_emil.docx,Emil de Borger ,"Cruise report of NICO 10, extract of casino data.",No
+Schaafdata 64PE438.xlsx,Rob Witbaard,"Biological data of TripleD during NICO 10. Species, counts, wet weights, and comments. Also some preparations for import in R, and station information.",No
+Access database versie 2019,Marc Lavaleye,Access database maintained by Marc Lavaleye with multiple years of Triple-D data.,No
+31135633_Bodemschaaf FrieseFront 2018_RWS_Database_V7.xlsx,Rob Witbaard,Triple-D data collected at the Frysian Front in 2018.,No
+datasheet_Bodemschaaf_alle_trekken_100117aangepastFormat.xlsx,Rob Witbaard,Triple-D data collected at the Frysian Front in 2018.,No
+Kopie van logboek.xlsx,Rob Witbaard,Logbook of the 2018 expedition to the Frysian Front with the Triple-D.,No
