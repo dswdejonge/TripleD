@@ -1,0 +1,127 @@
+---
+title: "Using the TripleD database"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib
+---
+
+```{r, include = FALSE}
+library(knitr)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(TripleD)
+```
+
+The TripleD package includes the collected Triple-D data by the NIOZ Royal Netherlands Institute for Sea Research. The Triple-D is a dredge designed by NIOZ that can easily sample relatively large areas of seabed in order to better quantitatively study the distribution of megafauna that has generally low abundances. The Triple-D is mostly used on the Dutch Continental Shelf, North Sea. It was chosen to collect the data in an R package in order to allow easy sharing of the data, its description in elaborate documentation, and the code used to clean, mutate, and explore the data. The package also includes a template that can be used when more Triple-D is collected to allow easy later incorporation into this database. How to add data to the database is included in a seperate vignette.  
+
+The Triple-D data is collected over a great many years, over which methodology changed gradually. In order to allow comparison data collected in different years by different people, elaborate documentation has been added to the database. It allows the user of the database to review the assumptions underlying the data.
+
+This vignette includes the following chapters:  
+1. Triple-D: Information on the Triple-D,  
+2. Raw data: Description of the raw data used to construct the dataset,  
+3. Quality control: Elaborate documentation of how the raw data was used to construct the final database,  
+4. Database: How to use the Triple-D database,  
+5. Bibliography: The papers referred to in this vignette.
+
+# Acknowledgements
+Magda Bergman  
+Rob Witbaard  
+Marc Lavaleye  
+
+# 1. TripleD
+A prototype of the Triple-D was introduced by Bergman & Santbrink [@Bergman1994]. It was developed in order to better quantitatively study the distribution of generally sparsly abundant megafauna. The prototype Triple-D was 2.0 m long, 1.5 m wide and 1.5 m high and weighted about 600 kg. The current Triple-D is 2.4 m long, 2.6 m wide, 1.2 m high and weights about 1200 kg. The dredge contains a blade of 20 cm width that is pushed into the sediment to a depth of 20 cm and consequently towed over the seabed at a speed of 3 knots. The tow track length is measured by an odometer (a wheel tracking the distance) set to 100 m that also controls the pneumatic opening-closing mechanism. The sediment that is exised from the seabed passes through a tailing 6 m with a mesh size of 7 mm. The remaining fauna in the net representing a total area of 20 m2 are brought aboard for identification and measurements.  
+
+More information: http://ipt.nioz.nl/resource?r=triple-d_dredge  
+
+Video:  
+[![TripleD operations video](http://img.youtube.com/vi/O3XIFzbljWk/0.jpg)](https://www.youtube.com/watch?v=O3XIFzbljWk "NIOZ Triple D Operations clip")
+
+# 2. Raw data
+TripleD biological data and corresponding metadata was collected and kept intact to refer back if inconsistencies would occur. The raw data is not included in the package to save space, but instead it should be available through the NIOZ data archiving system (DAS). The current database in based on the following sources of data:   
+```{r}
+raw_data_sources <- read.csv(system.file("extdata", "data_sources.csv", package = "TripleD"))
+knitr::kable(raw_data_sources)
+```
+
+If you would like to include new data in the database, please add a description of the raw data file(s) to the "data_sources.csv" found in the package folder "extdata".
+
+# 3. Data cleaning
+Data can be added to the database by depositing cleaned csv files with station and sample information in the respective package folders "Sampling_stations" and "Species" under "data-raw". These csv files must fulfill certain requirements (see below). Please describe below under "Description of cleaning process" how you had to adjust the raw data in order to fulfil these requirements if you add new data to the database
+
+## Requirements
+Two types of files can be distinguished: a csv file with station data i.e. information about every sampling event like location and track length, and a csv file with biological data, i.e. the analysis of the TripleD content after dredging. Files from separate cruises are preferably kept separate. Additionally, two metadata files were created, one for station data and one for biological data, called ‘Attributes.csv’ that includes information of each column variable/attribute, its unit if applicable, and a description. If different variables were measured on different cruises, thus different variables will be present in the different csv files, the explanation of all variables can be found in this one attribute explanation file. This metadata is important to prevent confusion about the meaning of values and allow easy transfer of the data to someone that is not familiar with the dataset. These raw datafiles with the correct format in csv extension can be found in the TripleD R-package, under ‘data_raw’ > ‘Sampling_stations’ or ‘Species’ > ‘files’.
+
+### Sampling_stations
+This dataframe includes information on all sampled station, i.e. on every dredge.  
+Columns:  
+- File: File name of the csv that contained the data entry.  
+- Station: A unique sampling ID. Usually the cruiseID combined with a number. Multiple sampling stations can occur at the same geographic location (i.e. have the same station name).  
+- Station_name: A generic name of the station that may contain some information on the location.  
+- Year: The year when the specific station was sampled.  
+- Month: The month when the specific station was sampled (1 to 12, Jan to Dec).  
+- Day: The day of the month when the specific station was sampled (1 to 31).  
+- Time: The time when the specific station was sampled.  
+- Lat: The average latitude (GPS coordinates) of the sampling station (in between the start and end position of the ship during the dredge) expressed in decimal degrees. Reference coordinate system is WGS84.  
+- Lon: The average longitude (GPS coordinates) of the sampling station (in between the start and end position of the ship during the dredge) expressed in decimal degrees. Reference coordinate system is WGS84.  
+- Distance: Distance dredged at this sampling location expressed in meters.  
+- Direction: Average bearing of the ship during the dredge, expressed in ??.  
+- Blade_width: The width of the used blade expressed in cm.  
+- Blade_depth: The depth of the used blade expressed in cm. 
+
+### Species
+This dataframe includes information on the species found in each sample, i.e. in every dredge.
+Columns:
+- File: File name of the csv that contained the data entry.  
+- Station: A unique sampling ID. Usually a cruiseID combined with a number. Is used for cross-referencing with the sampling station information.  
+- Unit: Unit used for expressing the size of the individual. ??  
+- Factor: ??  
+- Species: Scientific species name of the sampled individual.  
+- Common_name: Common name of the sampled individual.  
+- Count: How many individuals are included in this data entry? Should be 1 if the reported information is per individual.  
+- Size: The size of the individual reported by the unit reported in the column "Unit".  
+- WetWeight: The wet weight of the (group of) individuals reported in grams. If sizes are reported for individuals, but wet weight is only known for the collection of individuals per species, then report a wet weight of zero, except for one individual. In the analysis the total wet weight per species is calculated.
+
+## Description of cleaning process
+### 2019_NICO_10.csv
+	The column variables in all files were translated to English. The unit of the variable was added to the column name and no spaces were allowed. For example, ‘water depth’ was changed to ‘water_depth(m)’. Empty cells were not allowed. If a value was missing it was set to NA. Entries with a value 0 that did not have a numerical meaning were changed to NA. 
+For the species data a binary column called BulkWeight(Y/N) was added (either Yes or No) to indicate if a reported wet weight represents the weight of the one individual in the observation (BulkWeigth(Y/N) = N) or if it concerns the combined weight of multiple individuals, either in one row (count > 1) or in multiple rows (multiple individuals reported for size measurements, but weight in bulk) (BulkWeigth(Y/N) = Y) so when the wet weight can only be reported as average value. This column was added to aid analysis downstream if biomasses of individuals are important. Wet weight measurements of 0, originally meant to indicate that the individual was not measured, was changed to NA to avoid confusion in later downstream analysis.
+	For station data, the date of each sampling event was recorded in a column ‘Year’, column ‘Month’ and column ‘Day’. The start and end time of each sampling event was reported in their respective columns as ‘HH:MM:SS”. Start and stop latitude and longitude were reported in their respective columns in decimal degrees.
+
+# 4. Database
+
+# 5. Community matrices
+ 
+## 1. Environmental data
+•	Sediment depth samples
+•	Species caught
+•	Number of individuals
+•	Biomass / size of individuals
+•	Sex of individuals
+•	Age of individuals
+•	Overall density sample
+•	Overall biomass sample
+•	Discarded (surviving) species
+
+## 3. How to include more data
+When including data in this database, try to provide as much information as possible and beware of units!!
+
+# Raw data
+Add information on the raw data to the file "data_sources.csv" in the "data-raw folder."
+If possible, add the raw data files to DAS (Data Archiving System of NIOZ).
+
+
+Include information on the sampling stations:  
+In order to interpret the biological data, metadata on the sampling is necessary.
+1. Create a CSV file that include as many as the columns as mentioned in "Data format" as possible.  
+2. Add the CSV file to the 'data-raw/Sampling_stations' folder in this package.  
+3. Run the file 'Sampling_stations.R' in order to store the new data. It will create a new CSV file in the 'data-raw' folder, and an RData file in the 'data' folder.  
+
+# Bibliography
