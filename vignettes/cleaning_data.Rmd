@@ -4,89 +4,205 @@ output: html_document
 ---
 
 # Stations
+# General remarks
+test_Lavaleye: The raw data included station info together with biological data. The "remove duplicates" function in Excel was used to only keep one entry per station.
 
 ## StationID
 For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.
+test_Lavaleye: StCode is same as StationID. 
 
 ## Date
 For the NICO10 cruise (64PE438) the date for all samples is taken from the cruise report.
+test_Lavaleye: Already reported in correct format.
 
 ## Lat_start(DD) and Lon_start(DD)
 For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge touched bottom. Taken from CASINO extract in cruise report.
+test_Lavaleye: Not available.
 
 ## Lat_stop(DD) and Lon_stop(DD)
 For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge was heaved. Taken from CASINO extract in cruise report.
+test_Lavaleye: Not available. 
 
 ## Lat(DD) and Lon(DD)
 The Lat(DD) and Lon(DD) for the NICO10 cruise (64PE438) are calculated from the position of the ship, the position of the antenna on the ship, the estimated angle of the veered cable, and the length of the veered cable as follows:  
 **CODE BY ROB**
 Taken from the excel file provided by Rob Witbaard.
+test_Lavaleye: Reported, but unclear how these were obtained: ship or dredge positions? Midpoint of track?
 
 ## Track_dist(m)
 For the NICO10 cruise (64PE438) these correspond to the odometer. Taken from CASINO extract in cruise report.
+test_Lavaleye: Track length is Track_dist(m). Are these all measured with odometers, or also other methods to derive track distance?
 
 ## Blade_depth(cm)
 During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
+test_Laveleye: depth of blade is not recorded. For now assumed 20 cm, is this correct for all data? In prototype paper other possible depths were also recorded. 
 
 ## Blade_width(cm)
 During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
+test_Laveleye: width is blade width in meters, so multiplied x100 to obtain value in cm. 
 
 ## Vessel
 NICO10 cruise (64PE438): RV Pelagia
+test_Laveleye: Not available.
 
 ## CruiseID
 NICO10 cruise (64PE438)
+test_Laveleye: CruiseID is Cruise in raw data.
 
 ## Cruise_name
 NICO10 cruise (64PE438)
+test_Laveleye: Cruise_name is CruiseName in raw data.
 
 ## Station_name
 NICO10 cruise (64PE438): station names can be used to relate to other samples taken at these locations (boxcores, nutrient samples, etc.) as reported in the cruise report.
+test_Laveleye: can we use Station in raw data for this field?
 
 ## Region
 NICO10 cruise (64PE438): not included
+test_Laveleye: Available in raw data.
 
 ## Time_start
 NICO10 cruise (64PE438): Time when dredge touched bottom, taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Time_stop
 NICO10 cruise (64PE438): Time when dredge was heaved, taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Tow_speed(knots)
 NICO10 cruise (64PE438): not included.
+test_Laveleye: Not available.
 
 ## Water_depth_start(m)
 NICO10 cruise (64PE438): not included.
+test_Laveleye: Not available.
 
 ## Water_depth_stop(m)
 NICO10 cruise (64PE438): not included.
+test_Laveleye: Not available.
 
 ## Water_depth(m)
 NICO10 cruise (64PE438): how is this measured? Taken from CASINO extract in cruise report.
+test_Laveleye: Available, unclear how these values are obtained.
 
 ## Pre-run_setting
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Cable_length(m)
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## SB(count)
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## BB(count)
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Plate
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Buffer(bar)
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Sucker(bar)
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
 
 ## Quality
 NICO10 cruise (64PE438): included, based on the performance parameters of the dredge track. Taken from CASINO extract in cruise report.
+test_Laveleye: Not available.
+
+
+
+
 
 # Species
+## General remarks
 
+## StationID
+For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.  
+
+test_Lavaleye: StCode is same as StationID.
+
+## Fraction
+NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125.  
+
+test_Lavaleye: Taken from raw data.
+
+## isFractionAssumed
+NICO10 cruise (64PE438): Fractions were specifically reported so isFractionAssumed = 0.  
+
+test_Lavaleye: isFractionAssumed is based on the column AssumedFraction in raw data. In this case the column was empty, so all fractions were set to isFractionAssumed = 0.
+
+## Species_reported
+NICO10 cruise (64PE438): Species name taken for Species_reported.
+test_Lavaleye: Taken from raw data.
+
+## Count
+NICO10 cruise (64PE438): reported in raw data.  
+
+test_Lavaleye: Number column is taken as Count.
+
+## Unit_Length
+NICO10 cruise (64PE438): Maatvoering is taken for Unit_Length. 1/2 cm (with space) was converted to 1/2cm (without space).  
+
+test_Lavaleye: unit length taken for Unit_Length. 0.5cm was converted to 1/2cm. na was converted to NA.  
+
+## Length
+NICO10 cruise (64PE438): Size is taken for Length. Not clear what dimensions were measured as "size". Ask Rob.  
+
+test_Lavaleye: reported in raw data.  
+
+## Unit_Width
+NICO10 cruise (64PE438): not measured.  
+
+test_Lavaleye: not measured.
+
+## Width
+NICO10 cruise (64PE438): not measured.  
+
+test_Lavaleye: not measured.  
+
+## WetWeight(g)
+NICO10 cruise (64PE438): Reported in raw data. Entries of <0.5 were set to 0.  
+
+test_Lavaleye: scale gWweight with shell is WetWeight(g). Not measured.
+
+## isBulkWeight
+NICO10 cruise (64PE438): If at one sampling station multiple entries of one species exists or if there is one entry with a count > 1, isBulkWeight is set to 1 for all entries (so also for the species with a WetWeight of NA). isBulkWeight was only set to 0 if there was only one individual of that species in the sample. Ask Rob about Arctica islandica.
+
+test_Lavaleye: NA.  
+
+
+## Threshold_Scale
+NICO10 cruise (64PE438): All specimens were measured with the same scale with a threshold of 0.5 grams.
+
+test_Lavaleye: NA.  
+
+
+## isWithShell
+NICO10 cruise (64PE438): Assumed all measured with shell. Column not included.
+
+test_Lavaleye: NA (for now).  
+
+## isPartialWW
+NICO10 cruise (64PE438): Based on the comment isPartialWW was set to 1 if it was suspected the reported weight only concern part of the organism.  
+
+test_Lavaleye: NA (for now).  
+
+## ID_by
+NICO10 cruise (64PE438): Not reported in raw data.
+
+## isPreserved
+NICO10 cruise (64PE438): Not reported in raw data.
+
+test_Lavaleye: Preserved is isPreserved. NA (for now).  
+
+## Comment
+NICO10 cruise (64PE438): Used comments from raw data (in Dutch).
+test_Lavaleye: Remark is used for Comment. Empty cells filled with NA.
