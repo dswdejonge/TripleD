@@ -7,6 +7,8 @@ The Triple-D database is also meant to allow inclusion of future Triple-D data. 
 - The data imported into the database should be original data, e.g. measured or derived during the cruise. If data is missing it should not be taken from another source to complete the database. For example, when water depth at the sampling stations could not be collected, these fields should remain empty. You should not try to derive water depth at the sampling stations from, for example, bathymetry maps created by other parties.  
 - It is, of course, useful to fix missing data by using alternative datasets. The package also includes data and functions to complete the database where original data is missing, so that it can be readily used for analysis. Feel free to add such a fix to the package. For example, if you have data and code to derive missing water depths, you can add this to the package.  
 - A station is defined as a **unique sampling event** (so not a sampling region). Therefore, if two samples are taken at the same geographical location, they are defined as two distinct stations.  
+- Ideally, every specimen collected in the net is counted, measured, and weighted, thus also be individually reported. However, this is very time consuming and methods exist to speed this process up while maintaining the quantitative advantages of the dredge. The specimens are sorted per species. Per species it is decided whether all specimens or only a fraction is processed (fraction is reported in file). The individuals in the processed fraction are counted, size measured, and weighted either individually or as group. Therefore, each entry in the database can concern an individual or a group of individuals from the same species.  
+- Beware of the difference between an empty cell, the value of NA, and the value of 0. NA means the information for this entry and variable was not measured or available. If a cell is empty, it will be recorded as NA. However, it is good practice to never let a cell empty and include NA yourself to show that it was not a mistake leaving it empty but a delibarate choice. The value of 0 has numerical meaning: you tried to measure something and it turned out to be 0 or below the measuring threshold. For example, if you did not try to measure wet weight, record NA, but if you tried to measure wet weight but it was below the threshold of the scale, record 0.  
 
 # 1. Collect data
 1. Go to the TripleD database repository on GitHub.  
@@ -41,16 +43,39 @@ Note: A station is defined as a **unique sampling event** (so not a sampling reg
 - In the "attributes_station.csv" file add a row that includes the variable name, its unit, and a detailed description of your new variable you would like to add.  
 - Include a column with the new variable in the csv you are contributing. It will automatically be added to the database if the new variable is accepted by the database moderator. All other entries will get a value of NA for this new variable, unless their original csv files are changed so that it also includes a column with this new variable.  
 
+# 6. Biological data
+1. Data about species found in the net after a dredge track should be added as a separate csv file to the folder **"data-raw/Species"**. Preferably named as **"year_cruiseID_cruisename.csv"**, for example: 2019_64PE438_NICO10.csv
+2. The column names in the csv file should comply with the variable names as described in **"inst/extdata/attributes_species.csv"**. The values in each column should be the type of data (e.g. same unit) described for each variable in "attributes_species.csv". The order of the columns is not important.
+4. If your raw data is not exactly similar to the required data types, you should document how you altered your raw data (as stored in DAS) in order to arrived at this cleaned csv file (stored in this package). Go to **"vignettes/cleaning_data.Rmd"** and for each variable provide information how you arrived at the data you contributed. This can be either a description if you did this manually, or documentation of data and scripts used to automatically alter data.
+5. The following columns are at least required in your csv file:  
+- *StationID*: A unique ID for the sampling event, preferably as "<cruiseID>#<station/event number>". For example: 64PE438#21. Otherwise <cruise name>_<station number>. Very important because it is used to match species observations to station data.  
+- *Fraction*: A fraction between 0 and 1 that indicates the fraction of the catch that has been processed for this species. For example, if 10 crabs were caught, but only 5 were reported and weighted, the fraction is 0.5. This is used in later analysis to upscale the values if necessary.  
+- *isFractionAssumed*: Binary boolean to describe if the reported "Fraction" was not specified in the original data thus it was assumed to be the reported value (isFractionAssumed = 1 i.e. yes), or if "Fraction" was reported specifically in the original data (isFractionAssumed = 0 i.e. no).  
+- *Species_reported*: The scientific species name as reported in the original data files (so not updated to revised species names).  
+- *Count*: Count of number of specimens of this species in the specified size found in this specific fraction. If Count = 1 the measurements come from an individual, if Count > 1 the measurement belongs to a group of species of size Count, if Count = -1
+(often historical data) it concerns observations like eggs, rest material, empty worm tubes, seaweed batches, etc.  
+6. The other column variables are optional but the more data the better. Again, if your raw data does not exactly match the unit and/or description of the data types from the "attributes_species.csv" file, please provide a detailed description in "cleaning_data.Rmd" about how you derived the required data. Highly recommended fields are:  
+- 
+
+
+
 # Add to database
+## Stations
 It is automatically checked  
 - If you provided the required fields for stations and species.  
 - If the data types in each column are correct (integers, doubles, text, date, time etc.).  
 - If there are any suspicious values (very deep water depths, very large organisms).  
 - A log text dump is created with the date and newly added data.
 
-
 The moderator checks:
 - If you provided documentation on how you cleaned your raw data and derived your clean csv.  
 - Whether or not your new variable will be added (requirements: the variable is not redundant i.e. cannot be derived from the already available variables.)
+
+## Species
+It is automatically checked:
+- Fraction, isFractionAssumed must be same for all species entries at a certain stationID.
+- If the species name is present in WoRMS: the newest accepted synonym is added in a column.
+- If the species name is not present in WoRMS (for example higher taxon): what then?
+- All size measurements have units.
 
 # Fix for missing data
