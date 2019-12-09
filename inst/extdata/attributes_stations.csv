@@ -21,7 +21,7 @@ Tow_speed_knots,Knots,Double,Optional,NA,The average speed at which the TripleD 
 Water_depth_start_m,Meters,Double,Optional,4,Water depth in meters at the start of the dredge track (touch bottom) as measured during the cruise.
 Water_depth_stop_m,Meters,Double,Optional,4,Water depth in meters at the end of the dredge track (heaving) as measured during the cruise.
 Water_depth_m,Meters,Double,Optional,NA,Average water depth at the dredge track as measured during the cruise.
-Pre-run_setting,?,Integer,Optional,NA,?
+Pre_run_setting,?,Integer,Optional,NA,?
 Cable_length_m,Meters,Double,Optional,NA,Length of cable veered from ship to the dredge.
 SB_count,Count,Integer,Optional,NA,?
 BB_count,Count,Integer,Optional,NA,?
