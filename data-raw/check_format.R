@@ -249,3 +249,23 @@ are_species_metadata_consistent <- function(file, file_name){
     stop(paste0("In file ", file_name," the reported Fraction and isFractionAssumed must be equal for all species in a sample."))
   }
 }
+
+do_measurements_have_units <- function(file, file_name){
+  unit_cols <- grep("Unit_", colnames(file))
+  if(length(unit_cols) > 0){
+    for(unit_col in unit_cols){
+      unit <- colnames(file)[unit_col]
+      measurement_col <- gsub("Unit_", "", unit)
+      if(!measurement_col %in% colnames(file)){
+        stop(paste0("In file ",file_name," no corresponding measurement column called ",
+                   measurement_col," was found for the unit column ",unit))
+      }
+      measurements <- which(!is.na(file[,measurement_col]))
+      no_units <- which(is.na(file[measurements,unit_col]))
+      if(length(no_units) > 0){
+        stop(paste0("In file ",file_name," units are missing in column ",unit,
+                   " in row(s) ",paste(no_units, collapse = ", ")))
+      }
+    }
+  }
+}
