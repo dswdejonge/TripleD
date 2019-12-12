@@ -11,6 +11,7 @@ tables <- list(
 )
 
 for(table in tables){
+  print(table$folder)
   # Read in attribute requirements
   my_attributes <- read.csv(system.file("extdata", table$att, package = "TripleD"))
 
@@ -36,7 +37,7 @@ for(table in tables){
     are_alternative_required_att_present(file, file_name, alternative_attributes)
     are_att_names_valid(file, file_name, my_attributes)
 
-    # Correct values
+    # Correct values and units
     are_StationIDs_unique(file, file_name)
     are_required_att_complete(file, file_name, required_attributes)
     are_alternative_required_att_complete(file, file_name, alternative_attributes)
@@ -53,6 +54,15 @@ for(table in tables){
     if(table$folder == "Species"){
       are_species_metadata_consistent(file, file_name)
     }
+    do_measurements_have_units(file, file_name)
+  }
+  if(table$folder == "Stations"){
+    stations <- dplyr::bind_rows(data, .id = "File")
+    usethis::use_data(stations, overwrite = T)
+  }
+  if(table$folder == "Species"){
+    species <- dplyr::bind_rows(data, .id = "File")
+    usethis::use_data(species, overwrite = T)
   }
 }
 

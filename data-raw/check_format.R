@@ -119,8 +119,9 @@ are_StationIDs_unique <- function(file, file_name){
 are_required_att_complete <- function(file, file_name, required_attributes){
   # No NA values are allowed in the required columns.
   columns <- colnames(file) %in% required_attributes$Attribute
-  if(TRUE %in% is.na(file[,columns])){
-    rowi <- which(is.na(file[,columns]), arr.ind = T)[,"row"]+1
+  subset <- file[,columns, drop = F]
+  if(TRUE %in% is.na(subset)){
+    rowi <- which(is.na(subset), arr.ind = T)[,"row"]+1
     stop(paste0("NA values are not allowed for the required attributes ",
                 paste(required_attributes$Attribute, collapse = ", "),
                 ". Please check the file ", file_name,
@@ -134,7 +135,7 @@ are_alternative_required_att_complete <- function(file, file_name, alternative_a
     NA_index <- list()
     for(j in 1:length(alternative_attributes)){
       columns <- colnames(file) %in% alternative_attributes[[j]]$Attribute
-      NA_index[[j]] <- unique(which(is.na(file[,columns]), arr.ind = TRUE)[,"row"])
+      NA_index[[j]] <- unique(which(is.na(file[,columns, drop = F]), arr.ind = TRUE)[,"row"])
     }
     if(TRUE %in% duplicated(unlist(NA_index))){
       stop(paste0("Every entry must have at least one complete set of alternative required fields. ",
@@ -188,7 +189,7 @@ are_values_correct_type <- function(file, file_name, type_attributes, func){
 are_booleans_correct <- function(file, file_name, boolean_attributes){
   if(length(boolean_attributes$Attribute) > 0){
     columns <- which(colnames(file) %in% boolean_attributes$Attribute)
-    subset <- file[,columns]
+    subset <- file[,columns, drop = F]
     is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
     if(length(is_not_boolean) > 0){
       stop(paste0("In file ",file_name,
@@ -202,7 +203,8 @@ are_booleans_correct <- function(file, file_name, boolean_attributes){
 are_fractions_correct <- function(file, file_name, fraction_attributes){
   if(length(fraction_attributes$Attribute) > 0){
     columns <- which(colnames(file) %in% fraction_attributes$Attribute)
-    is_not_fraction <- which(file[,columns] < 0 | file[,columns] > 1, arr.ind = T)[,"row"]+1
+    subset <- file[,columns, drop = F]
+    is_not_fraction <- which(subset < 0 | subset > 1, arr.ind = T)[,"row"]+1
     if(length(is_not_fraction) > 0){
       stop(paste0("In file ",file_name,
                   " the attributes ", paste(colnames(file)[columns], collapse = ", "),
@@ -225,7 +227,7 @@ are_predefined_atts_correct <- function(file, file_name, predefined_attributes){
           "In file ",file_name," in column ",att,
           " values exist that are not the predefined values ",
           paste(predefined_attributes[[i]], collapse = ", "),
-          " or NA in row(s): ",is_not_predefined
+          " or NA in row(s): ",paste(is_not_predefined, collapse = ", ")
         ))
       }
     }
@@ -261,7 +263,7 @@ do_measurements_have_units <- function(file, file_name){
                    measurement_col," was found for the unit column ",unit))
       }
       measurements <- which(!is.na(file[,measurement_col]))
-      no_units <- which(is.na(file[measurements,unit_col]))
+      no_units <- which(is.na(file[measurements,unit_col]))+1
       if(length(no_units) > 0){
         stop(paste0("In file ",file_name," units are missing in column ",unit,
                    " in row(s) ",paste(no_units, collapse = ", ")))
