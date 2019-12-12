@@ -130,7 +130,20 @@ For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.
 test_Lavaleye: StCode is same as StationID.
 
 ## Fraction
-NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125.  
+NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125. There were some double entries (combination species - station with differing fractions):  
+
+Arctica islandica 64PE438#122    0.5 -> fraction set to 1, the count was changed 1x2, and WetWeight was changed 1.5x2, isBulkWeight set to 1. Comment "Manually set fraction to 1 from 0.5."    
+Arctica islandica 64PE438#122    1      
+
+Porifera          64PE438#122    0.5 -> fraction set to 1, count changed 1x2, isBulkWeight set to 1. Comment "Manually set fraction to 1 from 0.5."                       
+Porifera          64PE438#122    1               
+
+Nucula spp        64PE438#214    1 -> In total 9 individuals of Nucula spp were found. Three were recorded so the fraction for all Nucula spp was set to 0.33 isBulkWeight of this individual set to 0.  
+Nucula spp        64PE438#214    0.25           
+
+Polychaeta spp    64PE438#215    1                     
+Polychaeta spp    64PE438#215    0.125 -> In total 82 individuals were found, of which 12 were recorded. So the fraction for all Polychaeta spp was set to 12/82=0.146.   
+
 
 test_Lavaleye: Taken from raw data.
 
@@ -140,11 +153,12 @@ NICO10 cruise (64PE438): Fractions were specifically reported so isFractionAssum
 test_Lavaleye: isFractionAssumed is based on the column AssumedFraction in raw data. In this case the column was empty, so all fractions were set to isFractionAssumed = 0.
 
 ## Species_reported
-NICO10 cruise (64PE438): Species name taken for Species_reported.
+NICO10 cruise (64PE438): Species name taken for Species_reported.  
+
 test_Lavaleye: Taken from raw data.
 
 ## Count
-NICO10 cruise (64PE438): reported in raw data.  
+NICO10 cruise (64PE438): reported in raw data. NA counts were set to -1.    
 
 test_Lavaleye: Number column is taken as Count.
 
@@ -186,7 +200,7 @@ test_Lavaleye: NA.
 
 
 ## isWithShell
-NICO10 cruise (64PE438): Assumed all measured with shell. Column not included.
+NICO10 cruise (64PE438): Assumed all organisms are weighted as a whole, unless the comment indicates otherwise.
 
 test_Lavaleye: NA (for now).  
 
