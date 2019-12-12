@@ -7,11 +7,13 @@ output: html_document
 library(TripleD)
 ```
 
-The database contains `r length(unique(stations$StationID))` stations sampled during `r length(unique(stations$CruiseID))` cruises. The oldest sample was taken on `r min(stations$Date)` and the most recent sample was taken on `r max(stations$Date)`.
+The database contains `r length(unique(stations$StationID))` stations sampled during `r length(unique(stations$CruiseID))` cruises. The oldest sample was taken on `r min(stations$Date)` and the most recent sample was taken on `r max(stations$Date)`. Total suface area of the North Sea that has been sampled with the TripleD is ADD R CODE.
+
+In total there are `r dim(species)[1]` biological entries from `r length(unique(species$Species_reported))` species. Nr of individuals. Total biomass.
 
 # Stations
 Map of all the sampled stations in the database. The North-Sea is bounded by the coordinates 62N to 50N, -5W to 10E.
-```{r}
+```{r map, echo=FALSE, message=FALSE, warning=FALSE}
 # NOAA bathymetry package
 library(marmap)
 # Geographic high-resolution outlines
@@ -27,13 +29,13 @@ library(mapproj)
 #lats <- c(50, 62)
 #lons <- c(-5, 10)
 # map boundaries based on database values with a small buffer
-lats <- c(min(stations$Lat_DD), max(stations$Lat_DD))
-lons <- c(min(stations$Lon_DD), max(stations$Lon_DD))
+lats <- c(min(stations$Lat_DD)-5, max(stations$Lat_DD)+5)
+lons <- c(min(stations$Lon_DD)-5, max(stations$Lon_DD)+5)
 
 # Download North-Sea Bathymetry data from NOAA
 bathy <- getNOAA.bathy(
-  lon1=lons[1],lon2=lons[2],lat1=lats[1],lat2=lats[2], 
-  resolution=1)
+  lon1 = lons[1], lon2 = lons[2], lat1 = lats[1], lat2 = lats[2], 
+  resolution = 1, keep = T)
 
 # Convert to dataframe
 bathy <- fortify.bathy(bathy)
@@ -52,24 +54,24 @@ map_samples <- ggplot() +
   
   # add 20m contour
   geom_contour(data = bathy,
-               aes(x=x, y=y, z=z),
-               breaks=c(-20),
-               size=c(0.3),
-               colour="grey") +
+               aes(x = x, y = y, z = z),
+               breaks = c(-20),
+               size = c(0.3),
+               colour = "grey") +
   
   # add 50m contour
   geom_contour(data = bathy, 
-               aes(x=x, y=y, z=z),
-               breaks=c(-50),
-               size=c(0.3),
-               colour="grey") +
+               aes(x = x, y = y, z = z),
+               breaks = c(-50),
+               size = c(0.3),
+               colour ="grey") +
   
   # add 100m contour
   geom_contour(data = bathy, 
-               aes(x=x, y=y, z=z),
-               breaks=c(-100),
-               size=c(0.3),
-               colour="grey") +
+               aes(x = x, y = y, z = z),
+               breaks = c(-100),
+               size = c(0.3),
+               colour = "grey") +
   
   # add coastline
   geom_polygon(data = reg, aes(x = long, y = lat, group = group), 
@@ -91,7 +93,7 @@ map_samples
 
 # Missing data
 Percentage of entries that have a value for every attribute (higher percentage means better data coverage).
-```{r stations}
+```{r stations, echo=FALSE}
 stations_perc_complete <- stations %>%
   sapply(., 
     function(x){sum(length(which(!is.na(x))))/dim(stations)[1]}
@@ -114,7 +116,7 @@ perc_complete <- ggplot(stations_perc_complete) +
 perc_complete
 ```
 
-```{r species}
+```{r species, echo=FALSE}
 species_perc_complete <- species %>%
   sapply(., 
     function(x){sum(length(which(!is.na(x))))/dim(species)[1]}
