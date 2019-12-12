@@ -14,7 +14,7 @@ Vessel,NA,String,Optional,NA,Name of the research vessel. Often used: RV Pelagia
 CruiseID,NA,String,Optional,NA,"Cruise ID when the sampling occurred, for example 64PE438"
 Cruise_name,NA,String,Optional,NA,"Name of the cruise, for example NICO10 or Normomap."
 Station_name,NA,String,Optional,NA,"Generic name of the station where the sample is taken, can be used to later link back to for example box core samples. DO NOT CONFUSE with StationID."
-Region,"BC, CB, DB, DH, FF",String,Optional,NA,"Predefined general region where the sample is taken. If the station was not in these predefined regions, insert NA. BC = Botney Cut, CB = Cleaver Bank, DB = Dogger Bank, DH = Devil's Hole, FF = Frysian Front"
+Region,"Predefined: BC, CB, DB, DH, FF",String,Optional,NA,"Predefined general region where the sample is taken. If the station was not in these predefined regions, insert NA. BC = Botney Cut, CB = Cleaver Bank, DB = Dogger Bank, DH = Devil's Hole, FF = Frysian Front"
 Time_start,HH:MM:SS,Time,Optional,3,Time when the dredge touched bottom. Format: HH:MM:SS
 Time_stop,HH:MM:SS,Time,Optional,3,Time when the dredge was heaved from the bottom. Format: HH:MM:SS
 Tow_speed_knots,Knots,Double,Optional,NA,The average speed at which the TripleD was towed in knots.
