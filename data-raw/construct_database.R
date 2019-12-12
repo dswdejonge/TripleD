@@ -65,14 +65,3 @@ for(table in tables){
     usethis::use_data(species, overwrite = T)
   }
 }
-
-
-
-# - If there are any suspicious values (very deep water depths, very large organisms, strange locations).
-# - Track distances equal?
-# - are there any suspicious values (very small/large/heavy organisms)
-# If the species name is present in WoRMS: the newest accepted synonym is added in a column.
-# If the species name is not present in WoRMS (for example higher taxon): what then?
-# Add findings to construct database log file
-# - what data is missing
-# - weird values
