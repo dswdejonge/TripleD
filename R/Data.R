@@ -1,9 +1,9 @@
-#' TripleD sampling stations
+#' TripleD stations
 #'
 #' Data frame (tibble) with information on all stations where samples with the
 #' TripleD were collected.
 #'
-#' @name sampling_stations
+#' @name stations
 #' @format A dataframe with the following columns:
 #' \describe{
 #' \item{\code{File}}{File name of the csv that contained the data entry.}
@@ -21,21 +21,32 @@
 #' \item{\code{Blade_depth}}{The depth of the used blade expressed in cm.}
 #' }
 #' @references \itemize{
-#' \item{Rob Witbaard, NICO 10, 64PE438}
+#' \item{Rob Witbaard (NIOZ), NICO 10, 64PE438}
+#' \item{Marc Lavaleye (NIOZ), Access database}
 #' }
-#' @details Details here.
+#' @details Researchers collected raw data during TripleD field studies about the
+#' sampling stations. They are encouraged to upload this raw data to the NIOZ
+#' data archiving system (DAS) so that other database users can retrace the origin
+#' of the data. CSV files in the correct database format were created by
+#' researchers based on their original raw data.
+#' A description of how the csv files were created based on this raw data
+#' can be found in the vignette "cleaning_data.Rmd". The CSV files' format
+#' was checked with the code in "construct_database.R" and merged into the
+#' dataframe (tibble format from the dplyr package) called "stations".
+#' Therefore, this dataframe should only include original data and no data from
+#' other sources or calculations based on assumptions.
 NULL
 
-#' @rdname sampling_stations
-"sampling_stations"
+#' @rdname stations
+"stations"
 
 
 
 #' TripleD species data
 #'
-#' Data frame (tibble) with size and wet weight of all sampled individuals.
+#' Data frame (tibble) with count and sometimes measurements of all sampled individuals.
 #' Raw biological data.
-#' Preferably each data entry (row) concerns an individual. However, sometimes a small group
+#' Preferably each data entry (row) concerns an individual. However, often a small group
 #' of individuals from the same species was measured and the given metrics concern the
 #' group as a whole.
 #'
@@ -53,9 +64,19 @@ NULL
 #' \item{\code{WetWeight}}{The wet weight of the (group of) individuals reported in grams. If sizes are reported for individuals, but wet weight is only known for the collection of individuals per species, then report a wet weight of zero, except for one individual. In the analysis the total wet weight per species is calculated.}
 #' }
 #' @references \itemize{
-#' \item{Rob Witbaard, NICO 10, 64PE438}
+#' \item{Rob Witbaard (NIOZ), NICO 10, 64PE438}
+#' \item{Marc Lavaleye (NIOZ), Access database}
 #' }
-#' @details Details here.
+#' @details Researchers collected species data during TripleD field studies.
+#' They are encourage to store this raw data in the NIOZ Data Archiving System
+#' (DAS) so that other users of the database can retrace the origin of the data.
+#' The raw data was used to construct CSV files in the right database format.
+#' A description of this process should be provided by the contributers to the
+#' database in the vignette "cleaning_data.Rmd". The CSV files' format was
+#' checked with the code in "construct_database.R" and merged into a datframe
+#' (tibble from the dplyr package) called "species". This dataframe contains
+#' only original data, so no data from other sources or calculations based on
+#' assumptions.
 NULL
 
 #' @rdname species
