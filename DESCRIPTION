@@ -16,3 +16,7 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1.9000
+Imports: 
+    dplyr,
+    geosphere,
+    marmap
