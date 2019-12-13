@@ -16,3 +16,14 @@ collect_bathymetry <- function(stations, buffer = 2, resolution = 1){
   bathy <- marmap::fortify.bathy(bathy)
   return(bathy)
 }
+
+add_water_depth <- function(stations, bathymetry = NULL){
+  if(is.null(bathymetry)){
+    bathymetry <- collect_bathymetry(stations)
+  }
+  stations$Water_depth_m_Bathy <- -(marmap::get.depth(
+      mat = marmap::as.bathy(bathymetry),
+      x = as.matrix(stations[,c("Lon_DD", "Lat_DD")]),
+      locator = F)$depth)
+  return(stations)
+}

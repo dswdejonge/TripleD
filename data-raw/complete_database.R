@@ -16,6 +16,7 @@ usethis::use_data(bathymetry, overwrite = T)
 stations_additions <- stations %>%
   add_track_midpoints() %>%
   add_track_length_GPS() %>%
-  add_track_length_Odometer()
+  add_track_length_Odometer() %>%
+  add_water_depth(bathymetry = bathymetry)
 
 
