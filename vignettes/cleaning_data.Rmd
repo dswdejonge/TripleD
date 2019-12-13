@@ -101,17 +101,10 @@ test_Laveleye: Not available.
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
 test_Laveleye: Not available.
 
-## Plate
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
+## isBladeDeployed
+NICO10 cruise (64PE438): Taken from CASINO extract in cruise report. Column Plate was used, so that OK was isBladeDeployed = 1, No was isBladeDeployed = 0, and NA was kept NA.
 test_Laveleye: Not available.
 
-## Buffer(bar)
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
-
-## Sucker(bar)
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
 
 ## Quality
 NICO10 cruise (64PE438): included, based on the performance parameters of the dredge track. Taken from CASINO extract in cruise report.

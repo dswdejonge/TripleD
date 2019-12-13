@@ -21,11 +21,9 @@ Tow_speed_knots,Knots,Double,Optional,NA,The average speed at which the TripleD 
 Water_depth_start_m,Meters,Double,Optional,4,Water depth in meters at the start of the dredge track (touch bottom) as measured during the cruise.
 Water_depth_stop_m,Meters,Double,Optional,4,Water depth in meters at the end of the dredge track (heaving) as measured during the cruise.
 Water_depth_m,Meters,Double,Optional,NA,Average water depth at the dredge track as measured during the cruise.
-Pre_run_setting,?,Integer,Optional,NA,?
+Pre_track_distance_m,Meters,Double,Optional,NA,The dredge length before the start of the actual track. Used to determine the stability of the dredge in terms of bottom contact before starting the actual sampling procedure.
 Cable_length_m,Meters,Double,Optional,NA,Length of cable veered from ship to the dredge.
-SB_count,Count,Integer,Optional,NA,?
-BB_count,Count,Integer,Optional,NA,?
-Plate,?,String,Optional,NA,?
-Buffer_bar,Bar,Double,Optional,NA,Pressure of buffer?
-Sucker_bar,Bar,Double,Optional,NA,Pressure of sucker? (zuiger)?
-Quality,Good / Failed / Doubt,String,Optional,NA,"Predefined qualitative description of the quality of the dredge. Good = successful dredge track, Failed = unsuccessful sample, Doubt = unknown if correct sampling was fully achieved."
+SB_count,Count,Integer,Optional,NA,"Measure to check the pre-track + track distance, where each counted tick equals 2 m."
+BB_count,Count,Integer,Optional,NA,"Measure to check the track distance, where each counted tick equals 2 m."
+isBladeDeployed,1 or 0,Boolean,Optional,NA,"Check if the blade has been fully deployed during the track i.e. has reached its most open position. If it was fully deployed isBladeDeployed = 1, if it was not fully deployed isBladeDeployed = 0. If no information is available isBladeDeployed = NA."
+Quality,"Predefined: Good, Failed, Doubt",String,Optional,NA,"Predefined qualitative description of the quality of the dredge. Good = successful dredge track, Failed = unsuccessful sample, Doubt = unknown if correct sampling was fully achieved."
