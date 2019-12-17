@@ -3,23 +3,27 @@ title: "Database dashboard"
 output: html_document
 ---
 
-```{r}
+```{r include=FALSE}
 library(TripleD)
+library(ggplot2)
+library(tidyverse)
 ```
 
-The database contains `r length(unique(stations$StationID))` stations sampled during `r length(unique(stations$CruiseID))` cruises. The oldest sample was taken on `r min(stations$Date)` and the most recent sample was taken on `r max(stations$Date)`. Total suface area of the North Sea that has been sampled with the TripleD is ADD R CODE.
+Database summary:   
+- The database contains **`r length(unique(stations$StationID))` stations ** sampled during **`r length(unique(stations$CruiseID))` cruises**.  
+- The oldest sample was taken on **`r min(stations$Date)`** and the most recent sample was taken on **`r max(stations$Date)`**.  
+- Total suface area of the North Sea that has been sampled with the TripleD is ADD R CODE.   
+- In total there are **`r dim(species)[1]`** biological entries from **`r length(unique(species$Species_reported))` species**.  
+- Nr of individuals.  
+- Total biomass.  
 
-In total there are `r dim(species)[1]` biological entries from `r length(unique(species$Species_reported))` species. Nr of individuals. Total biomass.
-
-# Stations
-Map of all the sampled stations in the database. The North-Sea is bounded by the coordinates 62N to 50N, -5W to 10E.
+# Map with sampled stations
+Map of all the sampled stations in the database. The North-Sea is approximately bounded by the coordinates 62N to 50N, -5W to 10E.
 ```{r map, echo=FALSE, message=FALSE, warning=FALSE}
 # NOAA bathymetry package
 library(marmap)
 # Geographic high-resolution outlines
 library(mapdata)
-# ggplot2 packing for visualizing map and datapoints
-library(ggplot2)
 # dplry package to easily search dataframes
 library(dplyr)
 # library with map projections
@@ -33,15 +37,11 @@ lats <- c(min(stations$Lat_DD)-5, max(stations$Lat_DD)+5)
 lons <- c(min(stations$Lon_DD)-5, max(stations$Lon_DD)+5)
 
 # Download North-Sea Bathymetry data from NOAA
-bathy <- getNOAA.bathy(
-  lon1 = lons[1], lon2 = lons[2], lat1 = lats[1], lat2 = lats[2], 
-  resolution = 1, keep = T)
-
-# Convert to dataframe
-bathy <- fortify.bathy(bathy)
+bathy <- bathymetry
+#bathy <- collect_bathymetry(stations)
 
 # Get coastal outlines
-reg = map_data("world2Hires")
+reg <- map_data("world2Hires")
 reg <- reg %>%
   filter(
     long > lons[1] &
@@ -91,8 +91,8 @@ map_samples <- ggplot() +
 map_samples  
 ```
 
-# Missing data
-Percentage of entries that have a value for every attribute (higher percentage means better data coverage).
+# Missing raw data
+Not all attributes present in the database are required; some are optional thus not always filled. The following two plots show per attribute the percentage of entries in the dataframes 'stations' and 'species' that have a value (i.e. are not NA). 
 ```{r stations, echo=FALSE}
 stations_perc_complete <- stations %>%
   sapply(., 
@@ -139,3 +139,76 @@ perc_complete <- ggplot(species_perc_complete) +
 perc_complete
 ```
 
+# Data accuracy
+To check the accuracy of raw and automatically generated data, some exploratory plots are made. These plots show the distribution of values in order to detect suspiscious values; e.g. suspiciously deep waters, or heavy animals.
+## Water depth
+```{r real_vs_estimated_depths, echo=FALSE}
+differences <- na.omit(abs(stations_additions$Water_depth_m - stations_additions$Water_depth_m_Bathy))
+avg_diff <- sum(differences) / length(differences)
+plot <- ggplot(stations_additions, aes(x = Water_depth_m, y = Water_depth_m_Bathy)) +
+  geom_point() +
+  geom_abline() +
+  annotate(
+    "text", 
+    x = 50, y = 175, 
+    label = paste0("average difference = ", round(avg_diff, digits = 1)," m.")) +
+  labs(
+    title = "Difference between observed and bathymetry water depth",
+    x = "Water depth measured on site (m)", 
+    y = "Water depth from NOAA bathymetry resolution 1' (m)") +
+  xlim(0, max(c(stations_additions$Water_depth_m, stations_additions$Water_depth_m_Bathy), na.rm = T)) +
+  ylim(0, max(c(stations_additions$Water_depth_m, stations_additions$Water_depth_m_Bathy), na.rm = T)) +
+  coord_fixed() +
+  theme_bw()
+plot
+```
+
+```{r suspicous_depths, echo=FALSE}
+plot <- ggplot(stations_additions) +
+  geom_histogram(aes(x = Water_depth_m_Bathy)) +
+  labs(
+    title = "Suspicious water depths added?", 
+    x = "Water depth from NOAA bathymetry resolution 1' (m)") +
+  theme_bw()
+plot
+```
+
+## Track length
+```{r reported_vs_estimated_track_lengths, echo=FALSE}
+#differences <- na.omit(abs(stations_additions$Water_depth_m - stations_additions$Water_depth_m_Bathy))
+#avg_diff <- sum(differences) / length(differences)
+tidy <- stations_additions %>%
+  select(StationID, Track_dist_m, Track_dist_m_BB, Track_dist_m_GPS) %>%
+  gather(Track_dist_m_GPS, Track_dist_m_BB, 
+         key = "Sensor", value = "Estimated_length_m")
+plot <- ggplot(
+  tidy, 
+  aes(
+    x = Track_dist_m, 
+    y = Estimated_length_m, 
+    colour = Sensor)) +
+  geom_point() +
+  geom_abline() +
+  #annotate(
+  #  "text", 
+  #  x = 50, y = 175, 
+  #  label = paste0("average difference = ", round(avg_diff, digits = 1)," m.")) +
+  labs(
+    title = "Difference between reported and calculated track length",
+    x = "Reported track length (m)", 
+    y = "Estimated track length (m)") +
+  xlim(0, max(c(tidy$Track_dist_m, tidy$Estimated_length_m), na.rm = T)) +
+  ylim(0, max(c(tidy$Track_dist_m, tidy$Estimated_length_m), na.rm = T)) +
+  coord_fixed() +
+  theme_bw()
+plot
+```
+
+## Reported species names
+Which reported species names are named differently according to WoRMS, or could not be matched?
+```{r}
+i <- which(worms$Query != worms$valid_name)
+print(worms[i,c("Query", "valid_name")])
+```
+
+Hierarchical dendrogram.
