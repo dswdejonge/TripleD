@@ -20,18 +20,28 @@
 species
 }
 \description{
-Data frame (tibble) with size and wet weight of all sampled individuals.
+Data frame (tibble) with count and sometimes measurements of all sampled individuals.
 Raw biological data.
-Preferably each data entry (row) concerns an individual. However, sometimes a small group
+Preferably each data entry (row) concerns an individual. However, often a small group
 of individuals from the same species was measured and the given metrics concern the
 group as a whole.
 }
 \details{
-Details here.
+Researchers collected species data during TripleD field studies.
+They are encourage to store this raw data in the NIOZ Data Archiving System
+(DAS) so that other users of the database can retrace the origin of the data.
+The raw data was used to construct CSV files in the right database format.
+A description of this process should be provided by the contributers to the
+database in the vignette "cleaning_data.Rmd". The CSV files' format was
+checked with the code in "construct_database.R" and merged into a datframe
+(tibble from the dplyr package) called "species". This dataframe contains
+only original data, so no data from other sources or calculations based on
+assumptions.
 }
 \references{
 \itemize{
-\item{Rob Witbaard, NICO 10, 64PE438}
+\item{Rob Witbaard (NIOZ), NICO 10, 64PE438}
+\item{Marc Lavaleye (NIOZ), Access database}
 }
 }
 \keyword{datasets}
