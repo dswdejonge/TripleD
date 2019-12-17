@@ -8,3 +8,21 @@ output: html_document
 
 # Weighting
 Special weighting scale of Mark Fonds.
+
+# Conversion
+Questions about the conversions:  
+- Per species (morphology) what measured body dimension is defined for Length?   
+- How did you get from Length to NewLength for Formula? i.e. No Length reported for Cucumaria elongata (entry 17) but NewLength for Formula is 69.64285714 mm. Is this an average?  
+- Why was there decided to round 0.5cm up in conversion to mm? So, 2x0.5cm is not 10 mm but 15 mm. I understand for the measurements <0.5cm thus 0x0.5cm, but maybe not for the other measurements. Doesn't this lead to overestimation?  
+- I changed to conversion factor A_factor for Astropecten irregularis to 0.000005 (was 0.005) to avoid the extra conversion /1000.  
+- The conversion for Upogebia deltaura is supposed to be 0.28, but I get a regression which clearly better fits 0.29.  
+- The regression of Upogebia was done with widths. I changed the regression formula width the conversion factor to go from length to width to make the regression formula suitable to use with length.  
+- A and B for equation code 2 should be changed so that the input can be mm instead of 0.5cm.  
+
+Prepare for conversation with Marc:  
+- Images of species to draw how they were measured.  
+- Original regression lines to go from length to AFDW.  
+- How conversion factor for length to width were established.  
+
+
+

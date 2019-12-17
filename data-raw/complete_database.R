@@ -35,3 +35,13 @@ species_additions <- species %>%
 # Species size to biomass
 conversion_data <- read.csv(system.file("extdata", "size_to_weight.csv", package = "TripleD"))
 conversion_test <-read.csv(system.file("extdata", "test_size_to_weight.csv", package = "TripleD"))
+
+result <- conversion_test %>%
+  left_join(conversion_data, by = "Species") %>%
+  mutate(Length_mm = ifelse(Unit_Length == "0.5cm", Length*5+5, Length)) %>%
+  mutate(AFDW_g_calc = size_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
+  mutate(calc_diff = AFDW_g - AFDW_g_calc)
+
+
+
+
