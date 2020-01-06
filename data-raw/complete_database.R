@@ -14,7 +14,7 @@ bathymetry <- collect_bathymetry(stations)
 usethis::use_data(bathymetry, overwrite = T)
 
 # Collect taxonomy of species from WoRMs
-worms <- get_worms_taxonomy(species)
+worms <- get_worms_taxonomy(species$Species_reported)
 usethis::use_data(worms, overwrite = T)
 
 # Add additional data to stations
@@ -33,15 +33,19 @@ species_additions <- species %>%
             by = c("Species_reported" = "Query"))
 
 # Species size to biomass
-conversion_data <- read.csv(system.file("extdata", "size_to_weight.csv", package = "TripleD"))
-conversion_test <-read.csv(system.file("extdata", "test_size_to_weight.csv", package = "TripleD"))
+#test_input <- read.csv(system.file("extdata", "test_input.csv", package = "TripleD"))
+conversion_data <- read.csv(system.file("extdata", "test_length_to_weight.csv", package = "TripleD"))
 
-result <- conversion_test %>%
-  left_join(conversion_data, by = "Species") %>%
-  mutate(Length_mm = ifelse(Unit_Length == "0.5cm", Length*5+5, Length)) %>%
-  mutate(AFDW_g_calc = size_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
-  mutate(calc_diff = AFDW_g - AFDW_g_calc)
+#result <- test_input %>%
+#  left_join(conversion_data, by = "Species") %>%
+#  mutate(Length_mm = ifelse(Unit_Length == "0.5cm", Length*5+5, Length)) %>%
+#  mutate(AFDW_g_calc = size_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
+#  mutate(calc_diff = abs(AFDW_g - AFDW_g_calc)/AFDW_g*100)
 
+result <- species_additions %>%
+  left_join(conversion_data, by = "Species")
+
+plot(result$AFDW_g ~ result$AFDW_g_calc)
 
 
 

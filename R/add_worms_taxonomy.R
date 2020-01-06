@@ -28,9 +28,9 @@ collect_from_worms <- function(species_names, fuzzy = FALSE){
 
 
 #' @rdname collect_from_worms
-get_worms_taxonomy <- function(species){
+get_worms_taxonomy <- function(species_names){
   # Get unique species names
-  reported_species <- unique(species$Species_reported)
+  reported_species <- unique(species_names)
 
   # Collect exact matches
   worms <- collect_from_worms(reported_species)
