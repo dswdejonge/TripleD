@@ -9,6 +9,7 @@
 #' (columns) "Lon_start_DD", "Lat_start_DD","Lon_stop_DD", and "Lat_stop_DD".
 #' @return This function returns the input tibble with an added column called
 #' "Track_dist_m_GPS".
+#' @export
 add_track_length_GPS <- function(stations){
   stations <- stations %>%
     dplyr::mutate(Track_dist_m_GPS = geosphere::distGeo(
@@ -29,6 +30,7 @@ add_track_length_GPS <- function(stations){
 #' (columns) "Lon_start_DD", "Lat_start_DD","Lon_stop_DD", and "Lat_stop_DD".
 #' @return This function returns the input tibble with an added column called
 #' "Track_dist_m_BB" and "Track_dist_m_SB".
+#' @export
 add_track_length_Odometer <- function(stations){
   stations <- stations %>%
     dplyr::mutate(Track_dist_m_BB = BB_count * 2) %>%
