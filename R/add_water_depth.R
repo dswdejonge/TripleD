@@ -2,7 +2,7 @@
 #'
 #' This function collects NOAA bathymetry with the marmap R-pacakge
 #' based on the min and max coordinates in the database.
-#' @references maramp R-package
+#' @references marmap R-package
 #' @param stations Dataframe (tibble) with the attributes
 #' "Lat_DD", "Lat_start_DD", "Lat_stop_DD", "Lon_DD", "Lon_start_DD", "Lon_stop_DD".
 #' @param buffer The size of the buffer zone in decimal degrees around the

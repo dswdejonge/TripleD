@@ -3,6 +3,7 @@
 #' The functions \code{add_track_length_GPS} and \code{add_track_length_Odometer}
 #' add a column with tracklength based on track start and stop GPS coordinates and
 #' on Odometer ticks respectively.
+#' @name add_track_length
 #' @references
 #' \itemize{
 #' \item{geosphere R-package}
@@ -12,6 +13,9 @@
 #' @return This function returns the input tibble with an added column called
 #' "Track_dist_m_GPS".
 #' @export
+NULL
+
+#' @rdname add_track_length
 add_track_length_GPS <- function(stations){
   stations <- stations %>%
     dplyr::mutate(Track_dist_m_GPS = geosphere::distGeo(
@@ -21,7 +25,7 @@ add_track_length_GPS <- function(stations){
   return(stations)
 }
 
-#' @rdname add_track_length_GPS
+#' @rdname add_track_length
 add_track_length_Odometer <- function(stations){
   stations <- stations %>%
     dplyr::mutate(Track_dist_m_BB = BB_count * 2) %>%

@@ -27,7 +27,7 @@ collect_from_worms <- function(species_names, fuzzy = FALSE){
 }
 
 
-#' @describeIn collect_from_worms
+#' @rdname collect_from_worms
 get_worms_taxonomy <- function(species){
   # Get unique species names
   reported_species <- unique(species$Species_reported)

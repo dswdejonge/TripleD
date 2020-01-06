@@ -26,5 +26,5 @@ This function collects NOAA bathymetry with the marmap R-pacakge
 based on the min and max coordinates in the database.
 }
 \references{
-maramp R-package
+marmap R-package
 }

@@ -2,9 +2,12 @@
 % Please edit documentation in R/add_worms_taxonomy.R
 \name{collect_from_worms}
 \alias{collect_from_worms}
+\alias{get_worms_taxonomy}
 \title{Add WoRMs taxonomy}
 \usage{
 collect_from_worms(species_names, fuzzy = FALSE)
+
+get_worms_taxonomy(species)
 }
 \arguments{
 \item{species_names}{Only the species names.}
