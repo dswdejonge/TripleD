@@ -1,6 +1,6 @@
 # entry is length in mm
 # value is weight Ash Free Dry Weight in g
-size_to_weight <- function(Length, A, B){
-  W = A * Length^B
-  return(W)
+length_to_weight <- function(length, A, B){
+  weight = A * length^B
+  return(weight)
 }

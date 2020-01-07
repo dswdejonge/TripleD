@@ -7,6 +7,7 @@
 # to the database, you can write and insert your own code here.
 
 library(dplyr)
+library(tibble)
 library(TripleD)
 
 # Collect bathymetry and store in package
@@ -34,18 +35,41 @@ species_additions <- species %>%
 
 # Species size to biomass
 #test_input <- read.csv(system.file("extdata", "test_input.csv", package = "TripleD"))
-conversion_data <- read.csv(system.file("extdata", "test_length_to_weight.csv", package = "TripleD"))
+conversion_data <- read.csv(system.file("extdata", "test_length_to_weight.csv", package = "TripleD"), stringsAsFactors = F)
+# check names in conversion data file
+worms_conversion <- get_worms_taxonomy(conversion_data$Species)
+conversion_data <- left_join(conversion_data, select(worms_conversion, Query, valid_name),
+                             by = c("Species" = "Query"))
 
 #result <- test_input %>%
 #  left_join(conversion_data, by = "Species") %>%
 #  mutate(Length_mm = ifelse(Unit_Length == "0.5cm", Length*5+5, Length)) %>%
 #  mutate(AFDW_g_calc = size_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
 #  mutate(calc_diff = abs(AFDW_g - AFDW_g_calc)/AFDW_g*100)
+# plot(result$AFDW_g ~ result$AFDW_g_calc)
 
+# Calculate AFDW biomass from WW
 result <- species_additions %>%
-  left_join(conversion_data, by = "Species")
+  # Attach conversion data
+  left_join(conversion_data, by = "valid_name") %>%
+  # Convert length to mm from other units
+  mutate(Length_mm =
+           ifelse(Unit_Length == "0.5cm", Length*5+5,
+           ifelse(Unit_Length == "cm", Length*10+10, Length))) %>%
+  # Convert width to mm from other units
+  mutate(Width_mm =
+           ifelse(Unit_Width == "0.5cm", Width*5+5,
+                  ifelse(Unit_Width == "cm", Width*10+10, Width))) %>%
+  # Convert width in mm to length in mm
+  mutate(Length_from_Width_mm = Width_mm/Length_to_Width) %>%
+  # Calculate AFDW from length and length derived from width
+  mutate(AFDW_g_calc_L = length_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
+  mutate(AFDW_g_calc_W = length_to_weight(Length_from_Width_mm, A = A_factor, B = B_exponent)) %>%
+  # If wet weight is reported as 0, use the scale threshold as wet weight.
+  mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
+  # Calculate AFDW from wet weight
+  mutate(AFDW_g_calc_WW = WetWeight_g_threshold * WW_to_AFDW_Perc / 100)
 
-plot(result$AFDW_g ~ result$AFDW_g_calc)
 
 
 
