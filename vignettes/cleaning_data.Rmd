@@ -158,7 +158,7 @@ test_Lavaleye: Number column is taken as Count.
 ## Unit_Length
 NICO10 cruise (64PE438): Maatvoering is taken for Unit_Length. 1/2 cm (with space) was converted to 1/2cm (without space).  
 
-test_Lavaleye: unit length taken for Unit_Length. 0.5cm was converted to 1/2cm. na was converted to NA.  
+test_Lavaleye: 'unit length' taken for Unit_Length. 0.5cm was converted to 1/2cm. na was converted to NA.  
 
 ## Length
 NICO10 cruise (64PE438): Size is taken for Length. Not clear what dimensions were measured as "size". Ask Rob.  
@@ -166,14 +166,14 @@ NICO10 cruise (64PE438): Size is taken for Length. Not clear what dimensions wer
 test_Lavaleye: reported in raw data.  
 
 ## Unit_Width
-NICO10 cruise (64PE438): not measured.  
+NICO10 cruise (64PE438): 'Maatvoering' is taken for Unit_Width if the comment denotes the measurement concerned width not length. Unit_Length is set to NA for these entries.    
 
-test_Lavaleye: not measured.
+test_Lavaleye: 'unit length' taken for Unit_Width if the notes in the original file mention the measured dimension is in fact width not length.  
 
 ## Width
-NICO10 cruise (64PE438): not measured.  
+NICO10 cruise (64PE438): Values reported in 'Size' with a comment that it concerned width of the individual were reported in Width, Length for these entries was set to NA.  
 
-test_Lavaleye: not measured.  
+test_Lavaleye: The values reported in 'Width' are used, or the values in 'Length' if the notes/comments in the file mention that the value actually concerns a width not length.    
 
 ## WetWeight(g)
 NICO10 cruise (64PE438): Reported in raw data. Entries of <0.5 were set to 0.  
