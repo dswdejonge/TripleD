@@ -71,27 +71,34 @@ Note: A station is defined as a **unique sampling event** (so not a sampling reg
 - Include a column with the new variable in the csv you are contributing. It will automatically be added to the database if the new variable is accepted by the database moderator. All other entries will get a value of NA for this new variable, unless their original csv files are changed so that it also includes a column with this new variable.   
 
 # 7. Add to database
-1. Make sure you have added the clean CSV files in the required format to "data-raw/Stations" and "data-raw/Species" as described above.
-2. Go to the folder "data-raw" and set as working directory.
-3. Run the R-script **construct_database.R** in this working directory.
+1. Make sure you have added the clean CSV files in the required format to "data-raw/Stations" and "data-raw/Species" as described above.  
+2. Go to the folder "data-raw" and set as working directory.  
+3. Run the R-script **construct_database.R** in this working directory. The script checks ...   
+- ... if all mandatory fields for stations and species are provided.  
+- ... if the data types in each column are correct (integers, doubles, text, date, time, etc.).  
+- ... if the reported Fraction and isFractionAssumed is the same for all species entries at a certain stationID.  
+- .... if all size measurements have units.  
+
+The original data is now added to the database. All original data from all csv files merged together can be found in the files **"data/stations.rda"** and **"data/species.rda"**. If this is all you wanted to add, go to '10. Merge request' to read how you can upload your changes to the online github version of the database. If you want to add missing data to the database and do some number crunching already, keep on reading.  
+
+## Some help with errors thrown by the script
+Error: **The column X in file X.csv must contain only values of datatype Double**.  
+Some columns, for example those containing weights, must contain numbers in the form of doubles. Doubles are numbers that allow decimal values, whereas integers (like counts) do not. If you have opened your CSV file in Excel, some numeric columns might have been set to the Excel type 'general'. Fix this by opening your CSV file again in Excel, select the columns that should be doubles and set their Excel type to 'numbers'.  
+
+# 8. Complete the database with additional data
+To add missing data and process your data further into a format suitable for spatial ecological analyses, keep on reading.  
+1. Open the script **"data-raw/complete_database.R"** that contains functions to add missing data to the database. These functions either use data from secondary sources or calculate new values based on some assumptions. There are basically two options: 1) You simply run the full script as it is. If you do, please make sure you are aware of these sources and assumptions so you understand how to interpret the data. 2) You use the provided functions by the package, but maybe not all, or in another order, or you alter them somewhat to fit your own secondary sources and assumptions you want to use. Keep reading to understand what you can add and calculate.    
+2. If start and end coordinates are provided for the TripleD tracks, the midpoint and track length can be calculated.
+Missing depth values for sampling stations can be obtained from bathymetry data using track midpoints.
 
 
-## Stations
-It is automatically checked  
-- If you provided the required fields for stations and species.  
-- If the data types in each column are correct (integers, doubles, text, date, time etc.).  
-- If there are any suspicious values (very deep water depths, very large organisms).
-- A log text dump is created with the date and newly added data.
 
+# 9. Create community matrices
+
+# 10. Merge request
+- if the species name is present in WoRMS: the newest accepted synonym is added in a column.
+- If the species name is not present in WoRMS (for example higher taxon): what then?
+- 
 The moderator checks:
 - If you provided documentation on how you cleaned your raw data and derived your clean csv.  
 - Whether or not your new variable will be added (requirements: the variable is not redundant i.e. cannot be derived from the already available variables.)
-
-## Species
-It is automatically checked:
-- Fraction, isFractionAssumed must be same for all species entries at a certain stationID.
-- If the species name is present in WoRMS: the newest accepted synonym is added in a column.
-- If the species name is not present in WoRMS (for example higher taxon): what then?
-- All size measurements have units.
-
-# Fix for missing data
