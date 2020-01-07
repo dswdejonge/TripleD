@@ -7,7 +7,7 @@
 \usage{
 collect_from_worms(species_names, fuzzy = FALSE)
 
-get_worms_taxonomy(species)
+get_worms_taxonomy(species_names)
 }
 \arguments{
 \item{species_names}{Only the species names.}
