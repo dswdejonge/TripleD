@@ -190,12 +190,14 @@ are_booleans_correct <- function(file, file_name, boolean_attributes){
   if(length(boolean_attributes$Attribute) > 0){
     columns <- which(colnames(file) %in% boolean_attributes$Attribute)
     subset <- file[,columns, drop = F]
-    is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
-    if(length(is_not_boolean) > 0){
-      stop(paste0("In file ",file_name,
-                  " the boolean attributes ", paste(colnames(file)[columns], collapse = ", "),
-                  " may only be 0, 1, or NA. Please check row(s) ",
-                  paste(is_not_boolean, collapse = ", ")))
+    if(dim(subset)[2] != 0){
+      is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
+      if(length(is_not_boolean) > 0){
+        stop(paste0("In file ",file_name,
+                    " the boolean attributes ", paste(colnames(file)[columns], collapse = ", "),
+                    " may only be 0, 1, or NA. Please check row(s) ",
+                    paste(is_not_boolean, collapse = ", ")))
+      }
     }
   }
 }
