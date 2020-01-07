@@ -11,7 +11,7 @@ tables <- list(
 )
 
 for(table in tables){
-  print(table$folder)
+  print(paste0("Checking the files in folder ", table$folder, ". Importing data."))
   # Read in attribute requirements
   my_attributes <- read.csv(system.file("extdata", table$att, package = "TripleD"))
 
@@ -31,7 +31,7 @@ for(table in tables){
   for(i in 1:length(data)){
     file <- data[[i]]
     file_name <- paste(table$folder, names(data)[i], sep = "/")
-
+    print(paste0("Checking file ", file_name))
     # Attribute presence
     are_required_att_present(file, file_name, required_attributes)
     are_alternative_required_att_present(file, file_name, alternative_attributes)
