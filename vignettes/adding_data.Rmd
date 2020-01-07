@@ -86,14 +86,30 @@ Error: **The column X in file X.csv must contain only values of datatype Double*
 Some columns, for example those containing weights, must contain numbers in the form of doubles. Doubles are numbers that allow decimal values, whereas integers (like counts) do not. If you have opened your CSV file in Excel, some numeric columns might have been set to the Excel type 'general'. Fix this by opening your CSV file again in Excel, select the columns that should be doubles and set their Excel type to 'numbers'.  
 
 # 8. Complete the database with additional data
-To add missing data and process your data further into a format suitable for spatial ecological analyses, keep on reading.  
-1. Open the script **"data-raw/complete_database.R"** that contains functions to add missing data to the database. These functions either use data from secondary sources or calculate new values based on some assumptions. There are basically two options: 1) You simply run the full script as it is. If you do, please make sure you are aware of these sources and assumptions so you understand how to interpret the data. 2) You use the provided functions by the package, but maybe not all, or in another order, or you alter them somewhat to fit your own secondary sources and assumptions you want to use. Keep reading to understand what you can add and calculate.    
-2. If start and end coordinates are provided for the TripleD tracks, the midpoint and track length can be calculated.
-Missing depth values for sampling stations can be obtained from bathymetry data using track midpoints.
+It is possible to add missing data and process your data further into a format suitable for spatial ecological analyses.  
+
+Open the script **"data-raw/complete_database.R"** that contains functions to add missing data to the database. These functions either use data from secondary sources or calculate new values based on some assumptions. There are basically two options:   
+1) You simply run the full script as it is. If you do, please make sure you are aware of these sources and assumptions so you understand how to interpret the data.   
+2) You use the provided functions by the package, but maybe not all, or in another order, or you alter them somewhat to fit your own secondary sources and assumptions you want to use.  
+
+## Station and environmental data
+1. If start and end coordinates are provided for the TripleD tracks, the **track midpoint** and **track length** can be calculated. The R-package geosphere is used for this.  
+2. Track length is also calculated from the ticks reported by the **Odometer**. Default assumed tick length is 3 meters, but this can be adjusted as function argument.    
+4. Missing **depth values** for sampling stations can be obtained from **bathymetry data** using the calculated track midpoints. Bathymetry data is downloaded from NOAA based on the min and max coordinates present in the database with a buffer of 2 decimal degrees in all directions, with a resolution of 1 minute. The buffer and resolution can be adjusted as function argument. Missing depth values can of course also be found with a personal bathymetry dataset, for which the function 'add_water_depth' can be used.  
+
+## Species and biological data
+1. All **species names** from the column 'Species_reported' are checked against the **WoRMS taxonomic database** to check if their names are known, up-to-date, and accepted by the scientific community. If there are no direct matches, the species names is searched against WoRMS in a 'fuzzy' search which allows spelling mistakes. If there are multiple matches, the accepted name is selected. If there are multiple accepted names, the query is assumed to have no accurate match with the WoRMS database. The valid name of the specimen, the rank of the specimen name (sometimes only the genus or even higher taxonomic level is reported), its taxonomic classification (genus, family, order, class, phylum), whether or not the match was fuzzy, or if there was no match at all is added.  
+6. Biomasses in the unit Ash Free Dry Weight in grams (AFDW (g)) are estimated from size measurements and wet weights.  
+- Length measurements are all converted to the unit mm.  
+- Width measurements are converted to lengths using the 'Length_to_Widht' conversion factor.  
+- Converted length measurements are also converted to the unit mm.  
+- Length in mm is used in the power formula AFDW = A * Length^B, with coefficients per species taken from regression lines to obtain AFDW in grams.  
 
 
 
 # 9. Create community matrices
+Only use matched species names?  
+Only use complete organisms, no isPartial?  
 
 # 10. Merge request
 - if the species name is present in WoRMS: the newest accepted synonym is added in a column.

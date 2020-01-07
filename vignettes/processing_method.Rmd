@@ -47,7 +47,7 @@ Prepare for conversation with Marc:
 - Images of species to draw how they were measured.  
 - Original regression lines to go from length to AFDW.  
 - How conversion factor for length to width were established.  
-
+- Uncertainties for all regressions, so standard errors can be calcualted for all estimations.  
 
 # Questions
 - NICO10: zijn de notes (e.g. breedte top) voor alle specimens van die soort?  
