@@ -39,11 +39,13 @@ get_worms_taxonomy <- function(species_names){
   complete_matches <- which(lapply(worms,length) > 0)
   fuzzy_matches <- which(lapply(worms,length) == 0)
 
-  # Collect fuzzy matches
-  new_records <- collect_from_worms(names(fuzzy_matches), fuzzy = T)
+  if(length(fuzzy_matches) > 0){
+    # Collect fuzzy matches
+    new_records <- collect_from_worms(names(fuzzy_matches), fuzzy = T)
 
-  # Add fuzzy matches to worms list
-  worms[fuzzy_matches] <- new_records
+    # Add fuzzy matches to worms list
+    worms[fuzzy_matches] <- new_records
+  }
 
   # Find index of reported species without matches or with mulitple matches
   still_no_matches <- which(lapply(worms,length) == 0)
@@ -56,18 +58,22 @@ get_worms_taxonomy <- function(species_names){
 
   # If a reported species has multiple matches, only the accepted match is used
   # If there are multiple accepted names, it is assumed a no match and gets an empty record.
-  for(i in 1:length(multiple_matches)){
-    record <- worms[[multiple_matches[i]]] %>%
-      filter(status == "accepted")
-    if(nrow(record) > 1){
-      record <- empty_record
+  if(length(multiple_matches) > 0){
+    for(i in 1:length(multiple_matches)){
+      record <- worms[[multiple_matches[i]]] %>%
+        filter(status == "accepted")
+      if(nrow(record) > 1){
+        record <- empty_record
+      }
+      worms[[multiple_matches[i]]] <- record
     }
-    worms[[multiple_matches[i]]] <- record
   }
 
   # Reported species that cannot be fuzzy matches gets an empty record.
-  for(i in 1:length(still_no_matches)){
-    worms[[still_no_matches[i]]] <- empty_record
+  if(length(still_no_matches) > 0){
+    for(i in 1:length(still_no_matches)){
+      worms[[still_no_matches[i]]] <- empty_record
+    }
   }
 
   # Merge into tibble and save
