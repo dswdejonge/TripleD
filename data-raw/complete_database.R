@@ -65,35 +65,24 @@ species_additions <- species %>%
   left_join(., select(worms,
                       Query, valid_name, rank, phylum, class, order,
                       family, genus, hasNoMatch, isFuzzy),
-            by = c("Species_reported" = "Query")) %>%
+            by = c("Species_reported" = "Query")) #%>%
   # Attach conversion data
-  left_join(conversion_data, by = "valid_name") %>%
+  #left_join(conversion_data, by = "valid_name") %>%
   # Convert length to mm from other units
-  mutate(Length_mm =
-           ifelse(Unit_Length == "0.5cm", Length*5+5,
-           ifelse(Unit_Length == "cm", Length*10+10, Length))) %>%
+  #mutate(Length_mm =
+  #         ifelse(Unit_Length == "0.5cm", Length*5+5,
+  #         ifelse(Unit_Length == "cm", Length*10+10, Length))) %>%
   # Convert width to mm from other units
-  mutate(Width_mm =
-           ifelse(Unit_Width == "0.5cm", Width*5+5,
-           ifelse(Unit_Width == "cm", Width*10+10, Width))) %>%
+  #mutate(Width_mm =
+  #         ifelse(Unit_Width == "0.5cm", Width*5+5,
+  #         ifelse(Unit_Width == "cm", Width*10+10, Width))) %>%
   # Convert width in mm to length in mm
-  mutate(Length_from_Width_mm = Width_mm/Length_to_Width) %>%
+  #mutate(Length_from_Width_mm = Width_mm/Length_to_Width) %>%
   # Calculate AFDW from length and from length derived from width
-  mutate(AFDW_g_calc_L = length_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
-  mutate(AFDW_g_calc_W = length_to_weight(Length_from_Width_mm, A = A_factor, B = B_exponent)) %>%
+  #mutate(AFDW_g_calc_L = length_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
+  #mutate(AFDW_g_calc_W = length_to_weight(Length_from_Width_mm, A = A_factor, B = B_exponent)) %>%
   # If wet weight is reported as 0, use the scale threshold as wet weight.
-  mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
+  #mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
   # Calculate AFDW from wet weight
-  mutate(AFDW_g_calc_WW = WetWeight_g_threshold * WW_to_AFDW)
-
-
-
-
-# Species size to biomass
-#test_input <- read.csv(system.file("extdata", "test_input.csv", package = "TripleD"))
-#result <- test_input %>%
-#  left_join(conversion_data, by = "Species") %>%
-#  mutate(Length_mm = ifelse(Unit_Length == "0.5cm", Length*5+5, Length)) %>%
-#  mutate(AFDW_g_calc = size_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
-#  mutate(calc_diff = abs(AFDW_g - AFDW_g_calc)/AFDW_g*100)
-# plot(result$AFDW_g ~ result$AFDW_g_calc)
+  #mutate(AFDW_g_calc_WW = WetWeight_g_threshold * WW_to_AFDW)
+usethis::use_data(species_additions, overwrite = T)

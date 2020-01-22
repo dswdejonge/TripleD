@@ -131,7 +131,7 @@ Arctica islandica 64PE438#122    1
 Porifera          64PE438#122    0.5 -> fraction set to 1, count changed 1x2, isBulkWeight set to 1. Comment "Manually set fraction to 1 from 0.5."                       
 Porifera          64PE438#122    1               
 
-Nucula spp        64PE438#214    1 -> In total 9 individuals of Nucula spp were found. Three were recorded so the fraction for all Nucula spp was set to 0.33 isBulkWeight of this individual set to 0.  
+Nucula spp        64PE438#214    1 -> In total 9 individuals of Nucula spp were found. Three were recorded so the fraction for all Nucula spp was set to 0.33, isBulkWeight of this individual set to 0.  
 Nucula spp        64PE438#214    0.25           
 
 Polychaeta spp    64PE438#215    1                     

@@ -205,10 +205,12 @@ plot
 ```
 
 ## Reported species names
-Which reported species names are named differently according to WoRMS, or could not be matched?
+Which reported species names could not be matched to WoRMS?
 ```{r}
-i <- which(worms$Query != worms$valid_name)
-print(worms[i,c("Query", "valid_name")])
+print(species_additions %>%
+  select(Species_reported, valid_name) %>%
+  filter(is.na(valid_name))
+)
 ```
 
 Hierarchical dendrogram.
