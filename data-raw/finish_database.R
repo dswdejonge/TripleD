@@ -33,24 +33,31 @@ stations_final <- stations_additions %>%
   combine_data_sources(
     ., new_column_name = "Track_dist_m", order_of_preference = c("Track_dist_m_Odo", "Track_dist_m_BB")
   ) %>%
+  mutate(Sample_area_m2 = Track_dist_m * (Blade_width_cm/100)) %>%
+  mutate(Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
   select(
     File, Vessel, CruiseID, StationID, Station_name,
     Date, Time_start, Time_stop,
     Blade_depth_cm, Blade_width_cm,
     Lat_DD, source_Lat_DD, Lon_DD, source_Lon_DD,
-    Water_depth_m, source_Water_depth_m, source_Track_dist_m
+    Water_depth_m, source_Water_depth_m, source_Track_dist_m,
+    Sample_area_m2, Sample_volume_m3
   )
 usethis::use_data(stations_final, overwrite = T)
 
-
+# Create one large table for the Shiny app
+database <- stations_final %>%
+  select(-File) %>%
+  inner_join(species_final, ., by = "StationID")
+usethis::use_data(database, overwrite = T)
 
 # Create community matrix
-community <- species_final %>%
-  group_by(StationID, valid_name) %>%
-  summarise(
-    Count = sum(Count, na.rm = T),
-    Size_sd = sd(Size, na.rm = T),
-    Size = mean(Size, na.rm = T),
-    WetWeight = sum(WetWeight, na.rm = T)
-  )
+#community <- species_final %>%
+#  group_by(StationID, valid_name) %>%
+#  summarise(
+#    Count = sum(Count, na.rm = T),
+#    Size_sd = sd(Size, na.rm = T),
+#    Size = mean(Size, na.rm = T),
+#    WetWeight = sum(WetWeight, na.rm = T)
+#  )
 
