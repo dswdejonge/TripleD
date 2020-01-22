@@ -213,4 +213,15 @@ print(species_additions %>%
 )
 ```
 
+Which species were matched fuzzy?
+```{r}
+print(species_additions %>%
+  .[-which(.$hasNoMatch == 1),] %>%
+  filter(isFuzzy == 1) %>%
+  select(Species_reported, valid_name) %>%
+  distinct()
+)
+  
+```
+
 Hierarchical dendrogram.
