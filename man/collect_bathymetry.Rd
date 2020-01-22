@@ -15,7 +15,7 @@ min and max coordinates in the dataframe. Default = 2.}
 
 \item{resolution}{The resolution in minutes the bathymetry is collected in.
 A lower resolution provides better depth estimates from bathymetry, but takes
-a longer time to collect from the NOAA database.}
+a longer time to collect from the NOAA database. Default resolution is 1 minute.}
 }
 \value{
 Returns a xyz dataframe (x = lon, y = lat, z = altitude i.e. negative values are depth)

@@ -4,7 +4,7 @@
 \alias{add_track_length_Odometer}
 \title{Add track length based on the odometer}
 \usage{
-add_track_length_Odometer(stations)
+add_track_length_Odometer(stations, tick_length_m = 2)
 }
 \arguments{
 \item{stations}{(required) Dataframe (tibble) with all stations and the attributes

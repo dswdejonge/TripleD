@@ -17,24 +17,7 @@ species_final <- species_additions %>%
   )
 usethis::use_data(species_final, overwrite = T)
 
-# Function that will create one new variable (column) in which data
-# from multiple columns are combined in order of importance.
-# In other words, all data from the preferred data is used,
-# then all the missing data (NA) thatare left will be filled with
-# data from the secondly preferred data source, etc.
-# Order of preference is a vector with column names
-combine_data_sources <- function(mytable, new_column_name = "new", order_of_preference){
-  mytable$new <- mytable[,order_of_preference[1]]
-  for(i in 2:length(order_of_preference)){
-    NA_i <- which(is.na(mytable$new))
-    if(length(NA_i) == 0){
-      break
-    }
-    mytable$new[NA_i] <- mytable[NA_i, order_of_preference[i]]
-  }
-  colnames(mytable)[colnames(mytable) == "new"] <- new_column_name
-  return(mytable)
-}
+
 
 # Clean station database
 stations_final <- stations_additions %>%
@@ -54,7 +37,8 @@ stations_final <- stations_additions %>%
     File, Vessel, CruiseID, StationID, Station_name,
     Date, Time_start, Time_stop,
     Blade_depth_cm, Blade_width_cm,
-    Lat_DD, Lon_DD, Water_depth_m, Track_dist_m
+    Lat_DD, source_Lat_DD, Lon_DD, source_Lon_DD,
+    Water_depth_m, source_Water_depth_m, source_Track_dist_m
   )
 usethis::use_data(stations_final, overwrite = T)
 
