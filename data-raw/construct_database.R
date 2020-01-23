@@ -1,10 +1,17 @@
 # -------------------------------------------------------
 # Workflow to construct and update the Triple-D database
 # -------------------------------------------------------
+# Set working directory to data_raw
+setwd("~/Google Drive/Synced/Werk/Onderzoek/North Sea Ecosystem/TripleD/data-raw")
 
+# Load libraries
 library(dplyr)
 library(TripleD)
+
+# Load functions written to check data formats
 source("check_format.R")
+
+# List of tables to import and check
 tables <- list(
   Stations <- list(folder = "Stations", att = "attributes_stations.csv"),
   Species <- list(folder = "Species", att = "attributes_species.csv")
@@ -64,4 +71,10 @@ for(table in tables){
     species <- dplyr::bind_rows(data, .id = "File")
     usethis::use_data(species, overwrite = T)
   }
+}
+
+missing_stationIDs <- unique(species$StationID[which(!species$StationID %in% stations$StationID)])
+if(length(missing_stationIDs > 0)){
+  stop(paste0("The StationID(s) ", paste(missing_stationIDs, collapse = ", "), " are reported in the species file,
+              but are missing in the stations file, i.e. metadata is missing for these biological data points."))
 }

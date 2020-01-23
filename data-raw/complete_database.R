@@ -13,22 +13,22 @@
 # These libraries should be installed to use the functions below.
 # They should all be installed automatically when you installed the TripleD package.
 #library(TripleD)
-#library(dplyr)
-#library(tibble)
-#library(geosphere)
-#library(marmap)
+library(dplyr)
+library(tibble)
+library(geosphere)
+library(marmap)
 
 
 # ---------------#
 # Secondary data #
 # ---------------#
 # Collect bathymetry and store in package
-bathymetry <- collect_bathymetry(stations)
-usethis::use_data(bathymetry, overwrite = T)
+# UNCOMMENT TO COLLECT BATHY # bathymetry <- collect_bathymetry(stations)
+# UNCOMMENT TO COLLECT BATHY # usethis::use_data(bathymetry, overwrite = T)
 
 # Collect taxonomy of species from WoRMs
-worms <- get_worms_taxonomy(species$Species_reported)
-usethis::use_data(worms, overwrite = T)
+# UNCOMMENT TO COLLECT TAXONOMY # worms <- get_worms_taxonomy(species$Species_reported)
+# UNCOMMENT TO COLLECT TAXONOMY # usethis::use_data(worms, overwrite = T)
 
 # Open csv file that contains conversion data. Columns:
 # Species: species name for which the conversion data is valid.
@@ -36,13 +36,13 @@ usethis::use_data(worms, overwrite = T)
 # Length_to_Width: fraction of length that should be taken to obtain width.
 # A_factor: The factor A in the power function AFDW = A * Length^B as regression of AFDW vs. Length.
 # B_exponent: The exponent in the power function AFDW = A * Length^B as regression of AFDW vs. Length.
-conversion_data <- read.csv(
-  system.file("extdata", "bioconversion_data.csv", package = "TripleD"),
-  stringsAsFactors = F)
+#conversion_data <- read.csv(
+#  system.file("extdata", "bioconversion_data.csv", package = "TripleD"),
+#  stringsAsFactors = F)
 # Check names in the bioconversion data file
-worms_conversion <- get_worms_taxonomy(conversion_data$Species)
-conversion_data <- left_join(conversion_data, select(worms_conversion, Query, valid_name),
-                             by = c("Species" = "Query"))
+#worms_conversion <- get_worms_taxonomy(conversion_data$Species)
+#conversion_data <- left_join(conversion_data, select(worms_conversion, Query, valid_name),
+#                             by = c("Species" = "Query"))
 
 # --------------------------------#
 # Stations and environmental data #

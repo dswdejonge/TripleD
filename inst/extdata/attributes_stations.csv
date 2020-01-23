@@ -5,9 +5,9 @@ Lat_start_DD,Decimal degrees,Double,Required_alternative,1,Latitude of the dredg
 Lon_start_DD,Decimal degrees,Double,Required_alternative,1,Longitude of the dredge when the dredge touched bottom.
 Lat_stop_DD,Decimal degrees,Double,Required_alternative,1,Latitude of the dredge when the dredge was heaved from the bottom.
 Lon_stop_DD,Decimal degrees,Double,Required_alternative,1,Longitude of the dredge when the dredge was heaved from the bottom.
-Lat_DD,Decimal degrees,Double,Required_alternative,2,Closest approximation possible of the latitude of the midpoint of the dredge track. Alternative for start and stop coordinates.
-Lon_DD,Decimal degrees,Double,Required_alternative,2,Closest approximation possible of the longitude of the midpoint of the dredge track. Alternative for start and stop coordinates.
-Track_dist_m,Meters,Double,Required_alternative,2,Track length as measured by the odometer. Alternative for start and stop coordinates.
+Lat_DD_midpt,Decimal degrees,Double,Required_alternative,2,Closest approximation possible of the latitude of the midpoint of the dredge track. Alternative for start and stop coordinates.
+Lon_DD_midpt,Decimal degrees,Double,Required_alternative,2,Closest approximation possible of the longitude of the midpoint of the dredge track. Alternative for start and stop coordinates.
+Track_length_m_Odo,Meters,Double,Required_alternative,2,Track length as measured by the odometer. Alternative for start and stop coordinates.
 Blade_depth_cm,Centimeters,Double,Required,NA,The depth in cm of the exised strip of sediment by the blade.
 Blade_width_cm,Centimeters,Double,Required,NA,The width in cm of the exised strip of sediment by the blade.
 Vessel,NA,String,Optional,NA,Name of the research vessel. Often used: RV Pelagia.
@@ -20,7 +20,7 @@ Time_stop,HH:MM:SS,Time,Optional,3,Time when the dredge was heaved from the bott
 Tow_speed_knots,Knots,Double,Optional,NA,The average speed at which the TripleD was towed in knots.
 Water_depth_start_m,Meters,Double,Optional,4,Water depth in meters at the start of the dredge track (touch bottom) as measured during the cruise.
 Water_depth_stop_m,Meters,Double,Optional,4,Water depth in meters at the end of the dredge track (heaving) as measured during the cruise.
-Water_depth_m,Meters,Double,Optional,NA,Average water depth at the dredge track as measured during the cruise.
+Water_depth_m_cruise,Meters,Double,Optional,NA,Average water depth at the dredge track as measured during the cruise.
 Pre_track_distance_m,Meters,Double,Optional,NA,The dredge length before the start of the actual track. Used to determine the stability of the dredge in terms of bottom contact before starting the actual sampling procedure.
 Cable_length_m,Meters,Double,Optional,NA,Length of cable veered from ship to the dredge.
 SB_count,Count,Integer,Optional,NA,"Measure to check the pre-track + track distance, where each counted tick equals 2 m."

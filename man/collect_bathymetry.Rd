@@ -8,7 +8,7 @@ collect_bathymetry(stations, buffer = 2, resolution = 1)
 }
 \arguments{
 \item{stations}{Dataframe (tibble) with the attributes
-"Lat_DD", "Lat_start_DD", "Lat_stop_DD", "Lon_DD", "Lon_start_DD", "Lon_stop_DD".}
+"Lat_DD_midpt", "Lat_start_DD", "Lat_stop_DD", "Lon_DD_midpt", "Lon_start_DD", "Lon_stop_DD".}
 
 \item{buffer}{The size of the buffer zone in decimal degrees around the
 min and max coordinates in the dataframe. Default = 2.}
