@@ -64,6 +64,7 @@ ui <- navbarPage( # page with tabs to navigate to different pages
   # ------------------------------------
   tabPanel(
     "Summary",
+
     h1("Factsheet"),
     p(paste0("This database contains ",dim(database)[1]," entries, collected over
              ",length(unique(database$StationID))," sample stations,
@@ -74,7 +75,24 @@ ui <- navbarPage( # page with tabs to navigate to different pages
              sum(stations_final$Sample_area_m2), "m2 and the total volume of sediment
              sampled is ", sum(stations_final$Sample_volume_m3), "m3.")),
     p(paste0("In total ", sum(as.integer(database$Count)), " specimens have been counted from ",
-             length(unique(database$valid_name))," taxa."))
+             length(unique(database$valid_name))," taxa.")),
+    hr(),
+
+    h1("Missing data"),
+    p("Not all raw data attributes are mandatory,
+      which means optional fields might not always be filled.
+      These graphs show the percentage of entries per attribute that are
+      provided in the raw data."),
+    radioButtons(
+      "missing_data",
+      label = "Show missing data for:",
+      choices = list("Stations", "Species")),
+    plotOutput("missingDataPlot"),
+
+    h1("Water depth accuracy"),
+    p("In order to check the accuracy of water depth derived from bathymetry at the track midpoint,
+      it is compared to water depth measured onboard if this data exists."),
+    plotOutput("waterDepthAccuracy")
   ),
 
   # --------------------
@@ -126,9 +144,8 @@ server <- function(input, output) {
         filter(phylum == input$taxonomic_level) %>%
         rename(Density = Density_nr_per_m2)
     }
-
     # make plot
-    map_samples <- ggplot() +
+    ggplot() +
       # add 20m contour
       geom_contour(data = bathymetry,
                    aes(x = x, y = y, z = z),
@@ -159,8 +176,72 @@ server <- function(input, output) {
       # formatting
       ylab("") + xlab("")+
       theme_bw()
-    map_samples
   })
+
+  # ------------
+  # Summary page
+  # ------------
+  # Missing data plot
+  output$missingDataPlot <- renderPlot({
+    # stations
+    stations_perc_complete <- stations %>%
+      sapply(.,
+             function(x){sum(length(which(!is.na(x))))/dim(stations)[1]}
+      ) %>%
+      sort(., decreasing = T) %>%
+      as.data.frame() %>%
+      as_tibble(rownames = "Attribute")
+    colnames(stations_perc_complete)[2] <- "Percentage"
+    stations_perc_complete$Attribute <- factor(
+      stations_perc_complete$Attribute, levels = stations_perc_complete$Attribute)
+    # species
+    species_perc_complete <- species %>%
+      sapply(.,
+             function(x){sum(length(which(!is.na(x))))/dim(species)[1]}
+      ) %>%
+      sort(., decreasing = T) %>%
+      as.data.frame() %>%
+      as_tibble(rownames = "Attribute")
+    colnames(species_perc_complete)[2] <- "Percentage"
+    species_perc_complete$Attribute <- factor(
+      species_perc_complete$Attribute, levels = species_perc_complete$Attribute)
+    # plot
+    if(input$missing_data == "Stations"){
+      my_data <- stations_perc_complete
+    }else if(input$missing_data == "Species"){
+      my_data <- species_perc_complete
+    }
+    ggplot(my_data) +
+      geom_col(aes(x = Attribute, y = Percentage)) +
+      labs(title = input$missing_data, y = "% complete i.e. not NA") +
+      theme_bw() +
+      theme(
+        axis.text.x = element_text(angle = 90, hjust = 1)
+      )
+  })
+
+  # Water depth accuracy
+  output$waterDepthAccuracy <- renderPlot({
+    differences <- na.omit(abs(stations_additions$Water_depth_m_cruise - stations_additions$Water_depth_m_Bathy))
+    avg_diff <- sum(differences) / length(differences)
+    ggplot(stations_additions,
+           aes(x = Water_depth_m_cruise, y = Water_depth_m_Bathy)) +
+      geom_point() +
+      geom_abline() +
+      annotate(
+        "text",
+        x = 50, y = 175,
+        label = paste0("average difference = ", round(avg_diff, digits = 1)," m.")) +
+      labs(
+        title = "Difference between observed and bathymetry water depth",
+        x = "Water depth measured on site (m)",
+        y = "Water depth from NOAA bathymetry resolution 1' (m)") +
+      xlim(0, max(c(stations_additions$Water_depth_m, stations_additions$Water_depth_m_Bathy), na.rm = T)) +
+      ylim(0, max(c(stations_additions$Water_depth_m, stations_additions$Water_depth_m_Bathy), na.rm = T)) +
+      coord_fixed() +
+      theme_bw()
+  })
+
 
   # --------------
   # Histogram plots
