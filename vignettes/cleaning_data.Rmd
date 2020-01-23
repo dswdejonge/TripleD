@@ -5,99 +5,115 @@ output: html_document
 
 # Stations
 # General remarks
-test_Lavaleye: The raw data included station info together with biological data. The "remove duplicates" function in Excel was used to only keep one entry per station.
+test_Lavaleye: The raw data included station info together with biological data. The "remove duplicates" function in Excel was used to only keep one entry per station.  
+
+The RWS data do not have a cruise ID, so instead they are named RWS<databasenr>. For the RWS data 2018, stations with a failed dredge were removed, to prevent double stationIDs.
 
 ## StationID
 For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.
-test_Lavaleye: StCode is same as StationID. 
+test_Lavaleye: StCode is same as StationID.
+RWS2018: Station ID is RWS31135633#<station nr reported before _FrieseFront in the column Loc_name> using the Excelcode: ="RWS31135633#"&LEFT(A2,FIND("_",A2)-1).
 
 ## Date
 For the NICO10 cruise (64PE438) the date for all samples is taken from the cruise report.
 test_Lavaleye: Already reported in correct format.
+RWS2018: "DATE_SMP" is Date.
 
-## Lat_start(DD) and Lon_start(DD)
+## Lat_start_DD and Lon_start_DD
 For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge touched bottom. Taken from CASINO extract in cruise report.
 test_Lavaleye: Not available.
+RWS2018: "Position_x, begin"	"Position_y, begin" are Lon_start_DD and Lat_start_DD.
 
-## Lat_stop(DD) and Lon_stop(DD)
+## Lat_stop_DD and Lon_stop_DD
 For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge was heaved. Taken from CASINO extract in cruise report.
 test_Lavaleye: Not available. 
+RWS2018: "Position_x, eind"	"Position_y, eind" are Lon_stop_DD and Lat_stop_DD.
 
-## Lat(DD) and Lon(DD)
+## Lat_DD_midpt and Lon_DD_midpt
 The Lat(DD) and Lon(DD) for the NICO10 cruise (64PE438) are calculated from the position of the ship, the position of the antenna on the ship, the estimated angle of the veered cable, and the length of the veered cable as follows:  
 **CODE BY ROB**
 Taken from the excel file provided by Rob Witbaard.
 test_Lavaleye: Reported, but unclear how these were obtained: ship or dredge positions? Midpoint of track?
+RWS2018: "COORD_Y" is Lat_DD_midpt and "COORD_X" is Lon_DD_midpt.
 
-## Track_dist(m)
+## Track_length_m_Odo
 For the NICO10 cruise (64PE438) these correspond to the odometer. Taken from CASINO extract in cruise report.
 test_Lavaleye: Track length is Track_dist(m). Are these all measured with odometers, or also other methods to derive track distance?
+RWS2018: The variable "AMT_MEAS" is the area that was measured. Because the blade width is 20 cm, the track length can be deduced from area and blade width (all track lengths are 100m).
 
-## Blade_depth(cm)
+## Blade_depth_cm
 During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
-test_Laveleye: depth of blade is not recorded. For now assumed 20 cm, is this correct for all data? In prototype paper other possible depths were also recorded. 
+test_Laveleye: depth of blade is not recorded. For now assumed 20 cm, is this correct for all data? In prototype paper other possible depths were also recorded.
+RWS2018: "Schaafdiepte (cm)" used for blade depth.
 
-## Blade_width(cm)
+## Blade_width_cm
 During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
 test_Laveleye: width is blade width in meters, so multiplied x100 to obtain value in cm. 
+RWS2018: Blade width assumed to be 20 cm?
 
 ## Vessel
 NICO10 cruise (64PE438): RV Pelagia
 test_Laveleye: Not available.
+RWS2018: NA.
 
 ## CruiseID
 NICO10 cruise (64PE438)
 test_Laveleye: CruiseID is Cruise in raw data.
+RWS2018: NA.
 
 ## Cruise_name
 NICO10 cruise (64PE438)
 test_Laveleye: Cruise_name is CruiseName in raw data.
+RWS2018: NA.
 
 ## Station_name
 NICO10 cruise (64PE438): station names can be used to relate to other samples taken at these locations (boxcores, nutrient samples, etc.) as reported in the cruise report.
 test_Laveleye: can we use Station in raw data for this field?
+RWS2018: "Loc_name" used.
 
 ## Region
 NICO10 cruise (64PE438): not included
 test_Laveleye: Available in raw data.
+RWS2018: All data from Frysian Front, so set to FF.
 
-## Time_start
-NICO10 cruise (64PE438): Time when dredge touched bottom, taken from CASINO extract in cruise report.
+## Time_start and Time_stop
+NICO10 cruise (64PE438): Time when dredge touched bottom, taken from CASINO extract in cruise report is start. Time when dredge was heaved, taken from CASINO extract in cruise report is end.
 test_Laveleye: Not available.
+RWS2018: "TIME_OBS" used for Time_start. Time_stop set to NA.
 
-## Time_stop
-NICO10 cruise (64PE438): Time when dredge was heaved, taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
-
-## Tow_speed(knots)
+## Tow_speed_knots
 NICO10 cruise (64PE438): not included.
 test_Laveleye: Not available.
+RWS2018: NA.
 
-## Water_depth_start(m)
+## Water_depth_start_m
 NICO10 cruise (64PE438): not included.
 test_Laveleye: Not available.
+RWS2018: NA.
 
-## Water_depth_stop(m)
+## Water_depth_stop_m
 NICO10 cruise (64PE438): not included.
 test_Laveleye: Not available.
+RWS2018: Na.
 
-## Water_depth(m)
+## Water_depth_m_cruise
 NICO10 cruise (64PE438): how is this measured? Taken from CASINO extract in cruise report.
 test_Laveleye: Available, unclear how these values are obtained.
+RWS2018: The variable "MONSDTE" is used as depth in meters, as the column "UNT_MONSDTE" specifies "m" for all entries.
 
 ## Pre-run_setting
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
 test_Laveleye: Not available.
 
-## Cable_length(m)
+## Cable_length_m
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
 test_Laveleye: Not available.
 
-## SB(count)
+## SB_count
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
 test_Laveleye: Not available.
 
-## BB(count)
+## BB_count
 NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
 test_Laveleye: Not available.
 
@@ -119,8 +135,8 @@ test_Laveleye: Not available.
 
 ## StationID
 For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.  
-
-test_Lavaleye: StCode is same as StationID.
+test_Lavaleye: StCode is same as StationID.  
+RWS2018: Station ID is RWS31135633#<station nr reported before _FrieseFront in the column Loc_name> using the Excelcode: ="RWS31135633#"&LEFT(A2,FIND("_",A2)-1).
 
 ## Fraction
 NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125. There were some double entries (combination species - station with differing fractions):  
@@ -138,22 +154,30 @@ Polychaeta spp    64PE438#215    1
 Polychaeta spp    64PE438#215    0.125 -> In total 82 individuals were found, of which 12 were recorded. So the fraction for all Polychaeta spp was set to 12/82=0.146.   
 
 
-test_Lavaleye: Taken from raw data.
+test_Lavaleye: Taken from raw data.  
+
+RWS2018: " FCT-A " is used as Fraction.
 
 ## isFractionAssumed
 NICO10 cruise (64PE438): Fractions were specifically reported so isFractionAssumed = 0.  
 
 test_Lavaleye: isFractionAssumed is based on the column AssumedFraction in raw data. In this case the column was empty, so all fractions were set to isFractionAssumed = 0.
 
+RWS2018: Specifically given in original data file, so set to 0.
+
 ## Species_reported
 NICO10 cruise (64PE438): Species name taken for Species_reported.  
 
 test_Lavaleye: Taken from raw data.
 
+RWS2018: "PAR_Name" is used.
+
 ## Count
 NICO10 cruise (64PE438): reported in raw data. NA counts were set to -1.    
 
-test_Lavaleye: Number column is taken as Count.
+test_Lavaleye: "Number"" column is taken as Count.
+
+RWS2018: "AMT_MEAS" is used. How was dealt with species with count 0? Set to -1?
 
 ## Unit_Length
 NICO10 cruise (64PE438): Maatvoering is taken for Unit_Length. 1/2 cm (with space) was converted to 1/2cm (without space).  
@@ -204,6 +228,7 @@ test_Lavaleye: NA (for now).
 
 ## ID_by
 NICO10 cruise (64PE438): Not reported in raw data.
+RWS2018: "Controle" is used.
 
 ## isPreserved
 NICO10 cruise (64PE438): Not reported in raw data.
@@ -213,3 +238,4 @@ test_Lavaleye: Preserved is isPreserved. NA (for now).
 ## Comment
 NICO10 cruise (64PE438): Used comments from raw data (in Dutch).
 test_Lavaleye: Remark is used for Comment. Empty cells filled with NA.
+RWS2018: "RMK_MEAS" is used.

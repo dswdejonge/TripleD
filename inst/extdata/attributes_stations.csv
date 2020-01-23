@@ -1,5 +1,5 @@
 ﻿Attribute,Unit,Datatype,Required_or_Optional,Group,Description
-StationID,<cruiseID/cruise name>#<station/event number>,String,Required,NA,"A unique ID for the sampling event, preferably as ""<cruiseID>#<station/event number>"". For example: 64PE438#21. Otherwise <cruise name>_<station number>. "
+StationID,<cruiseID/cruise name>#<station/event number>,String,Required,NA,"A unique ID for the sampling event, preferably as ""<cruiseID>#<station/event number>"". For example: 64PE438#21. Otherwise <cruise name>#<station number>. "
 Date,DD/MM/YYYY,Date,Required,NA,"The date when the sampling event took place in the format ""DD/MM/YYYY"". For example: 12/01/1994."
 Lat_start_DD,Decimal degrees,Double,Required_alternative,1,Latitude of the dredge when the dredge touched bottom.
 Lon_start_DD,Decimal degrees,Double,Required_alternative,1,Longitude of the dredge when the dredge touched bottom.
