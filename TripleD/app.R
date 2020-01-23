@@ -21,6 +21,17 @@ library(dplyr)
 lats <- c(50, 62)
 lons <- c(-5, 10)
 
+# Get coastal outlines
+reg <- ggplot2::map_data("world2Hires")
+reg <- reg %>%
+  dplyr::filter(
+    region == "UK" |
+    region == "Netherlands" |
+    region == "Belgium" |
+    region == "France" |
+    region == "Denmark" |
+    region == "Norway" |
+    region == "Germany")
 
 # ---------------
 # User interface
@@ -33,7 +44,37 @@ ui <- navbarPage( # page with tabs to navigate to different pages
   # ------------------------------------
   tabPanel(
     "Map",
-    plotOutput("North_Sea_map")
+    sidebarLayout(
+      sidebarPanel(
+        selectInput(
+          "taxonomic_level",
+          label = h3("Select a taxonomic group:"),
+          choices = as.list(
+            c("all", unique(database$phylum))),
+          selected = 1)
+      ),
+      mainPanel(
+        plotOutput("North_Sea_map")
+      )
+    )
+  ),
+
+  # ------------------------------------
+  # Page with database summary
+  # ------------------------------------
+  tabPanel(
+    "Summary",
+    h1("Factsheet"),
+    p(paste0("This database contains ",dim(database)[1]," entries, collected over
+             ",length(unique(database$StationID))," sample stations,
+             during ",length(unique(database$CruiseID))," cruises.")),
+    p(paste0("The oldest sample was taken on ",min(database$Date),
+             " and the most recent sample was taken on ",max(database$Date),".")),
+    p(paste0("Total suface area that has been sampled with the TripleD is ",
+             sum(stations_final$Sample_area_m2), "m2 and the total volume of sediment
+             sampled is ", sum(stations_final$Sample_volume_m3), "m3.")),
+    p(paste0("In total ", sum(as.integer(database$Count)), " specimens have been counted from ",
+             length(unique(database$valid_name))," taxa."))
   ),
 
   # --------------------
@@ -63,7 +104,7 @@ ui <- navbarPage( # page with tabs to navigate to different pages
   # -----------
   tabPanel("About",
            p("This interactive page is created by Danielle de Jonge."),
-           img(src = "Diagram_TripleD.png"))
+           img(src = "Diagram_TripleD.png", height = 400))
 )
 
 # ---------------------------------------
@@ -75,26 +116,46 @@ server <- function(input, output) {
   # North Sea map
   # --------------
   output$North_Sea_map <- renderPlot({
-    # Get coastal outlines
-    reg <- ggplot2::map_data("world2Hires")
-    reg <- reg %>%
-      dplyr::filter(
-        long > lons[1] &
-        long < lons[2] &
-        lat > lats[1] &
-        lat < lats[2]
-      )
+    # Subset data based on input
+    if(input$taxonomic_level == "all"){
+      my_data <- database %>%
+        group_by(StationID, Lat_DD, Lon_DD) %>%
+        summarise(Density = sum(Density_nr_per_m2))
+    }else{
+      my_data <- database %>%
+        filter(phylum == input$taxonomic_level) %>%
+        rename(Density = Density_nr_per_m2)
+    }
+
     # make plot
     map_samples <- ggplot() +
+      # add 20m contour
+      geom_contour(data = bathymetry,
+                   aes(x = x, y = y, z = z),
+                   breaks = c(-20),
+                   size = c(0.3),
+                   colour = "grey") +
+      # add 50m contour
+      geom_contour(data = bathymetry,
+                   aes(x = x, y = y, z = z),
+                   breaks = c(-50),
+                   size = c(0.3),
+                   colour ="grey") +
+      # add 100m contour
+      geom_contour(data = bathymetry,
+                   aes(x = x, y = y, z = z),
+                   breaks = c(-100),
+                   size = c(0.3),
+                   colour = "grey") +
       # add coastline
       geom_polygon(data = reg, aes(x = long, y = lat, group = group),
                    fill = "darkgrey", color = NA) +
       # add points
-      geom_point(data = stations_final, aes(x = Lon_DD, y = Lat_DD),
-                 fill = "red", colour = "black",
-                 size = 1, shape = 21) +
+      geom_point(data = my_data, aes(x = Lon_DD, y = Lat_DD, colour = Density),
+                 size = 2) +
       # configure projection and plot domain
       coord_map(xlim = lons, ylim = lats) +
+      scale_colour_gradientn(colours = rainbow(4)) +
       # formatting
       ylab("") + xlab("")+
       theme_bw()
