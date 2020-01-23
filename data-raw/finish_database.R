@@ -9,10 +9,15 @@
 species_final <- species_additions %>%
   # Remove species with no match to WoRMS database
   .[-which(.$hasNoMatch == 1),] %>%
+  # Remove species that are not counted as organism (Count = -1)
+  filter(Count > 0) %>%
+  # Upscale count based on fraction
+  mutate(Count_scaled = Count / Fraction) %>%
   # Only select revelant columns
+  ### !!!! Later add in columns for biomass !!!
   select(
     File, StationID,
-    Fraction, isFractionAssumed, Count,
+    Count_scaled,
     valid_name, rank, phylum, class, order, family, genus, isFuzzy
   )
 usethis::use_data(species_final, overwrite = T)
@@ -46,11 +51,17 @@ stations_final <- stations_additions %>%
 usethis::use_data(stations_final, overwrite = T)
 
 # Create one large table for the Shiny app
+# Deselect File in stations because it's double.
 st <- select(stations_final, -File)
+# Count all species per station
 sp <- species_final %>%
-  group_by(StationID, valid_name) %>%
-  summarise(Count = sum(Count, na.rm = T))
-database <- inner_join(sp, st, by = "StationID")
+  group_by(StationID, valid_name, rank, phylum, class, order, family, genus, isFuzzy) %>%
+  summarise(Count = sum(Count_scaled, na.rm = T))
+# Join data into big table
+database <- inner_join(sp, st, by = "StationID") %>%
+  # Calculate density per site
+  mutate(Density_nr_per_m2 = Count / Sample_area_m2) %>%
+  mutate(Density_nr_per_m3 = Count / Sample_volume_m3)
 usethis::use_data(database, overwrite = T)
 
 # Create community matrix
