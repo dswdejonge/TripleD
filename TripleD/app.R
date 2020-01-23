@@ -88,33 +88,37 @@ ui <- navbarPage( # page with tabs to navigate to different pages
       label = "Show missing data for:",
       choices = list("Stations", "Species")),
     plotOutput("missingDataPlot"),
+    hr(),
 
     h1("Water depth accuracy"),
     p("In order to check the accuracy of water depth derived from bathymetry at the track midpoint,
       it is compared to water depth measured onboard if this data exists."),
-    plotOutput("waterDepthAccuracy")
-  ),
+    plotOutput("waterDepthAccuracy"),
+    hr(),
 
-  # --------------------
-  # Page with histograms
-  # --------------------
-  tabPanel(
-    "Histograms",
-    sidebarLayout(
-      sidebarPanel(
-        selectInput(
-          "histogram_data",
-          label = h3("Histogram of:"),
-          choices = list(
-            "Water depth" = "Water_depth_m",
-            "Track length" = "Track_length_m",
-            "Taxon count" = "Count"),
-          selected = 1)
-      ),
-      mainPanel(
-        plotOutput("histoPlot")
+    h1("Histograms"),
+    radioButtons(
+      "histogram_data",
+      label = "Show histogram of:",
+      choices = list(
+        "Water depth" = "Water_depth_m",
+        "Track length" = "Track_length_m",
+        "Taxon count" = "Count")),
+    plotOutput("histoPlot"),
+    hr(),
+
+    h1("Taxonomy"),
+    p("Taxon names in the raw data can be outdated or spelled wrongly (typos, phonetic spelling, etc.).
+      Therefore, the taxon names are checked and updated against the WoRMS database with the worrms R-package."),
+    radioButtons(
+      "worms_matches",
+      label = "Show taxa with:",
+      choices = list(
+        "no match to WoRMS" = "nomatch",
+        "a fuzzy match to WoRMS" = "fuzzy"
       )
-    )
+    ),
+    tableOutput("wormsMatches")
   ),
 
   # -----------
@@ -242,14 +246,38 @@ server <- function(input, output) {
       theme_bw()
   })
 
+  # WoRMS matches
+  output$wormsMatches <- renderTable({
+    if(input$worms_matches == "nomatch"){
+      species_additions %>%
+        select(Species_reported, valid_name) %>%
+        filter(is.na(valid_name))
+    }else if(input$worms_matches == "fuzzy"){
+      species_additions %>%
+        .[-which(.$hasNoMatch == 1),] %>%
+        filter(isFuzzy == 1) %>%
+        select(Species_reported, valid_name) %>%
+        distinct()
+    }
+  })
+
 
   # --------------
   # Histogram plots
   # --------------
   output$histoPlot <- renderPlot({
-    data_to_plot <- pull(database, input$histogram_data)
-    hist(data_to_plot)
+    ggplot() +
+      geom_histogram(aes(x = pull(database, input$histogram_data))) +
+      labs(
+        title = "Suspiciously large or small values?",
+        x = input$histogram_data) +
+      theme_bw()
   })
+
+  #output$histoPlot <- renderPlot({
+  #  data_to_plot <- pull(database, input$histogram_data)
+  #  hist(data_to_plot)
+  #})
 }
 
 # Run the application
