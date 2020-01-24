@@ -1,8 +1,7 @@
 #' Add WoRMs taxonomy
 #'
-#' These functions are used to check the reported species names against the WoRMs datbase.
+#' This function collects WoRMS entries from their database using the reported taxa.
 #' @references worrms R-package
-#' @param species Tibble with reported species names.
 #' @param species_names Only the species names.
 #' @param fuzzy Uses the TAXAMATCH algorithm to match species names.
 #' @details Searches in batches of 50.
@@ -27,7 +26,15 @@ collect_from_worms <- function(species_names, fuzzy = FALSE){
 }
 
 
-#' @rdname collect_from_worms
+#' Get WoRMs taxonomy
+#'
+#' This function checks all reported taxa against the WoRMS databse.
+#' @references worrms R-package
+#' @param species_names Only the species names.
+#' @details This function collects WoRMS entries based on the given species names, and reports the valid name
+#' and rank that is found. It first finds all direct matches, and then does a fuzzy match for queries that do
+#' not have a direct match against the database.
+#' @export
 get_worms_taxonomy <- function(species_names){
   # Get unique species names
   reported_species <- unique(species_names)
