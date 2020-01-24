@@ -14,9 +14,9 @@ Vessel,NA,String,Optional,NA,Name of the research vessel. Often used: RV Pelagia
 CruiseID,NA,String,Optional,NA,"Cruise ID when the sampling occurred, for example 64PE438"
 Cruise_name,NA,String,Optional,NA,"Name of the cruise, for example NICO10 or Normomap."
 Station_name,NA,String,Optional,NA,"Generic name of the station where the sample is taken, can be used to later link back to for example box core samples. DO NOT CONFUSE with StationID."
-Region,"Predefined: BC, CB, DB, DH, FF",String,Optional,NA,"Predefined general region where the sample is taken. If the station was not in these predefined regions, insert NA. BC = Botney Cut, CB = Cleaver Bank, DB = Dogger Bank, DH = Devil's Hole, FF = Frysian Front"
-Time_start,HH:MM:SS,Time,Optional,3,Time when the dredge touched bottom. Format: HH:MM:SS
-Time_stop,HH:MM:SS,Time,Optional,3,Time when the dredge was heaved from the bottom. Format: HH:MM:SS
+Region,"Predefined: BB, BC, CB, DB, DH, FF, OG",String,Optional,NA,"Predefined general region where the sample is taken. If the station was not in these predefined regions, insert NA. BB = Brown Bank, BC = Botney Cut, CB = Cleaver Bank, DB = Dogger Bank, DH = Devil's Hole, FF = Frysian Front, OG = Oyster Grounds"
+Time_start,HH:MM:SS,Time,Optional,3,Local time when the dredge touched bottom. Format: HH:MM:SS. North Sea is UTC+0.
+Time_stop,HH:MM:SS,Time,Optional,3,Local time when the dredge was heaved from the bottom. Format: HH:MM:SS. North Sea is UTC+0.
 Tow_speed_knots,Knots,Double,Optional,NA,The average speed at which the TripleD was towed in knots.
 Water_depth_start_m,Meters,Double,Optional,4,Water depth in meters at the start of the dredge track (touch bottom) as measured during the cruise.
 Water_depth_stop_m,Meters,Double,Optional,4,Water depth in meters at the end of the dredge track (heaving) as measured during the cruise.
@@ -27,3 +27,4 @@ SB_count,Count,Integer,Optional,NA,"Measure to check the pre-track + track dista
 BB_count,Count,Integer,Optional,NA,"Measure to check the track distance, where each counted tick equals 2 m."
 isBladeDeployed,1 or 0,Boolean,Optional,NA,"Check if the blade has been fully deployed during the track i.e. has reached its most open position. If it was fully deployed isBladeDeployed = 1, if it was not fully deployed isBladeDeployed = 0. If no information is available isBladeDeployed = NA."
 Quality,"Predefined: Good, Failed, Doubt",String,Optional,NA,"Predefined qualitative description of the quality of the dredge. Good = successful dredge track, Failed = unsuccessful sample, Doubt = unknown if correct sampling was fully achieved."
+Comment,Text,String,Optional,NA,Any comments about the sampling station / track.
