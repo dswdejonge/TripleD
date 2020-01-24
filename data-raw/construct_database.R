@@ -75,6 +75,6 @@ for(table in tables){
 
 missing_stationIDs <- unique(species$StationID[which(!species$StationID %in% stations$StationID)])
 if(length(missing_stationIDs > 0)){
-  stop(paste0("The StationID(s) ", paste(missing_stationIDs, collapse = ", "), " are reported in the species file,
+  warning(paste0("The StationID(s) ", paste(missing_stationIDs, collapse = ", "), " are reported in the species file,
               but are missing in the stations file, i.e. metadata is missing for these biological data points."))
 }

@@ -77,7 +77,8 @@ Note: A station is defined as a **unique sampling event** (so not a sampling reg
 - ... if all mandatory fields for stations and species are provided.  
 - ... if the data types in each column are correct (integers, doubles, text, date, time, etc.).  
 - ... if the reported Fraction and isFractionAssumed is the same for all species entries at a certain stationID.  
-- .... if all size measurements have units.  
+- ... if all size measurements have units.  
+- ... if all StationID is the species file have metadata in the stations file.
 
 The original data is now added to the database. All original data from all csv files merged together can be found in the files **"data/stations.rda"** and **"data/species.rda"**. If this is all you wanted to add, go to '10. Merge request' to read how you can upload your changes to the online github version of the database. If you want to add missing data to the database and do some number crunching already, keep on reading.  
 
