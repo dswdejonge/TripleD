@@ -86,8 +86,11 @@ The original data is now added to the database. All original data from all csv f
 Error: **The column X in file X.csv must contain only values of datatype Double**.  
 Some columns, for example those containing weights, must contain numbers in the form of doubles. Doubles are numbers that allow decimal values, whereas integers (like counts) do not. If you have opened your CSV file in Excel, some numeric columns might have been set to the Excel type 'general'. Fix this by opening your CSV file again in Excel, select the columns that should be doubles and set their Excel type to 'numbers'.  
 
+Error: **Error in are_species_metadata_consistent(file, file_name) : In file Species/<filename>.csv the reported Fraction and isFractionAssumed must be equal for all species in a sample.**  
+It is assumed that at every sampling station all entries for the same species must have the same value for fraction and isFractionAssumed. An example of how this would go onboard: You can 100 specimens of species X, you decide to measure 20 representative specimens of species X and discard the rest. You can then add one entry per individual specimen, where each entry has a fracion 0.20 (because this specimen belonged to the 20% of catch you processed) and the count is 1 (because the entries concerns one specimen). If you would have different fractions for the different entries, the code will throw this error. So, the column Fraction does NOT tell the fraction of the total catch of this specific entry, but the fraction of the total catch for all specimens of the specific taxon under consideration. If you have recorded your data like this, you will have to manually calculate the correct fractions before adding this data to the database (so total # processed for taxon X / total # of caught specimens of taxon x).  
+
 # 8. Complete the database with additional data
-It is possible to add missing data and process your data further into a format suitable for spatial ecological analyses.  
+It is possible to add missing data and calculate extra information based on the original data.
 
 Open the script **"data-raw/complete_database.R"** that contains functions to add missing data to the database. These functions either use data from secondary sources or calculate new values based on some assumptions. There are basically two options:   
 1) You simply run the full script as it is. If you do, please make sure you are aware of these sources and assumptions so you understand how to interpret the data.   
@@ -108,9 +111,28 @@ Open the script **"data-raw/complete_database.R"** that contains functions to ad
 
 
 
-# 9. Create community matrices
-Only use matched species names?  
-Only use complete organisms, no isPartial?  
+# 9. Finish the database
+The table with additional data is very large and not easy to use straight-away for ecological analyses. For example, there are multiple columns that have water depth information taken from different sources. The table can be filtered and simplified to a clear table that is easy to use in further analysis.
+
+Open the script **"data-raw/finish_database.R"** that contains a workflow to finalize your database. It executes the following rules (which you can manually change if you feel it doesn't suit your needs):
+1) Taxon names that could not be matched to the WoRMS database are removed. You can find out which species are removed by executing code that filter on "hasNoMatch == 1" or by looking at the summary in the TripleD shiny app.  
+2) Taxa that were included in the database but could not be counted, for example because it was just fragments or eggs of a species, were removed (Count != -1).  
+3) Abundance data is scaled according to the reported fraction. If the count for 0.5 fraction of species X is 5, then the total count will become 10.  
+4) Only relevant columns are kept (File, StationID, scaled count, and taxonomy info). The final table with species info is stored as **species_final.Rda**.   
+5) For station metadata, columns that contain the same information are merged based on a predefined preference. This means that preferably the water depth as measured onboard is used, and otherwise water depth derived from track midpoint and bathymetry. For location it means preferably the reported midpoint is used, but if that is missing the calculated midpoint based on start and end positions is used. Finally, preferably the reported track length from the Odometer is used, but otherwise the tracklength calculated from the BB count, and otherwise the track length as calculated from the start and end position of the track.  
+6) For every station the total sampled area (m2) and sampled volume (m3) is calculated from track length, blade width, and blade depth.  
+7) Only relevant columns are kept and the final table with station info is stored as **stations_final.Rda**.  
+8) Finally, species numbers are summed per sampling station and station info is added for each combination of station and species. Two columns are added with the final density in # per m2 and # per m3.  
+9) The final single table with all relevant information is stored as **database.Rda**.
+
+
+# 10. Shiny app
+1) Open the file **"TripleD/TripleD/app.R"**.  
+2) Run the app.  
+3) It will take a small while to render the maps and plots.  
+4) You will be able to view a map with overall densities or per phylum under the tab "Map".    
+5) You will be able to view some summary statistics on the dataset under the tab "Summary".  
+
 
 # 10. Merge request
 - if the species name is present in WoRMS: the newest accepted synonym is added in a column.
