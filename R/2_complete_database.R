@@ -21,10 +21,11 @@
 #' @param lons (optional) You can specify longitudes you want to use to collect bathymetry.
 #' If not specified, the track midpoints in the database are used.
 #' @param data_folder If the stations and/or species database are not provided, the function will search
-#' for it ('stations_initial.rda' and 'species_initial.rda') in this folder.
-#' @param out_folder The external data is stored in this folder.
+#' for it ('stations_initial.rda' and 'species_initial.rda') in this folder. Default is 'data'.
+#' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @export
-collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, lons = NULL, data_folder = NULL, out_folder){
+collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, lons = NULL,
+                                  data_folder = "data", out_folder = "data"){
   if(is.null(stations)){
     message("Loading intitial database with stations...")
     load(paste0(data_folder,"/stations_initial.rda"))
