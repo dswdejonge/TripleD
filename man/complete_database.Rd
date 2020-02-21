@@ -16,6 +16,10 @@ to be stored. Default is 'data'.}
 \item{bathymetry}{(optional) Water depth can be added to the database if you have a
 bathymetry file. If no such file is given, bathymetry is collected from NOAA.}
 }
+\value{
+This function does not return an object, but stores 'stations_additions.rda'
+and 'species_additions.rda' to the out_folder.
+}
 \description{
 This function contains a workflow to add information to the original data
 through external datasets and calculations. Please review this workflow as
@@ -34,5 +38,6 @@ adjust this chain to your own wishes.
 #' The latest accepted name for the specimen is added to the database including the taxonomic classification (phylum, class, order, family, genus).
 }
 \seealso{
-
+\code{add_track_midpoints}, \code{add_track_length_GPS},
+\code{add_track_length_Odometer}, \code{add_water_depth}.
 }

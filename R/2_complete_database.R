@@ -52,7 +52,6 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 #' through external datasets and calculations. Please review this workflow as
 #' explained in \code{Details}. You can also create your own workflow, for example by using
 #' other functions contained in this package.
-#' @seealso
 #' @details
 #' The initial database created with \code{construct_database} only contains
 #' raw data as imported from the CSV files. Sometimes data is missing (e.g.
@@ -69,6 +68,11 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 #' to be stored. Default is 'data'.
 #' @param bathymetry (optional) Water depth can be added to the database if you have a
 #' bathymetry file. If no such file is given, bathymetry is collected from NOAA.
+#' @return This function does not return an object, but stores 'stations_additions.rda'
+#' and 'species_additions.rda' to the out_folder.
+#' @seealso \code{add_track_midpoints}, \code{add_track_length_GPS},
+#' \code{add_track_length_Odometer}, \code{add_water_depth}.
+#' @export
 complete_database <- function(data_folder = "data", out_folder = "data", bathymetry = NULL){
   # Load initial database
   message("Loading initial database...")

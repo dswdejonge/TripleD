@@ -13,9 +13,9 @@
 #' with bathymetry of a resolution of 1 minute.
 #' @export
 collect_bathymetry <- function(stations = NULL, lats = NULL, lons = NULL, buffer = 2, resolution = 1){
-  if(!null(lats) & !null(lons)){
+  if(!is.null(lats) & !is.null(lons)){
     lats <- lats ; lons <- lons
-  }else if(!null(stations)){
+  }else if(!is.null(stations)){
     # Window of coordinates within which to collect bathymetry
     all_Lat <- unlist(stations[,"Lat_DD_midpt"])
     all_Lon <- unlist(stations[,"Lon_DD_midpt"])
