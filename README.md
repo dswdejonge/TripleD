@@ -2,8 +2,10 @@
 TripleD database NIOZ
 
 ## Installation
-`r require(devtools)`
-`r install_github(dswdejonge/TripleD)`
+\code{
+  require(devtools)
+  install_github(dswdejonge/TripleD)
+}
 
 ## Contructing the database
 
