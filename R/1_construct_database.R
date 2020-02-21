@@ -288,6 +288,7 @@ do_measurements_have_units <- function(file, file_name){
 #' contained by the 'in-folder'. If the functions finds any irregularities, an error will be thrown.
 #' @return This function does not return any objects. It will throw errors if anything is wrong with
 #' your initial data. If there are no errors, it will store Rdata in the newly created folder 'out_folder'.
+#' @importFrom magrittr "%>%"
 #' @export
 construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
   # List of tables to import and check
