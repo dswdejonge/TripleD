@@ -15,42 +15,42 @@ import_data <- function(folder) {
 # Get required attributes
 get_required_att <- function(my_attributes) {
   req_att <- my_attributes %>%
-    filter(Required_or_Optional == "Required")
+    dplyr::filter(Required_or_Optional == "Required")
   return(req_att)
 }
 
 # Get alternative attributes
 get_alternative_att <- function(my_attributes) {
   alt_att <- my_attributes %>%
-    filter(Required_or_Optional == "Required_alternative") %>%
-    group_by(Group) %>%
-    group_split
+    dplyr::filter(Required_or_Optional == "Required_alternative") %>%
+    dplyr::group_by(Group) %>%
+    dplyr::group_split
   return(alt_att)
 }
 
 # Get attributes with datatype double
 get_doubles_att <- function(my_attributes) {
   doubles_attributes <- my_attributes %>%
-    filter(Datatype == "Double")
+    dplyr::filter(Datatype == "Double")
   return(doubles_attributes)
 }
 
 # Get attributes with datatype integer
 get_int_att <- function(my_attributes){
   int_att <- my_attributes %>%
-    filter(Datatype == "Integer")
+    dplyr::filter(Datatype == "Integer")
   return(int_att)
 }
 
 get_fraction_att <- function(my_attributes){
   frac_att <- my_attributes %>%
-    filter(Unit == "Fraction")
+    dplyr::filter(Unit == "Fraction")
   return(frac_att)
 }
 
 get_boolean_att <- function(my_attributes){
   bool_att <- my_attributes %>%
-    filter(Datatype == "Boolean")
+    dplyr::filter(Datatype == "Boolean")
   return(bool_att)
 }
 
@@ -148,9 +148,9 @@ are_alternative_required_att_complete <- function(file, file_name, alternative_a
 
 are_groups_complete <- function(file, file_name, my_attributes){
   my_groups <- my_attributes %>%
-    filter(!is.na(Group)) %>%
-    group_by(Group) %>%
-    group_split()
+    dplyr::filter(!is.na(Group)) %>%
+    dplyr::group_by(Group) %>%
+    dplyr::group_split()
 
   for(my_group in my_groups){
     is_group_included <- colnames(file) %in% my_group$Attribute
@@ -238,15 +238,15 @@ are_predefined_atts_correct <- function(file, file_name, predefined_attributes){
 
 are_species_metadata_consistent <- function(file, file_name){
   n_unique_Expect <- file %>%
-    group_by(Species_reported, StationID) %>%
-    select(Species_reported, StationID) %>%
-    distinct()
+    dplyr::group_by(Species_reported, StationID) %>%
+    dplyr::select(Species_reported, StationID) %>%
+    dplyr::distinct()
 
   n_unique_Obs <- file %>%
-    group_by(Species_reported, StationID) %>%
-    select(Species_reported, StationID, Fraction, isFractionAssumed) %>%
-    distinct() %>%
-    mutate(mistake_count = n())
+    dplyr::group_by(Species_reported, StationID) %>%
+    dplyr::select(Species_reported, StationID, Fraction, isFractionAssumed) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(mistake_count = n())
 
   if(dim(n_unique_Expect)[1] != dim(n_unique_Obs)[1]){
     print(filter(n_unique_Obs, mistake_count > 1))
