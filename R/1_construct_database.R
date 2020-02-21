@@ -24,7 +24,7 @@ get_alternative_att <- function(my_attributes) {
   alt_att <- my_attributes %>%
     dplyr::filter(Required_or_Optional == "Required_alternative") %>%
     dplyr::group_by(Group) %>%
-    dplyr::group_split
+    dplyr::group_split()
   return(alt_att)
 }
 
