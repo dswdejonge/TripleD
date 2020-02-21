@@ -1,5 +1,7 @@
 # TripleD
-TripleD database NIOZ
+TripleD database NIOZ.
+
+NOTE: Code is not yet functional. In development stage.
 
 ## Installation
 ```R
