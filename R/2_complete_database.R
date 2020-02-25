@@ -82,7 +82,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", bathyme
   # Load external data
   if(is.null(bathymetry)){
     message("Loading bathymetric data...")
-    bathymetry <- load(paste0(data_folder,"/bathymetry.rda"))
+    load(paste0(data_folder,"/bathymetry.rda"))
   }else{
     # TODO: CHECK FORMAT BATHYMETRY WHEN GIVEN
   }
