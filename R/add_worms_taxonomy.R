@@ -61,14 +61,14 @@ get_worms_taxonomy <- function(species_names){
   # Create an empty record for species without a (good) match
   empty_record <- worms[[complete_matches[1]]]
   empty_record[1,] <- NA
-  empty_record <- mutate(empty_record, hasNoMatch = 1)
+  empty_record <- dplyr::mutate(empty_record, hasNoMatch = 1)
 
   # If a reported species has multiple matches, only the accepted match is used
   # If there are multiple accepted names, it is assumed a no match and gets an empty record.
   if(length(multiple_matches) > 0){
     for(i in 1:length(multiple_matches)){
       record <- worms[[multiple_matches[i]]] %>%
-        filter(status == "accepted")
+        dplyr::filter(status == "accepted")
       if(nrow(record) > 1){
         record <- empty_record
       }
@@ -85,7 +85,8 @@ get_worms_taxonomy <- function(species_names){
 
   # Merge into tibble and save
   worms_df <- bind_rows(worms, .id = "Query") %>%
-    add_column(isFuzzy = NA)
+    #add_column(isFuzzy = NA)
+    dplyr::mutate(isFuzzy = NA)
   worms_df[fuzzy_matches,"isFuzzy"] <- 1
 
   return(worms_df)

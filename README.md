@@ -7,8 +7,8 @@ This package contains all the code necessary to set up the TripleD database with
 
 ## Installation
 ```R
-require(devtools)
-install_github("dswdejonge/TripleD")
+#install.packages("devtools")
+devtools::install_github("dswdejonge/TripleD")
 ```
 
 ## Contructing the database
