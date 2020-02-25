@@ -1,7 +1,9 @@
 # TripleD
-TripleD database NIOZ.
+Scaffold script for the TripleD database of NIOZ.
 
 NOTE: Code is not yet functional. In development stage.
+
+This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does NOT contain data; data can be requested from the NIOZ Data Archiving System (DAS).
 
 ## Installation
 ```R
