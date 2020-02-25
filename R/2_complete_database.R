@@ -100,7 +100,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", bathyme
   # Add additional data to species data
   species_additions <- species %>%
     # Add taxonomic data
-    dplyr::left_join(., select(worms,
+    dplyr::left_join(., dplyr::select(worms,
                         Query, valid_name, rank, phylum, class, order,
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query"))
