@@ -5,7 +5,7 @@
 #' This workflow describes which data from species_additions and
 #' stations_additions are selected to form a final, clean, database
 #' that can be used in the Shiny app and in ecological analyses.
-#' @section Specimens
+#' @section Specimens:
 #' Specimen entries are removed if:
 #' \itemize{
 #' \item{Its reported name has no match to the WoRMS database}
@@ -17,7 +17,7 @@
 #' family, and genus), and whether or not the name was matched fuzzy against WoRMS is stored.
 #' The latter information (isFuzzy) may be important to track if there was perhaps a wrongly assigned new
 #' valid name if there are suspicious results.
-#' @section Stations
+#' @section Stations:
 #' A column with final latitude and longitude are created, by first taking all originally reported midpoints,
 #' and filling any empty data points with the calculated midpoint based on track start and stop coordinates.
 #' \cr
