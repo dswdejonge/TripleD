@@ -33,4 +33,8 @@ collect_external_data()
 
 # Add extra data to the intial database (taxonomy, water depths, etc.)
 complete_database()
+
+# Finalize database, by aggregating data, selecting relevant columns, and
+# calculating final densities and biomass per sampling station.
+finalize_database()
 ```
