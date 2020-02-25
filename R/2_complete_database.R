@@ -41,7 +41,7 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
   message(paste0("Bathymetry stored as ",out_folder,"/bathymetry.rda."))
   # Collect taxonomy of species from WoRMs
   message("Collecting taxonomy from the WoRMS database. This can take a while...")
-  worms <- get_worms_taxonomy(species$Species_reported)
+  worms <- get_worms_taxonomy(as.character(species$Species_reported))
   save(worms, file = paste0(out_folder,"/worms.rda"))
   message(paste0("WoRMS taxonomic information is stored as ",out_folder,"/worms.rda."))
 }
