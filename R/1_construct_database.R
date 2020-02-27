@@ -274,6 +274,31 @@ do_measurements_have_units <- function(file, file_name){
   }
 }
 
+#############
+# pos2coord #
+#############
+# source: https://www.r-bloggers.com/array-position-to-matrix-coordinates-conversion/
+# Function to go from position in matrix to coordinates of matrix
+# position is index from 1 to length(matrix)
+# coord is [row, col]
+# dim.mat is c(nrow, ncol)
+pos2coord <- function(pos=NULL, coord=NULL, dim.mat=NULL) {
+  if(is.null(pos) & is.null(coord) | is.null(dim.mat)){
+    stop("must supply either 'pos' or 'coord', and 'dim.mat'")
+  }
+  if(is.null(pos) & !is.null(coord) & !is.null(dim.mat)){
+    pos <- ((coord[,2]-1)*dim.mat[1])+coord[,1]
+    return(pos)
+  }
+  if(!is.null(pos) & is.null(coord) & !is.null(dim.mat)){
+    coord <- matrix(NA, nrow=length(pos), ncol=2)
+    colnames(coord) <- c("row", "col")
+    coord[,1] <- ((pos-1) %% dim.mat[1]) +1
+    coord[,2] <- ((pos-1) %/% dim.mat[1]) +1
+    return(coord)
+  }
+}
+
 #' Construct initial database
 #'
 #' This function loads CSV files, checks the data format, and constructs an initial table
@@ -326,11 +351,11 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
 
       # Check if all cells are filled.
       # Empty cells are read in as "" or NaN and are not allowed.
-      NaNs <- is.nan(file)
+      NaNs <- is.nan(unlist(file))
       emptystr <- (file == "")
       if(TRUE %in% c(NaNs, emptystr)){
         rowi <- unique(c(
-          which(is.nan(file), arr.ind = T)[,"row"]+1,
+          pos2coord(pos = which(NaNs), dim.mat = dim(file))[,"row"]+1,
           which(file == "", arr.ind = T)[,"row"]+1
         ))
         stop("No empty cells are allowed in the CSV. Check rows ",
