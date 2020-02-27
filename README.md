@@ -16,7 +16,7 @@ Set up your working directory as follows in order to start with the NIOZ TripleD
 
 1. Go to the NIOZ Data Archiving System (DAS) and request the formatted TripleD data files.  
 2. In your working directory create a folder called 'inputfiles'. Within this folder you have to create two other folders called 'Species' and 'Stations'.   
-3. Put the CSVs with all species data in the folder 'inputfiles/Species' and the CSVs with all station data in the foldr 'inputfiles/Stations'.  
+3. Put the CSVs with all species data in the folder 'inputfiles/Species' and the CSVs with all station data in the foldr 'inputfiles/Stations' (do not put any files in these folders that are not csv data files formatted for the TripleD database).  
 4. Add and run the following R-script to your working directory:
 
 ```R
@@ -26,7 +26,7 @@ library(TripleD)
 # Loads all CSVs, checks format, and stores an R dataframe 
 # in the newly created folder 'data'.
 # Should not throw errors if the CSVs taken directly from DAS are used.
-construct_database(in_folder = inputfiles)
+construct_database(in_folder = "inputfiles"")
 
 # Collects external data at NOAA and WoRMS.
 collect_external_data()
