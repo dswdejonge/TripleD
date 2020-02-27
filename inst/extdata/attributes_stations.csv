@@ -1,4 +1,4 @@
-﻿Attribute,Unit,Datatype,Required_or_Optional,Group,Description
+Attribute,Unit,Datatype,Required_or_Optional,Group,Description
 CruiseID,NA,String,Required,NA,"Cruise ID when the sampling occurred, for example 64PE438. If the cruise also had a name it can optionally be provided in the attribute Cruise_name."
 StationID,<cruiseID/cruise name>#<station/event number>,String,Required,NA,"A unique ID for the sampling event, preferably as ""<cruiseID>#<station/event number>"". For example: 64PE438#21. Very important because it is used to match stations metadata to species observations."
 Date,DD/MM/YYYY,Date,Required,NA,"The date when the sampling event took place in the format ""DD/MM/YYYY"". For example: 12/01/1994. Should be based on the time in UTC+0."
