@@ -121,7 +121,7 @@ are_required_att_complete <- function(file, file_name, required_attributes){
   columns <- colnames(file) %in% required_attributes$Attribute
   subset <- file[,columns, drop = F]
   if(TRUE %in% is.na(subset)){
-    rowi <- which(is.na(subset), arr.ind = T)[,"row"]+1
+    rowi <- unique(which(is.na(subset), arr.ind = T)[,"row"]+1)
     stop(paste0("NA values are not allowed for the required attributes ",
                 paste(required_attributes$Attribute, collapse = ", "),
                 ". Please check the file ", file_name,
@@ -323,6 +323,20 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
       file <- data[[i]]
       file_name <- paste(table$folder, names(data)[i], sep = "/")
       print(paste0("Checking file ", file_name))
+
+      # Check if all cells are filled.
+      # Empty cells are read in as "" or NaN and are not allowed.
+      NaNs <- is.nan(file)
+      emptystr <- (file == "")
+      if(TRUE %in% c(NaNs, emptystr)){
+        rowi <- unique(c(
+          which(is.nan(file), arr.ind = T)[,"row"]+1,
+          which(file == "", arr.ind = T)[,"row"]+1
+        ))
+        stop("No empty cells are allowed in the CSV. Check rows ",
+             paste(rowi, sep = ", ", collapse = T))
+      }
+
       # Attribute presence
       are_required_att_present(file, file_name, required_attributes)
       are_alternative_required_att_present(file, file_name, alternative_attributes)
