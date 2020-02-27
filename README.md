@@ -26,7 +26,7 @@ library(TripleD)
 # Loads all CSVs, checks format, and stores an R dataframe 
 # in the newly created folder 'data'.
 # Should not throw errors if the CSVs taken directly from DAS are used.
-construct_database(in_folder = "inputfiles"")
+construct_database(in_folder = "inputfiles")
 
 # Collects external data at NOAA and WoRMS.
 collect_external_data()
