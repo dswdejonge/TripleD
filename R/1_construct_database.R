@@ -359,7 +359,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
           which(file == "", arr.ind = T)[,"row"]+1
         ))
         stop("No empty cells are allowed in the CSV. Check rows ",
-             paste(rowi, sep = ", ", collapse = T))
+             paste(rowi, collapse = ", "))
       }
 
       # Attribute presence
