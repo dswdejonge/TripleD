@@ -293,6 +293,28 @@ are_species_metadata_consistent <- function(file, file_name){
   }
 }
 
+is_biomass_complete <- function(file, file_name){
+  # WW
+  should_be_complete <- which(!is.na(file$WetWeight_g))
+  if(length(should_be_complete > 0)){
+    if(TRUE %in% is.na(file[should_be_complete,
+                            c("WeightType", "Threshold_Scale",
+                              "isWithShell", "isPartialWW")])){
+      stop("WRITE THIS ERROR MESSAGE")
+    }
+  }
+
+  # AFDW
+  should_be_complete <- which(!is.na(file$AFDW_g))
+  if(length(should_be_complete > 0)){
+    if(TRUE %in% is.na(file[should_be_complete,
+                            c("WeightTypeAFDW", "Threshold_ScaleAFDW",
+                              "isPartialAFDW")])){
+      stop("WRITE THIS ERROR MESSAGE")
+    }
+  }
+}
+
 do_measurements_have_units <- function(file, file_name){
   unit_cols <- grep("Unit_", colnames(file))
   if(length(unit_cols) > 0){
@@ -534,6 +556,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
       are_predefined_atts_correct(file, file_name, predefined_attributes)
       if(table$folder == "Species"){
         are_species_metadata_consistent(file, file_name)
+        is_biomass_complete(file, file_name)
       }
       do_measurements_have_units(file, file_name)
       are_measurements_positive(file, file_name)
