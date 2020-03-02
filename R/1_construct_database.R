@@ -491,4 +491,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
   }
 
   # Test if stationIDs are unique over different files.
+  ID_is_duplicated <- duplicated(stations$StationID)
+  warning(paste0("The StationID(s)" ,paste(stations$StationID[ID_is_duplicated], collapse = ", "),
+                 " occur multiple times in differen files, but they must be unique. Please check."))
 }
