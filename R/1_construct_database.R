@@ -192,7 +192,7 @@ is_cruise_objective_correct <- function(file, file_name){
     }
     incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
     #else if(TRUE %in% is.na(file$Excluded[which(incomplete)])){
-    if(TRUE %in% incomplete_and_NA)
+    if(TRUE %in% incomplete_and_NA){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
                   #paste(which(is.na(file$Excluded[incomplete])), collapse = ", "),
                   paste(sort(which(incomplete_and_NA)), collapse = ", "),
