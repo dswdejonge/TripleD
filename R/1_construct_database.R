@@ -208,7 +208,7 @@ is_cruise_objective_correct <- function(file, file_name){
     if(length(focus_and_NA > 0)){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
                   paste(focus_and_NA), collapse = ", "),
-                  " are defined 'Focus' in the column 'Cruise_objective', but no excluded taxons are given in the extra column 'Focus'.")
+                  " are defined 'Focus' in the column 'Cruise_objective', but no taxons that were focussed on are given in the extra column 'Focus'.")
     }
   }
 }
@@ -323,42 +323,42 @@ are_measurements_positive <- function(file, file_name){
   if(!is.null(tl)){
     tl <- tl  < 0
     if(TRUE %in% tl){
-      stop(paste0("In file ",file_name," column Track_length_cruise_m the values in row(s)",
+      stop(paste0("In file ",file_name," column Track_length_cruise_m the values in row(s) ",
                   paste(which(tl), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(bd)){
     bd <- bd < 0
     if(TRUE %in% bd){
-      stop(paste0("In file ",file_name," column Blade_depth_cm the values in row(s)",
+      stop(paste0("In file ",file_name," column Blade_depth_cm the values in row(s) ",
                   paste(which(bd), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(bw)){
     bw <- bw < 0
     if(TRUE %in% bw){
-      stop(paste0("In file ",file_name," column Blade_width_cm the values in row(s)",
+      stop(paste0("In file ",file_name," column Blade_width_cm the values in row(s) ",
                   paste(which(bw), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ts)){
     ts <- ts < 0
     if(TRUE %in% ts){
-      stop(paste0("In file ",file_name," column Tow_speed_knots the values in row(s)",
+      stop(paste0("In file ",file_name," column Tow_speed_knots the values in row(s) ",
                   paste(which(ts), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(wd)){
     wd <- wd < 0
     if(TRUE %in% wd){
-      stop(paste0("In file ",file_name," column Water_depth_m_cruise the values in row(s)",
+      stop(paste0("In file ",file_name," column Water_depth_m_cruise the values in row(s) ",
                   paste(which(wd), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(oc)){
     oc <- oc < 0
     if(TRUE %in% oc){
-      stop(paste0("In file ",file_name," column Odometer_count the values in row(s)",
+      stop(paste0("In file ",file_name," column Odometer_count the values in row(s) ",
                   paste(which(oc), collapse = ", "), " are negative but should be positive."))
     }
   }
