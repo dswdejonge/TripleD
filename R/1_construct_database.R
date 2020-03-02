@@ -192,22 +192,23 @@ is_cruise_objective_correct <- function(file, file_name){
     }
     incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
     #else if(TRUE %in% is.na(file$Excluded[which(incomplete)])){
-    if(TRUE %in% incomplete_and_NA){
+    if(length(incomplete_and_NA) > 0){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  #paste(which(is.na(file$Excluded[incomplete])), collapse = ", "),
-                  paste(sort(which(incomplete_and_NA)), collapse = ", "),
+                  paste(sort(incomplete_and_NA), collapse = ", "),
                   " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
     }
   }
 
   focus <- (file$Cruise_objective == "Focus")
-  if(length(focus) > 0){
+  if(TRUE %in% focus){
     if(is.null(file$Focus)){
       stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Focus', but the necessary extra column 'Focus' does not exist."))
-    }else if(TRUE %in% is.na(file$Focus[focus])){
+    }
+    focus_and_NA <- which(focus & is.na(file$Focus))
+    if(length(focus_and_NA > 0)){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  paste(which(is.na(file$Focus[focus])), collapse = ", "),
-                  " are defined 'Focus' in the column 'Cruise_objective', but no excluded taxons are given in the extra column 'Focus'."))
+                  paste(focus_and_NA), collapse = ", "),
+                  " are defined 'Focus' in the column 'Cruise_objective', but no excluded taxons are given in the extra column 'Focus'.")
     }
   }
 }
