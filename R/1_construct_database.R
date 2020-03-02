@@ -314,6 +314,7 @@ do_measurements_have_units <- function(file, file_name){
 }
 
 are_measurements_positive <- function(file, file_name){
+  # Stations
   tl <- file$Track_length_m_cruise
   bd <- file$Blade_depth_cm
   bw <- file$Blade_width_cm
@@ -360,6 +361,64 @@ are_measurements_positive <- function(file, file_name){
     if(TRUE %in% oc){
       stop(paste0("In file ",file_name," column Odometer_count the values in row(s) ",
                   paste(which(oc), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  # Species
+  ct <- file$Count
+  ln <- file$Length
+  wd <- file$Width
+  ww <- file$WetWeight_g
+  aw <- file$AFDW_g
+  tw <- file$Threshold_Scale
+  ta <- file$Threshold_ScaleAFDW
+
+  if(!is.null(ct)){
+    ct <- ct  < 0
+    if(TRUE %in% ct){
+      stop(paste0("In file ",file_name," column Count the values in row(s) ",
+                  paste(which(ct), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(ln)){
+    ln <- ln  < 0
+    if(TRUE %in% ln){
+      stop(paste0("In file ",file_name," column Length the values in row(s) ",
+                  paste(which(ln), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(wd)){
+    wd <- wd  < 0
+    if(TRUE %in% wd){
+      stop(paste0("In file ",file_name," column Width the values in row(s) ",
+                  paste(which(wd), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(ww)){
+    ww <- ww  < 0
+    if(TRUE %in% ww){
+      stop(paste0("In file ",file_name," column WetWeight_g the values in row(s) ",
+                  paste(which(ww), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(aw)){
+    aw <- aw  < 0
+    if(TRUE %in% aw){
+      stop(paste0("In file ",file_name," column AFDW_g the values in row(s) ",
+                  paste(which(aw), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(tw)){
+    tw <- tw  < 0
+    if(TRUE %in% tw){
+      stop(paste0("In file ",file_name," column Threshold_Scale the values in row(s) ",
+                  paste(which(tw), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(ta)){
+    ta <- ta  < 0
+    if(TRUE %in% ta){
+      stop(paste0("In file ",file_name," column Threshold_ScaleAFDW the values in row(s) ",
+                  paste(which(ta), collapse = ", "), " are negative but should be positive."))
     }
   }
 }
