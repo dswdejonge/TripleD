@@ -288,7 +288,7 @@ are_species_metadata_consistent <- function(file, file_name){
     dplyr::mutate(mistake_count = n())
 
   if(dim(n_unique_Expect)[1] != dim(n_unique_Obs)[1]){
-    print(filter(n_unique_Obs, mistake_count > 1))
+    print(dplyr::filter(n_unique_Obs, mistake_count > 1))
     stop(paste0("In file ", file_name," the reported Fraction and isFractionAssumed must be equal for all species in a sample."))
   }
 }
