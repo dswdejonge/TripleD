@@ -314,7 +314,7 @@ do_measurements_have_units <- function(file, file_name){
 }
 
 are_measurements_positive <- function(file, file_name){
-  tl <- file$Track_length_cruise_m
+  tl <- file$Track_length_m_cruise
   bd <- file$Blade_depth_cm
   bw <- file$Blade_width_cm
   ts <- file$Tow_speed_knots
