@@ -168,9 +168,19 @@ are_dates_converted <- function(file, file_name){
   # All dates should be convertible from a string dd/mm/yyyy to R data format.
   is_unconverted_date <- is.na(file$Date)
   if(TRUE %in% is_unconverted_date){
-    stop(paste0("The date is row(s) ",paste(which(is_unconverted_date)+1, collapse = ", "),
+    stop(paste0("The date in row(s) ",paste(which(is_unconverted_date)+1, collapse = ", "),
                 " in file ", file_name,
                 " cannot be converted. Ensure all dates have the right format: dd/mm/yyyy."))
+  }
+}
+
+is_time_format_correct <- function(file, file_name){
+  is_wrong_time_start <- gsub("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]","", file$Time_start) != ""
+  is_wrong_time_stop <- gsub("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]","", file$Time_stop) != ""
+  if(TRUE %in% is_wrong_time_start | TRUE %in% is_wrong_time_stop){
+    stop(paste0("The time in column 'Time_start' and/or 'Time_stop' and row(s) ",
+                paste(which(c(is_wrong_time_start, is_wrong_time_stop))+1, collapse = ", "),
+                " in file ", file_name, "should be in the format 'HH:MM:SS'."))
   }
 }
 
@@ -374,6 +384,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
       if(table$folder == "Stations"){
         data[[i]]$Date <- as.Date(data[[i]]$Date, format = "%d/%m/%Y")
         are_dates_converted(file = data[[i]], file_name)
+        is_time_format_correct(file, file_name)
       }
       are_groups_complete(file, file_name, my_attributes)
       are_values_correct_type(file, file_name, doubles_attributes, func = is.double)
