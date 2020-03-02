@@ -408,14 +408,14 @@ are_measurements_positive <- function(file, file_name){
     }
   }
   if(!is.null(tw)){
-    tw <- tw  < 0
+    tw <- tw  <= 0
     if(TRUE %in% tw){
       stop(paste0("In file ",file_name," column Threshold_Scale the values in row(s) ",
                   paste(which(tw), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ta)){
-    ta <- ta  < 0
+    ta <- ta  <= 0
     if(TRUE %in% ta){
       stop(paste0("In file ",file_name," column Threshold_ScaleAFDW the values in row(s) ",
                   paste(which(ta), collapse = ", "), " are negative but should be positive."))
