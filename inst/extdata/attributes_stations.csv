@@ -23,8 +23,6 @@ Time_start,HH:MM:SS,Time,Optional,NA,"Time in UTC+0 when the dredge touched bott
 Time_stop,HH:MM:SS,Time,Optional,NA,Time in UTC+0 when the dredge was heaved from the bottom or when sampling stopped. Format: HH:MM:SS.
 Bearing,Decimal degrees,Double,Optional,NA,The bearing of the vessel while steaming the transect in decimal degrees (0 is North). Can also be calculated from start and stop coordinates if present.
 Tow_speed_knots,Knots,Double,Optional,NA,The average speed at which the TripleD was towed in knots (one nautical mile per hour).
-Water_depth_start_m,Meters,Double,Optional,4,Water depth in meters at the start of the sampling track (blade in sediment) as measured during the cruise.
-Water_depth_stop_m,Meters,Double,Optional,4,Water depth in meters at the end of the sample track (blade out of sediment) as measured during the cruise.
 Water_depth_m_cruise,Meters,Double,Optional,NA,Average water depth in meters at the sampling track as measured during the cruise.
 Odometer_count,Count,Integer,Optional,NA,"Measure to check the track distance, where each counted tick equals 2 m."
 Comment,NA,String,Optional,NA,Any comments about the sampling station / track.

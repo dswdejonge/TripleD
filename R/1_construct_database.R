@@ -284,6 +284,57 @@ do_measurements_have_units <- function(file, file_name){
   }
 }
 
+are_measurements_positive <- function(file, file_name){
+  tl <- file$Track_length_cruise_m
+  bd <- file$Blade_depth_cm
+  bw <- file$Blade_width_cm
+  ts <- file$Tow_speed_knots
+  wd <- file$Water_depth_m_cruise
+  oc <- file$Odometer_count
+  if(!is.null(tl)){
+    tl <- tl  < 0
+    if(TRUE %in% tl){
+      stop(paste0("In file ",file_name," column Track_length_cruise_m the values in row(s)",
+                  paste(which(tl), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(bd)){
+    bd <- bd < 0
+    if(TRUE %in% bd){
+      stop(paste0("In file ",file_name," column Blade_depth_cm the values in row(s)",
+                  paste(which(bd), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(bw)){
+    bw <- bdw < 0
+    if(TRUE %in% bw){
+      stop(paste0("In file ",file_name," column Blade_width_cm the values in row(s)",
+                  paste(which(bw), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(ts)){
+    ts <- ts < 0
+    if(TRUE %in% ts){
+      stop(paste0("In file ",file_name," column Tow_speed_knots the values in row(s)",
+                  paste(which(ts), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(wd)){
+    wd <- wd < 0
+    if(TRUE %in% wd){
+      stop(paste0("In file ",file_name," column Water_depth_m_cruise the values in row(s)",
+                  paste(which(wd), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+  if(!is.null(oc)){
+    oc <- oc < 0
+    if(TRUE %in% oc){
+      stop(paste0("In file ",file_name," column Odometer_count the values in row(s)",
+                  paste(which(oc), collapse = ", "), " are negative but should be positive."))
+    }
+  }
+}
+
 #############
 # pos2coord #
 #############
@@ -396,6 +447,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
         are_species_metadata_consistent(file, file_name)
       }
       do_measurements_have_units(file, file_name)
+      are_measurements_positive(file, file_name)
     }
     if(table$folder == "Stations"){
       stations <- dplyr::bind_rows(data, .id = "File")
