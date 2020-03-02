@@ -180,23 +180,27 @@ is_time_format_correct <- function(file, file_name){
   if(TRUE %in% is_wrong_time_start | TRUE %in% is_wrong_time_stop){
     stop(paste0("The time in column 'Time_start' and/or 'Time_stop' and row(s) ",
                 paste(which(c(is_wrong_time_start, is_wrong_time_stop))+1, collapse = ", "),
-                " in file ", file_name, "should be in the format 'HH:MM:SS'."))
+                " in file ", file_name, " should be in the format 'HH:MM:SS'."))
   }
 }
 
 is_cruise_objective_correct <- function(file, file_name){
-  incomplete <- which(file$Cruise_objective == "Incomplete")
-  if(length(incomplete) > 0){
+  incomplete <- (file$Cruise_objective == "Incomplete")
+  if(TRUE %in% incomplete){
     if(is.null(file$Excluded)){
       stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
-    }else if(TRUE %in% is.na(file$Excluded[incomplete])){
+    }
+    incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
+    #else if(TRUE %in% is.na(file$Excluded[which(incomplete)])){
+    if(TRUE %in% incomplete_and_NA)
       stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  paste(which(is.na(file$Excluded[incomplete])), collapse = ", "),
+                  #paste(which(is.na(file$Excluded[incomplete])), collapse = ", "),
+                  paste(sort(which(incomplete_and_NA)), collapse = ", "),
                   " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
     }
   }
 
-  focus <- which(file$Cruise_objective == "Focus")
+  focus <- (file$Cruise_objective == "Focus")
   if(length(focus) > 0){
     if(is.null(file$Focus)){
       stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Focus', but the necessary extra column 'Focus' does not exist."))
