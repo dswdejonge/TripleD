@@ -184,6 +184,30 @@ is_time_format_correct <- function(file, file_name){
   }
 }
 
+is_cruise_objective_correct <- function(file, file_name){
+  incomplete <- which(file$Cruise_objective == "Incomplete")
+  if(length(incomplete) > 0){
+    if(is.null(file$Excluded)){
+      stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
+    }else if(TRUE %in% is.na(file$Excluded[incomplete])){
+      stop(paste0("In file ",file_name,", the entries in row(s) ",
+                  paste(which(is.na(file$Excluded[incomplete])), collapse = ", "),
+                  " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
+    }
+  }
+
+  focus <- which(file$Cruise_objective == "Focus")
+  if(length(focus) > 0){
+    if(is.null(file$Focus)){
+      stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Focus', but the necessary extra column 'Focus' does not exist."))
+    }else if(TRUE %in% is.na(file$Focus[focus])){
+      stop(paste0("In file ",file_name,", the entries in row(s) ",
+                  paste(which(is.na(file$Focus[focus])), collapse = ", "),
+                  " are defined 'Focus' in the column 'Cruise_objective', but no excluded taxons are given in the extra column 'Focus'."))
+    }
+  }
+}
+
 are_values_correct_type <- function(file, file_name, type_attributes, func){
   columns <- which(colnames(file) %in% type_attributes$Attribute)
   if(length(columns) > 0){
@@ -436,6 +460,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
         data[[i]]$Date <- as.Date(data[[i]]$Date, format = "%d/%m/%Y")
         are_dates_converted(file = data[[i]], file_name)
         is_time_format_correct(file, file_name)
+        is_cruise_objective_correct(file, file_name)
       }
       are_groups_complete(file, file_name, my_attributes)
       are_values_correct_type(file, file_name, doubles_attributes, func = is.double)
@@ -452,12 +477,10 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
     if(table$folder == "Stations"){
       stations <- dplyr::bind_rows(data, .id = "File")
       save(stations, file = paste0(out_folder,"/","stations_initial.rda"))
-      #usethis::use_data(stations, overwrite = T)
     }
     if(table$folder == "Species"){
       species <- dplyr::bind_rows(data, .id = "File")
       save(species, file = paste0(out_folder,"/","species_initial.rda"))
-      #usethis::use_data(species, overwrite = T)
     }
   }
 
