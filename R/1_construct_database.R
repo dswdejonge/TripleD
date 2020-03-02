@@ -335,7 +335,7 @@ are_measurements_positive <- function(file, file_name){
     }
   }
   if(!is.null(bw)){
-    bw <- bdw < 0
+    bw <- bw < 0
     if(TRUE %in% bw){
       stop(paste0("In file ",file_name," column Blade_width_cm the values in row(s)",
                   paste(which(bw), collapse = ", "), " are negative but should be positive."))
