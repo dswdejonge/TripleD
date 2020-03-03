@@ -193,7 +193,7 @@ is_cruise_objective_correct <- function(file, file_name){
     incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
     if(length(incomplete_and_NA) > 0){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  paste(sort(incomplete_and_NA), collapse = ", "),
+                  paste(sort(incomplete_and_NA+1), collapse = ", "),
                   " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
     }
   }
@@ -206,8 +206,9 @@ is_cruise_objective_correct <- function(file, file_name){
     focus_and_NA <- which(focus & is.na(file$Focus))
     if(length(focus_and_NA > 0)){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  paste(focus_and_NA), collapse = ", "),
-                  " are defined 'Focus' in the column 'Cruise_objective', but no taxons that were focussed on are given in the extra column 'Focus'.")
+                  paste(sort(focus_and_NA+1), collapse = ", "),
+                  " are defined 'Focus' in the column 'Cruise_objective', but no taxons that were focussed on are given in the extra column 'Focus'."
+                  ))
     }
   }
 }
@@ -348,42 +349,42 @@ are_measurements_positive <- function(file, file_name){
     tl <- tl  < 0
     if(TRUE %in% tl){
       stop(paste0("In file ",file_name," column Track_length_cruise_m the values in row(s) ",
-                  paste(sort(which(tl)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(tl)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(bd)){
     bd <- bd < 0
     if(TRUE %in% bd){
       stop(paste0("In file ",file_name," column Blade_depth_cm the values in row(s) ",
-                  paste(sort(which(bd)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(bd)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(bw)){
     bw <- bw < 0
     if(TRUE %in% bw){
       stop(paste0("In file ",file_name," column Blade_width_cm the values in row(s) ",
-                  paste(sort(which(bw)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(bw)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ts)){
     ts <- ts < 0
     if(TRUE %in% ts){
       stop(paste0("In file ",file_name," column Tow_speed_knots the values in row(s) ",
-                  paste(sort(which(ts)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ts)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(wd)){
     wd <- wd < 0
     if(TRUE %in% wd){
       stop(paste0("In file ",file_name," column Water_depth_m_cruise the values in row(s) ",
-                  paste(sort(which(wd)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(wd)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(oc)){
     oc <- oc < 0
     if(TRUE %in% oc){
       stop(paste0("In file ",file_name," column Odometer_count the values in row(s) ",
-                  paste(sort(which(oc)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(oc)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   # Species
@@ -399,49 +400,49 @@ are_measurements_positive <- function(file, file_name){
     ct <- ct  < 0
     if(TRUE %in% ct){
       stop(paste0("In file ",file_name," column Count the values in row(s) ",
-                  paste(sort(which(ct)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ct)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ln)){
     ln <- ln  < 0
     if(TRUE %in% ln){
       stop(paste0("In file ",file_name," column Length the values in row(s) ",
-                  paste(sort(which(ln)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ln)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(wd)){
     wd <- wd  < 0
     if(TRUE %in% wd){
       stop(paste0("In file ",file_name," column Width the values in row(s) ",
-                  paste(sort(which(wd)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(wd)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ww)){
     ww <- ww  < 0
     if(TRUE %in% ww){
       stop(paste0("In file ",file_name," column WetWeight_g the values in row(s) ",
-                  paste(sort(which(ww)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ww)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(aw)){
     aw <- aw  < 0
     if(TRUE %in% aw){
       stop(paste0("In file ",file_name," column AFDW_g the values in row(s) ",
-                  paste(sort(which(aw)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(aw)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(tw)){
     tw <- tw  <= 0
     if(TRUE %in% tw){
       stop(paste0("In file ",file_name," column Threshold_Scale the values in row(s) ",
-                  paste(sort(which(tw)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(tw)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ta)){
     ta <- ta  <= 0
     if(TRUE %in% ta){
       stop(paste0("In file ",file_name," column Threshold_ScaleAFDW the values in row(s) ",
-                  paste(sort(which(ta)), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ta)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
 }
