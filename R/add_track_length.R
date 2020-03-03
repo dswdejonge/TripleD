@@ -29,11 +29,10 @@ add_track_length_GPS <- function(stations){
 #' @param stations (required) Dataframe (tibble) with all stations and the attributes
 #' (columns) "Lon_start_DD", "Lat_start_DD","Lon_stop_DD", and "Lat_stop_DD".
 #' @return This function returns the input tibble with an added column called
-#' "Track_dist_m_BB" and "Track_dist_m_SB".
+#' "Track_dist_m_Odometer".
 #' @export
 add_track_length_Odometer <- function(stations, tick_length_m = 2){
   stations <- stations %>%
-    dplyr::mutate(Track_dist_m_BB = BB_count * tick_length_m) %>%
-    dplyr::mutate(Track_dist_m_SB = SB_count * tick_length_m)
+    dplyr::mutate(Track_dist_m_Odometer = Odometer_count * tick_length_m)
   return(stations)
 }
