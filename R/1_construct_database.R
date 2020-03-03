@@ -575,7 +575,8 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
     }
   }
 
-  missing_stationIDs <- unique(species$StationID[which(!species$StationID %in% stations$StationID)])
+  missing_stationIDs <- as.character(
+    unique(species$StationID[which(!species$StationID %in% stations$StationID)]))
   if(length(missing_stationIDs > 0)){
     stop(paste0("The StationID(s) ", paste(missing_stationIDs, collapse = ", "), " are reported in the species file,
                    but are missing in the stations file, i.e. metadata is missing for these biological data points."))
@@ -583,6 +584,8 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
 
   # Test if stationIDs are unique over different files.
   ID_is_duplicated <- duplicated(stations$StationID)
-  stop(paste0("The StationID(s)" ,paste(stations$StationID[ID_is_duplicated], collapse = ", "),
-                 " occur multiple times in differen files, but they must be unique. Please check."))
+  if(length(ID_is_duplicated) > 0){
+    stop(paste0("The StationID(s)" ,paste(stations$StationID[ID_is_duplicated], collapse = ", "),
+                " occur multiple times in differen files, but they must be unique. Please check."))
+  }
 }
