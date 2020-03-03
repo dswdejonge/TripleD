@@ -297,20 +297,22 @@ is_biomass_complete <- function(file, file_name){
   # WW
   should_be_complete <- which(!is.na(file$WetWeight_g))
   if(length(should_be_complete > 0)){
-    if(TRUE %in% is.na(file[should_be_complete,
-                            c("WeightType", "Threshold_Scale",
-                              "isWithShell", "isPartialWW")])){
-      stop("WRITE THIS ERROR MESSAGE")
+    isNA <- is.na(file[should_be_complete,
+                       c("WeightType", "Threshold_Scale",
+                         "isWithShell", "isPartialWW")])
+    if(TRUE %in% isNA){
+      stop("Wet weight is reported, but the columns WeightType, Threshold_Scale, isWithShell and isPartialWW are not filled for all weights.")
     }
   }
 
   # AFDW
   should_be_complete <- which(!is.na(file$AFDW_g))
   if(length(should_be_complete > 0)){
-    if(TRUE %in% is.na(file[should_be_complete,
-                            c("WeightTypeAFDW", "Threshold_ScaleAFDW",
-                              "isPartialAFDW")])){
-      stop("WRITE THIS ERROR MESSAGE")
+    isNA <- is.na(file[should_be_complete,
+                       c("WeightTypeAFDW", "Threshold_ScaleAFDW",
+                         "isPartialAFDW")])
+    if(TRUE %in% isNA){
+      stop("AFDW is reported, but the columns WeightTypeAFDW, Threshold_ScaleAFDW, and isPartialAFDW are not filled for all weights.")
     }
   }
 }
@@ -557,6 +559,8 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
       if(table$folder == "Species"){
         are_species_metadata_consistent(file, file_name)
         is_biomass_complete(file, file_name)
+        # TODO: check if there is only one sample weight for the species/station combi
+        # TODO: for sample weight all isWithShell should be the same??
       }
       do_measurements_have_units(file, file_name)
       are_measurements_positive(file, file_name)
