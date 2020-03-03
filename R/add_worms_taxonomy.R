@@ -14,7 +14,7 @@ collect_from_worms <- function(species_names, fuzzy = FALSE){
     func <- worrms::wm_records_names
   }
   i1 <- 1 ; i2 <- 50
-  while(i1 < length(species_names)){
+  while(i1 <= length(species_names)){
     if(i2 > length(species_names)){i2 <- length(species_names)}
     collected_data <- func(species_names[i1:i2])
     worms <- c(worms, collected_data)
