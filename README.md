@@ -37,4 +37,8 @@ complete_database()
 # Finalize database, by aggregating data, selecting relevant columns, and
 # calculating final densities and biomass per sampling station.
 finalize_database()
+
+# Load the final database and view within Rstudio
+load("database.rda")
+View(database)
 ```
