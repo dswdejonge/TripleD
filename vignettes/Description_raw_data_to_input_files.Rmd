@@ -144,29 +144,37 @@ RWS2019: "smp_memo" is used.
 
 # Species
 ## General remarks
+*Nucula* spp. without reported lengths were removed from the NICO10 file; based on the original handwritten files they were identified to be false entries.  
+
 The density, biomass, and length data in the RWS2018 and RWS2019 dataset are reported in different tabs. These were merged manually into a CSV in the right format as required for this package as described below.
 
 ## StationID
-For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.  
-test_Lavaleye: StCode is same as StationID.  
-RWS2018: Station ID is RWS31135633#<station nr reported before _FrieseFront in the column Loc_name> using the Excelcode: ="RWS31135633#"&LEFT(A2,FIND("_",A2)-1).
+For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO. A station was accidentally named 64PE438#49 which should have been 64PE438#53, so this was changed.    
+
+test_Lavaleye: StCode is same as StationID.   
+
+RWS2018: Station ID is RWS31135633#<station nr reported before _FrieseFront in the column Loc_name> using the Excelcode: ="RWS31135633#"&LEFT(A2,FIND("_",A2)-1).  
+
 RWS2019: Station ID is RWS31144108#<station nr reported before _ column Loc_name> using the Excelcode: ="RWS31144108#"&LEFT(A2,FIND("_",A2)-1).  
 
 ## Fraction
-NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125. There were some double entries (combination species - station with differing fractions):  
+NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125. There were some double entries (combination species - station with differing fractions), which were solved by going back to the original handwritten files:  
 
-Arctica islandica 64PE438#122    0.5 -> fraction set to 1, the count was changed 1x2, and WetWeight was changed 1.5x2, isBulkWeight set to 1. Comment "Manually set fraction to 1 from 0.5."    
+Arctica islandica 64PE438#122    0.5 -> mistake in file, fraction set to 1.  
 Arctica islandica 64PE438#122    1      
 
-Porifera          64PE438#122    0.5 -> fraction set to 1, count changed 1x2, isBulkWeight set to 1. Comment "Manually set fraction to 1 from 0.5."                       
+Porifera          64PE438#122    0.5 -> mistake in file, fraction set to 1.                      
 Porifera          64PE438#122    1               
 
-Nucula spp        64PE438#214    1 -> In total 9 individuals of Nucula spp were found. Three were recorded so the fraction for all Nucula spp was set to 0.33, isBulkWeight of this individual set to 0.  
+Nucula spp        64PE438#214    1 -> mistake in file, fraction set to 0.25. 
 Nucula spp        64PE438#214    0.25           
 
-Polychaeta spp    64PE438#215    1                     
-Polychaeta spp    64PE438#215    0.125 -> In total 82 individuals were found, of which 12 were recorded. So the fraction for all Polychaeta spp was set to 12/82=0.146.   
+Polychaeta spp    64PE438#215    1 -> These are from different taxa, new entry:                     
+Polychaeta spp    64PE438#215    0.125 -> ""
 
+Row 2003 (station 215). Unit cm. Fraction: 1/1. Poly spp becomes Nereis spp. N=1. Size is 12.  
+Row 2004 (station 215). Unit cm. Fraction: 1/8. Poly spp becomes Owenia fusiformis, N=1 Size=7.  
+Row 2099 (station 215). Unit mm. Fraction: 1/8. Polych. becomes Polychaeta spp, N=10, not measured so NA.
 
 test_Lavaleye: Taken from raw data.  
 
@@ -187,13 +195,15 @@ test_Lavaleye: isFractionAssumed is based on the column AssumedFraction in raw d
 RWS2018/2019: Specifically given in original data file, so set to 0.
 
 ## Species_reported
-NICO10 cruise (64PE438): Species name taken for Species_reported.  
-test_Lavaleye: Taken from raw data.  
-RWS2018/2019: "PAR_Name" is used.
+NICO10 cruise (64PE438): Species name taken for Species_reported.    
+test_Lavaleye: Taken from raw data.    
+RWS2018/2019: "PAR_Name" is used.  
 
 ## Count
-NICO10 cruise (64PE438): reported in raw data. NA counts were set to -1.    
-test_Lavaleye: "Number" column is taken as Count.  
+NICO10 cruise (64PE438): reported in raw data.  
+
+test_Lavaleye: "Number" column is taken as Count.   
+
 RWS2018: "AMT_MEAS" from tab 'Analyse bestand densiteit' is used. Some species were recorded with an 'AMT_MEAS' of 0 and a 'IND_MEAS' of >, meaning they could not be counted properly or that it was decided not to count them (which was the case for Calianassa and Upogebia during this specific cruise). The count of these species was set to NA. If biomass (tab 'Analyse bestand biomassa') or length (tab 'Analyse bestand lengte') measurements were done on smaller groups than indicated in the tab 'Analyse bestand densiteit', the 'AMT_MEAS' of the tab that resulted in the most entries for that species/location combination was used. For example: the 'AMT_MEAS' of a species in the density tab was 5, but were measured in the length tab individually: then they are included as individual entries. Additionally:  
 - Callianassa subterranea was reported as >0 in the density tab, but reported with both a count and a fraction in the biomass tab. Therefore, the count and fraction from the biomass tab were used.  
 - Sometimes the comment in the density tab said: 'x indidivu <5mm niet opgenomen' (' x individuals <5mm not counted). However, these individuals were included for the biomass measurements, therefore the originally omitted individuals were added to the count and the comment was removed.  
@@ -201,38 +211,40 @@ RWS2018: "AMT_MEAS" from tab 'Analyse bestand densiteit' is used. Some species w
 RWS2019: "AMT_MEAS" was used. Some species were recorded with an 'AMT_MEAS' of 0 and a 'IND_MEAS' of >, meaning they could not be counted properly or that it was decided not to count them. The count of these species was set to NA.
 
 ## Unit_Length
-NICO10 cruise (64PE438): Maatvoering is taken for Unit_Length. 1/2 cm (with space) was converted to 1/2cm (without space).  
+NICO10 cruise (64PE438): The column 'Maatvoering' is taken for Unit_Length. 1/2 cm (with space) was converted to 1/2cm (without space).   
+
 test_Lavaleye: 'unit length' taken for Unit_Length. 0.5cm was converted to 1/2cm. na was converted to NA.  
 RWS2018/2019: From the tab 'Analyse bestand lengte' can be seen all measurements were reported in mm.  
 
 ## Length
-NICO10 cruise (64PE438): Column 'Size' is taken for Length.  
+NICO10 cruise (64PE438): Column 'Size' is taken for Length.   
+
 test_Lavaleye: reported in raw data.  
 RWS2018: Length values are reported seperately from the density and biomass measurements, thus, in some cases the length cannot be traced back to the (group of) specimens the lengths belong to. Only for entries where the length could be unambiguously matches to a density or biomass entry was the length recorded. The rest of the fields was set to NA.
 RWS2019: The lengths from the tab 'Analyse bestand lengte' was used. If length was not recorded for species that were present in tabs 'Analyse bestand densiteit' and 'Analyse bestand biomassa' Length was set to NA.
 
 ## Unit_Width
-NICO10 cruise (64PE438): 'Maatvoering' is taken for Unit_Width if the comment denotes the measurement concerned width not length. Unit_Length is set to NA for these entries.    
+NICO10 cruise (64PE438): The column 'Maatvoering' is taken for Unit_Width IF the comment denotes the measurement concerned width not length. Unit_Length is set to NA for these entries.    
+
 test_Lavaleye: 'unit length' taken for Unit_Width if the notes in the original file mention the measured dimension is in fact width not length.  
 
 ## Width
 NICO10 cruise (64PE438): Values reported in 'Size' with a comment that it concerned width of the individual were reported in Width, Length for these entries was set to NA.  
+
 test_Lavaleye: The values reported in 'Width' are used, or the values in 'Length' if the notes/comments in the file mention that the value actually concerns a width not length.    
 
-## WetWeight_g
-NICO10 cruise (64PE438): Reported in raw data. Entries of '<0.5' were set to 0.  
-test_Lavaleye: scale gWweight with shell is WetWeight(g). Not measured.  
-RWS2018: Not recorded (weight was recorded as Ash Free Dry Weight).  
+## WetWeight_g  
+NICO10 cruise (64PE438): Reported in raw data. Entries of '<0.5' were set to 0. Not all individuals of Pennatula phosphorea at station 141 were included; 3 were missing. Added these three specimens with the lengths 35, 24 and 30 mm, and changed the wet weight to 7.5 g (missing data from hand written sheets).  
+
+test_Lavaleye: scale gWweight with shell is WetWeight(g).  
+
+RWS2018: Not recorded (weight was recorded as Ash Free Dry Weight).   
+
 RWS2019: The values reported in the column 'WW_MEAS' in the tab 'Analyse bestand biomassa' and 'Analyse bestand biomassa (Vis)' was used, and multiplied by 1000 to get from the reported kg to the required g. If wet weight was not reported it was set to NA. If wet weight was below the threshold it was set to 0.  
 
-## isBulkWeight
-NICO10 cruise (64PE438): If at one sampling station multiple entries of one species exists or if there is one entry with a count > 1, isBulkWeight is set to 1 for all entries (so also for the species with a WetWeight of NA). isBulkWeight was set to 0 if there was only one individual of that species in the sample or if there was not wet weight measured at all.  
-test_Lavaleye: NA.  
-RWS2018: NA (no wet weights reported).  
-RWS2019: Most of the reported wet weights were sample bulk weights, so isBulkWeight = 1. This was changed to isBulkWeight = 0 if only one individual was reported, or if no weight was reported at all.  
+## WeightType
+NICO10 cruise (64PE438): Was set to 'Single' if the weight only concerned one individual. Was set to NA if there was no weight reported. Was set to 'Entry' when the biomass only concerned one entry (i.e. the row). Was set to 'Sample' for all other entries.   
 
-## BulkWeightType
-NICO10 cruise (64PE438): Was set to 'NA' if isBulkWeight was 0. Was set to 'Sample' for all other entries, and changed manually to 'Entry' when the biomass only concerned one entry.  
 RWS2018: NA (no wet weights reported).  
 RWS2019: Most of the reported wet weights were sample bulk weights, so BulkWeightType = Sample. This was changed to NA if only one individual was reported.  
 
@@ -243,53 +255,56 @@ RWS2018: NA (no wet weights reported).
 RWS2019: Some species are reported as < 0.0005 kg, so the threshold of the scale was 0.5 g.  
 
 ## isWithShell
-NICO10 cruise (64PE438): Assumed all organisms are weighted as a whole, unless the comment indicates otherwise.  
+NICO10 cruise (64PE438): Assumed all organisms are weighted as a whole (i.e. isWithShell = 1), unless the comment indicates otherwise.  
+
 test_Lavaleye: NA (for now).  
 RWS2018: NA (no wet weights reported).  
 RWS2019: Set to 0, unless specified in the comments that it concerns a weight includion shell or tube 'inclusief schelp'.  
 
 ## isPartialWW
 NICO10 cruise (64PE438): Based on the comments column isPartialWW was set to 1 if it was suspected the reported weight only concerns part of the organism.  
+
 test_Lavaleye: NA (for now).  
 RWS2018: NA (no wet weights reported).  
 RWS2019: Set to 0, unless specified in the comments that it concerns fragments.  
 
 ## AFDW_g
 NICO10 cruise (64PE438): NA.  
-RWS2018: The column 'AFDW_MEAS' in the tab 'Analyse bestand biomassa' contains the ash-free dry weight in kilograms. These values were used after multiplying by 1000 (kg to g).  
-RWS2019: NA (no AFDW reported).  
 
-## isBulkWeightAFDW
-NICO10 cruise (64PE438): NA.  
-RWS2018: Was set using the count column using Excel: IF(B1 = 1, 0, 1).  
+RWS2018: The column 'AFDW_MEAS' in the tab 'Analyse bestand biomassa' contains the ash-free dry weight in kilograms. These values were used after multiplying by 1000 (kg to g).  
 RWS2019: NA (no AFDW reported).  
 
 ## BulkWeightTypeAFDW
 NICO10 cruise (64PE438): NA.  
+
 RWS2018: All AFDW values were either for individuals or groups of individuals, never only for the whole sample. Was set using the isBulkWeightAFDW column using Excel: =IF(I2 = 0, "NA", "Entry"). When lengths were reported on a finer scale than the AFDW (quite often) and could be included (see 'Length'), the BulkWeightTypeAFDW was set to 'Sample'.  
+
 RWS2019: NA (no AFDW reported).  
 
 ## Threshold_ScaleAFDW
 NICO10 cruise (64PE438): NA.  
+
 RWS2018: All AFDW values had an accuracy of 0.5 grams. Therefore, the threshold was set at 0.5. 
 RWS2019: NA (no AFDW reported).  
 
 ## isPartialAFDW
-NICO10 cruise (64PE438): NA.  
+NICO10 cruise (64PE438): NA.   
+
 RWS2018: Set to 0, unless specified in the comment that a (group of) specimen(s) was broken.  
 RWS2019: NA (no AFDW reported).  
 
 ## ID_by
-NICO10 cruise (64PE438): Not reported in raw data.  
+NICO10 cruise (64PE438): Not reported in raw data.   
+
 RWS2018/2019: "Controle" is used. Empty spaces filled with NA using Excel Find & Select > Go To Special > Select Blanks > OK > "NA" > ctrl+enter.
 
 ## isPreserved
-NICO10 cruise (64PE438): Not reported in raw data.
+NICO10 cruise (64PE438): Not reported in raw data.   
 
 test_Lavaleye: Preserved is isPreserved. NA (for now).  
 
 ## Comment
-NICO10 cruise (64PE438): Used comments from raw data (in Dutch).  
+NICO10 cruise (64PE438): Used comments from raw data (in Dutch).   
 
 test_Lavaleye: Remark is used for Comment. Empty cells filled with NA.  
 
