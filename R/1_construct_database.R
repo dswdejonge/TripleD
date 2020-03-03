@@ -125,7 +125,7 @@ are_required_att_complete <- function(file, file_name, required_attributes){
     stop(paste0("NA values are not allowed for the required attributes ",
                 paste(required_attributes$Attribute, collapse = ", "),
                 ". Please check the file ", file_name,
-                " row(s): ",paste(rowi, collapse = ", ")))
+                " row(s): ",paste(sort(unique(rowi)), collapse = ", ")))
   }
 }
 
@@ -140,7 +140,7 @@ are_alternative_required_att_complete <- function(file, file_name, alternative_a
     if(TRUE %in% duplicated(unlist(NA_index))){
       stop(paste0("Every entry must have at least one complete set of alternative required fields. ",
                   "Duplicate NAs are found in row(s) ",
-                  paste(unlist(NA_index)[duplicated(unlist(NA_index))]+1, collapse = ", "),
+                  paste(sort(unlist(NA_index)[duplicated(unlist(NA_index))]+1), collapse = ", "),
                   " in file: ", file_name))
     }
   }
@@ -168,7 +168,7 @@ are_dates_converted <- function(file, file_name){
   # All dates should be convertible from a string dd/mm/yyyy to R data format.
   is_unconverted_date <- is.na(file$Date)
   if(TRUE %in% is_unconverted_date){
-    stop(paste0("The date in row(s) ",paste(which(is_unconverted_date)+1, collapse = ", "),
+    stop(paste0("The date in row(s) ",paste(sort(which(is_unconverted_date)+1), collapse = ", "),
                 " in file ", file_name,
                 " cannot be converted. Ensure all dates have the right format: dd/mm/yyyy."))
   }
@@ -179,7 +179,7 @@ is_time_format_correct <- function(file, file_name){
   is_wrong_time_stop <- gsub("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]","", file$Time_stop) != ""
   if(TRUE %in% is_wrong_time_start | TRUE %in% is_wrong_time_stop){
     stop(paste0("The time in column 'Time_start' and/or 'Time_stop' and row(s) ",
-                paste(which(c(is_wrong_time_start, is_wrong_time_stop))+1, collapse = ", "),
+                paste(sort(which(c(is_wrong_time_start, is_wrong_time_stop))+1), collapse = ", "),
                 " in file ", file_name, " should be in the format 'HH:MM:SS'."))
   }
 }
@@ -191,7 +191,6 @@ is_cruise_objective_correct <- function(file, file_name){
       stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
     }
     incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
-    #else if(TRUE %in% is.na(file$Excluded[which(incomplete)])){
     if(length(incomplete_and_NA) > 0){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
                   paste(sort(incomplete_and_NA), collapse = ", "),
@@ -235,7 +234,7 @@ are_booleans_correct <- function(file, file_name, boolean_attributes){
         stop(paste0("In file ",file_name,
                     " the boolean attributes ", paste(colnames(file)[columns], collapse = ", "),
                     " may only be 0, 1, or NA. Please check row(s) ",
-                    paste(is_not_boolean, collapse = ", ")))
+                    paste(sort(is_not_boolean), collapse = ", ")))
       }
     }
   }
@@ -250,7 +249,7 @@ are_fractions_correct <- function(file, file_name, fraction_attributes){
       stop(paste0("In file ",file_name,
                   " the attributes ", paste(colnames(file)[columns], collapse = ", "),
                   " should lie between 0 and 1. Please check row(s) ",
-                  paste(is_not_fraction, collapse = ", ")))
+                  paste(sort(is_not_fraction), collapse = ", ")))
     }
   }
 }
@@ -268,7 +267,7 @@ are_predefined_atts_correct <- function(file, file_name, predefined_attributes){
           "In file ",file_name," in column ",att,
           " values exist that are not the predefined values ",
           paste(predefined_attributes[[i]], collapse = ", "),
-          " or NA in row(s): ",paste(is_not_predefined, collapse = ", ")
+          " or NA in row(s): ",paste(sort(is_not_predefined), collapse = ", ")
         ))
       }
     }
@@ -331,7 +330,7 @@ do_measurements_have_units <- function(file, file_name){
       no_units <- which(is.na(file[measurements,unit_col]))+1
       if(length(no_units) > 0){
         stop(paste0("In file ",file_name," units are missing in column ",unit,
-                    " in row(s) ",paste(no_units, collapse = ", ")))
+                    " in row(s) ",paste(sort(no_units), collapse = ", ")))
       }
     }
   }
@@ -349,42 +348,42 @@ are_measurements_positive <- function(file, file_name){
     tl <- tl  < 0
     if(TRUE %in% tl){
       stop(paste0("In file ",file_name," column Track_length_cruise_m the values in row(s) ",
-                  paste(which(tl), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(tl)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(bd)){
     bd <- bd < 0
     if(TRUE %in% bd){
       stop(paste0("In file ",file_name," column Blade_depth_cm the values in row(s) ",
-                  paste(which(bd), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(bd)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(bw)){
     bw <- bw < 0
     if(TRUE %in% bw){
       stop(paste0("In file ",file_name," column Blade_width_cm the values in row(s) ",
-                  paste(which(bw), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(bw)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ts)){
     ts <- ts < 0
     if(TRUE %in% ts){
       stop(paste0("In file ",file_name," column Tow_speed_knots the values in row(s) ",
-                  paste(which(ts), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ts)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(wd)){
     wd <- wd < 0
     if(TRUE %in% wd){
       stop(paste0("In file ",file_name," column Water_depth_m_cruise the values in row(s) ",
-                  paste(which(wd), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(wd)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(oc)){
     oc <- oc < 0
     if(TRUE %in% oc){
       stop(paste0("In file ",file_name," column Odometer_count the values in row(s) ",
-                  paste(which(oc), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(oc)), collapse = ", "), " are negative but should be positive."))
     }
   }
   # Species
@@ -400,49 +399,49 @@ are_measurements_positive <- function(file, file_name){
     ct <- ct  < 0
     if(TRUE %in% ct){
       stop(paste0("In file ",file_name," column Count the values in row(s) ",
-                  paste(which(ct), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ct)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ln)){
     ln <- ln  < 0
     if(TRUE %in% ln){
       stop(paste0("In file ",file_name," column Length the values in row(s) ",
-                  paste(which(ln), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ln)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(wd)){
     wd <- wd  < 0
     if(TRUE %in% wd){
       stop(paste0("In file ",file_name," column Width the values in row(s) ",
-                  paste(which(wd), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(wd)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ww)){
     ww <- ww  < 0
     if(TRUE %in% ww){
       stop(paste0("In file ",file_name," column WetWeight_g the values in row(s) ",
-                  paste(which(ww), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ww)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(aw)){
     aw <- aw  < 0
     if(TRUE %in% aw){
       stop(paste0("In file ",file_name," column AFDW_g the values in row(s) ",
-                  paste(which(aw), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(aw)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(tw)){
     tw <- tw  <= 0
     if(TRUE %in% tw){
       stop(paste0("In file ",file_name," column Threshold_Scale the values in row(s) ",
-                  paste(which(tw), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(tw)), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ta)){
     ta <- ta  <= 0
     if(TRUE %in% ta){
       stop(paste0("In file ",file_name," column Threshold_ScaleAFDW the values in row(s) ",
-                  paste(which(ta), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ta)), collapse = ", "), " are negative but should be positive."))
     }
   }
 }
@@ -532,7 +531,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
           which(file == "", arr.ind = T)[,"row"]+1
         ))
         stop("No empty cells are allowed in the CSV. Check rows ",
-             paste(rowi, collapse = ", "))
+             paste(sort(rowi), collapse = ", "))
       }
 
       # Attribute presence
