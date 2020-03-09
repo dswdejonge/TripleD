@@ -44,7 +44,8 @@
 #' @param database_folder This is the folder where you want your final database (combined stations and species
 #' data) to be stores. Default is NULL, which will store the database in your working directory.
 #' @export
-finalize_database <- function(data_folder = "data", out_folder = "data", database_folder = NULL){
+finalize_database <- function(data_folder = "data", out_folder = "data",
+                              database_folder = NULL, as_CSV = FALSE){
   load(paste0(data_folder,"/species_additions.rda"))
   load(paste0(data_folder,"/stations_additions.rda"))
   # Clean species database
@@ -62,7 +63,6 @@ finalize_database <- function(data_folder = "data", out_folder = "data", databas
       Count_scaled,
       valid_name, rank, phylum, class, order, family, genus, isFuzzy
     )
-  save(species_final, file = paste0(out_folder, "/species_final.rda"))
 
   # Clean station database
   stations_final <- stations_additions %>%
@@ -88,7 +88,6 @@ finalize_database <- function(data_folder = "data", out_folder = "data", databas
       Water_depth_m, source_Water_depth_m, Track_length_m, source_Track_length_m,
       Sample_area_m2, Sample_volume_m3
     )
-  save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
 
   # Create one large table for the Shiny app
   # Deselect File in stations because it's double.
@@ -102,10 +101,19 @@ finalize_database <- function(data_folder = "data", out_folder = "data", databas
     # Calculate density per site
     dplyr::mutate(Density_nr_per_m2 = Count / Sample_area_m2) %>%
     dplyr::mutate(Density_nr_per_m3 = Count / Sample_volume_m3)
+
+  save(species_final, file = paste0(out_folder, "/species_final.rda"))
+  save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
+  if(as_CSV){
+    write.csv(species_final, "species_final.csv")
+    write.csv(stations_final, "stations_final.csv")
+  }
   if(is.null(database_folder)){
     save(database, file = "database.rda")
+    if(as_CSV){write.csv(database, file = "database.csv")}
   }else{
     save(database, file = paste0(database_folder,"/database.rda"))
+    if(as_CSV){write.csv(database, file = paste0(database_folder,"/database.csv"))}
   }
 }
 

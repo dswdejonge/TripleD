@@ -487,7 +487,7 @@ pos2coord <- function(pos=NULL, coord=NULL, dim.mat=NULL) {
 #' your initial data. If there are no errors, it will store Rdata in the newly created folder 'out_folder'.
 #' @importFrom magrittr "%>%"
 #' @export
-construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
+construct_database <- function(in_folder = "inputfiles", out_folder = "data", as_CSV = FALSE){
   # List of tables to import and check
   tables <- list(
     Stations <- list(folder = "Stations", att = "attributes_stations.csv"),
@@ -573,23 +573,24 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
     }
   }
 
-  # TODO: save species and stations AFTER the code below.
   # TODO: Fix bug in one of the code snippets below (gives error but that shouldn't happen)
   missing_stationIDs <- as.character(
     unique(species$StationID[which(!species$StationID %in% stations$StationID)]))
-  if(length(missing_stationIDs > 0)){
+  if(length(missing_stationIDs) > 0){
     stop(paste0("The StationID(s) ", paste(missing_stationIDs, collapse = ", "), " are reported in the species file,
                    but are missing in the stations file, i.e. metadata is missing for these biological data points."))
   }
 
   # Test if stationIDs are unique over different files.
-  ID_is_duplicated <- duplicated(stations$StationID)
+  ID_is_duplicated <- which(duplicated(stations$StationID))
   if(length(ID_is_duplicated) > 0){
     stop(paste0("The StationID(s)" ,paste(stations$StationID[ID_is_duplicated], collapse = ", "),
                 " occur multiple times in differen files, but they must be unique. Please check."))
   }
-  #TODO: add argument that allows to write dataset also as CSV.
-
   save(stations, file = paste0(out_folder,"/","stations_initial.rda"))
   save(species, file = paste0(out_folder,"/","species_initial.rda"))
+  if(as_CSV){
+    write.csv(stations, file = "stations_initial.csv")
+    write.csv(stations, file = "species_initial.csv")
+  }
 }

@@ -25,7 +25,7 @@
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @export
 collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, lons = NULL,
-                                  data_folder = "data", out_folder = "data"){
+                                  data_folder = "data", out_folder = "data", as_CSV = FALSE){
   if(is.null(stations)){
     message("Loading intitial database with stations...")
     load(paste0(data_folder,"/stations_initial.rda"))
@@ -44,7 +44,12 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
   worms <- get_worms_taxonomy(as.character(species$Species_reported))
   save(worms, file = paste0(out_folder,"/worms.rda"))
   message(paste0("WoRMS taxonomic information is stored as ",out_folder,"/worms.rda."))
-}
+
+  if(as_CSV){
+    write.csv(bathymetry, file = "bathymetry.csv")
+    write.csv(worms, file = "worms_taxonomy.csv")
+  }
+  }
 
 #' Complete database with external data and calculations
 #'
@@ -73,8 +78,8 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 #' @seealso \code{add_track_midpoints}, \code{add_track_length_GPS},
 #' \code{add_track_length_Odometer}, \code{add_water_depth}.
 #' @export
-complete_database <- function(data_folder = "data", out_folder = "data", bathymetry = NULL){
-  # TODO: add argument to allow writing data to CSV.
+complete_database <- function(data_folder = "data", out_folder = "data",
+                              bathymetry = NULL, as_CSV = FALSE){
   # Load initial database
   message("Loading initial database...")
   load(paste0(data_folder,"/stations_initial.rda"))
@@ -96,7 +101,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", bathyme
     add_track_length_GPS() %>%
     add_track_length_Odometer() %>%
     add_water_depth(bathymetry = bathymetry)
-  save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
+
 
   # Add additional data to species data
   species_additions <- species %>%
@@ -105,8 +110,14 @@ complete_database <- function(data_folder = "data", out_folder = "data", bathyme
                         Query, valid_name, rank, phylum, class, order,
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query"))
-  save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
   #TODO: give list of taxa that do not match to worms at all.
+
+  save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
+  save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
+  if(as_CSV){
+    write.csv(stations_additions, "stations_additions.csv")
+    write.csv(species_additions, "species_additions.csv")
+  }
 }
 
 
