@@ -76,7 +76,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data", databas
       ., new_column_name = "Water_depth_m", order_of_preference = c("Water_depth_m_cruise", "Water_depth_m_Bathy")
     ) %>%
     combine_data_sources(
-      ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_cruise", "Track_dist_m_BB")
+      ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_cruise", "Track_dist_m_Odometer")
     ) %>%
     dplyr::mutate(Sample_area_m2 = Track_length_m * (Blade_width_cm/100)) %>%
     dplyr::mutate(Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
