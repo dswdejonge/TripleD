@@ -12,7 +12,7 @@ add_track_length_Odometer(stations, tick_length_m = 2)
 }
 \value{
 This function returns the input tibble with an added column called
-"Track_dist_m_BB" and "Track_dist_m_SB".
+"Track_dist_m_Odometer".
 }
 \description{
 The function adds a column with track length in meters based on odometer ticks (one tick is two meters).

@@ -4,7 +4,12 @@
 \alias{complete_database}
 \title{Complete database with external data and calculations}
 \usage{
-complete_database(data_folder = "data", out_folder = "data", bathymetry = NULL)
+complete_database(
+  data_folder = "data",
+  out_folder = "data",
+  bathymetry = NULL,
+  as_CSV = FALSE
+)
 }
 \arguments{
 \item{data_folder}{This is the folder that contains the initial database.

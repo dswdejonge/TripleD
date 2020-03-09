@@ -4,7 +4,11 @@
 \alias{construct_database}
 \title{Construct initial database}
 \usage{
-construct_database(in_folder = "inputfiles", out_folder = "data")
+construct_database(
+  in_folder = "inputfiles",
+  out_folder = "data",
+  as_CSV = FALSE
+)
 }
 \arguments{
 \item{in_folder}{This folder must contain two subfolders called 'Species' and 'Stations' that contain

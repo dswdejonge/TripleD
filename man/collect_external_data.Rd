@@ -10,7 +10,8 @@ collect_external_data(
   lats = NULL,
   lons = NULL,
   data_folder = "data",
-  out_folder = "data"
+  out_folder = "data",
+  as_CSV = FALSE
 )
 }
 \arguments{
