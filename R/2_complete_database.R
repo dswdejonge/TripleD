@@ -102,7 +102,6 @@ complete_database <- function(data_folder = "data", out_folder = "data",
     add_track_length_Odometer() %>%
     add_water_depth(bathymetry = bathymetry)
 
-
   # Add additional data to species data
   species_additions <- species %>%
     # Add taxonomic data
@@ -110,8 +109,20 @@ complete_database <- function(data_folder = "data", out_folder = "data",
                         Query, valid_name, rank, phylum, class, order,
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query"))
-  #TODO: give list of taxa that do not match to worms at all.
 
+  # Info / warnings
+  # Give list of taxa that do not match to worms at all.
+  no_match_i <- which(species_additions$hasNoMatch == 1)
+  #no_match_species <- unique(species_additions[no_match_i,"Species_reported"])
+  if(length(no_match_i) > 0){
+    warning(paste0("These printed taxa name(s) from the corresponding files cannot be matched to the WoRMS database:"))
+    print(species_additions[no_match_i,] %>%
+            dplyr::select(File, Species_reported) %>%
+            distinct())
+  }
+  # TODO: average difference between bathymetry and reported depth.
+
+  # Save
   save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
   save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
   if(as_CSV){
