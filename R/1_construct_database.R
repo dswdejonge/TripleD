@@ -106,13 +106,24 @@ are_att_names_valid <- function(file, file_name, my_attributes){
 # Check values validity
 # -----------------------
 
-are_StationIDs_unique <- function(file, file_name){
-  ID_is_duplicated <- duplicated(file$StationID)
-  if(!"Species_reported" %in% colnames(file)){
-    if(TRUE %in% ID_is_duplicated){
-      stop(paste0("The StationID(s) ", paste(file$StationID[ID_is_duplicated], collapse = ", "),
-                  " in file ",file_name," is/are duplicated. StationID must be unique."))
-    }
+#are_StationIDs_unique <- function(file, file_name, ID_column = NULL){
+#  ID_is_duplicated <- duplicated(file$StationID)
+#  if(!"Species_reported" %in% colnames(file)){
+#    if(TRUE %in% ID_is_duplicated){
+#      stop(paste0("The StationID(s) ", paste(file$StationID[ID_is_duplicated], collapse = ", "),
+#                  " in file ",file_name," is/are duplicated. StationID must be unique."))
+#    }
+#  }
+#}
+
+are_IDs_unique <- function(file, file_name, ID_column = NULL){
+  if(!(ID_column %in% colnames(file))){
+    stop("Unknown ID_column given.")
+  }
+  ID_is_duplicated <- duplicated(file[,ID_column])
+  if(TRUE %in% ID_is_duplicated){
+    stop(paste0("The ID(s) ", paste(file[ID_is_duplicated, ID_column], collapse = ", "),
+                 " in file ",file_name," is/are duplicated. IDs must be unique."))
   }
 }
 
@@ -318,22 +329,18 @@ is_biomass_complete <- function(file, file_name){
 }
 
 do_measurements_have_units <- function(file, file_name){
-  unit_cols <- grep("Unit_", colnames(file))
-  if(length(unit_cols) > 0){
-    for(unit_col in unit_cols){
-      unit <- colnames(file)[unit_col]
-      measurement_col <- gsub("Unit_", "", unit)
-      if(!measurement_col %in% colnames(file)){
-        stop(paste0("In file ",file_name," no corresponding measurement column called ",
-                    measurement_col," was found for the unit column ",unit))
-      }
-      measurements <- which(!is.na(file[,measurement_col]))
-      no_units <- which(is.na(file[measurements,unit_col]))+1
-      if(length(no_units) > 0){
-        stop(paste0("In file ",file_name," units are missing in column ",unit,
-                    " in row(s) ",paste(sort(no_units), collapse = ", ")))
-      }
-    }
+  measurements <- which(!is.na(file$Size_value))
+  no_units <- which(is.na(file$Size_unit[measurements]))+1
+  no_dimensions <- which(is.na(file$Size_dimension[measurements]))+1
+  if(length(no_units) > 0){
+    stop(paste0("In file ",file_name,
+                " size units are missing in row(s) ",
+                paste(sort(no_units), collapse = ", ")))
+  }
+  if(length(no_dimensions) > 0){
+    stop(paste0("In file ",file_name,
+                " size dimensions are missing in row(s) ",
+                paste(sort(no_dimensions), collapse = ", ")))
   }
 }
 
@@ -389,8 +396,7 @@ are_measurements_positive <- function(file, file_name){
   }
   # Species
   ct <- file$Count
-  ln <- file$Length
-  wd <- file$Width
+  sv <- file$Size_value #ln, wd
   ww <- file$WetWeight_g
   aw <- file$AFDW_g
   tw <- file$Threshold_Scale
@@ -403,18 +409,11 @@ are_measurements_positive <- function(file, file_name){
                   paste(sort(which(ct)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
-  if(!is.null(ln)){
-    ln <- ln  < 0
-    if(TRUE %in% ln){
-      stop(paste0("In file ",file_name," column Length the values in row(s) ",
-                  paste(sort(which(ln)+1), collapse = ", "), " are negative but should be positive."))
-    }
-  }
-  if(!is.null(wd)){
-    wd <- wd  < 0
-    if(TRUE %in% wd){
-      stop(paste0("In file ",file_name," column Width the values in row(s) ",
-                  paste(sort(which(wd)+1), collapse = ", "), " are negative but should be positive."))
+  if(!is.null(sv)){
+    sv <- sv  < 0
+    if(TRUE %in% sv){
+      stop(paste0("In file ",file_name," column Size_value the values in row(s) ",
+                  paste(sort(which(sv)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ww)){
@@ -541,26 +540,26 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
       are_att_names_valid(file, file_name, my_attributes)
 
       # Correct values and units
-      are_StationIDs_unique(file, file_name)
-      # TODO: are EntryIDs unique.
       are_required_att_complete(file, file_name, required_attributes)
       are_alternative_required_att_complete(file, file_name, alternative_attributes)
-      if(table$folder == "Stations"){
-        data[[i]]$Date <- as.Date(data[[i]]$Date, format = "%d/%m/%Y")
-        are_dates_converted(file = data[[i]], file_name)
-        is_time_format_correct(file, file_name)
-        is_cruise_objective_correct(file, file_name)
-      }
       are_groups_complete(file, file_name, my_attributes)
       are_values_correct_type(file, file_name, doubles_attributes, func = is.double)
       are_values_correct_type(file, file_name, integer_attributes, func = is.integer)
       are_booleans_correct(file, file_name, boolean_attributes)
       are_fractions_correct(file, file_name, fraction_attributes)
       are_predefined_atts_correct(file, file_name, predefined_attributes)
+      if(table$folder == "Stations"){
+        are_IDs_unique(file, file_name, ID_column = "StationID")
+        data[[i]]$Date <- as.Date(data[[i]]$Date, format = "%d/%m/%Y")
+        are_dates_converted(file = data[[i]], file_name)
+        is_time_format_correct(file, file_name)
+        is_cruise_objective_correct(file, file_name)
+      }
       if(table$folder == "Species"){
+        are_IDs_unique(file, file_name, ID_column = "EntryID")
         are_species_metadata_consistent(file, file_name)
         is_biomass_complete(file, file_name)
-        # TODO: check if there is only one sample weight for the species/station combi
+        # TODO: check if there is only one sample weight for the species/station combi??
         # TODO: for sample weight all isWithShell should be the same??
       }
       do_measurements_have_units(file, file_name)
@@ -568,11 +567,9 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
     }
     if(table$folder == "Stations"){
       stations <- dplyr::bind_rows(data, .id = "File")
-      save(stations, file = paste0(out_folder,"/","stations_initial.rda"))
     }
     if(table$folder == "Species"){
       species <- dplyr::bind_rows(data, .id = "File")
-      save(species, file = paste0(out_folder,"/","species_initial.rda"))
     }
   }
 
@@ -592,4 +589,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
                 " occur multiple times in differen files, but they must be unique. Please check."))
   }
   #TODO: add argument that allows to write dataset also as CSV.
+
+  save(stations, file = paste0(out_folder,"/","stations_initial.rda"))
+  save(species, file = paste0(out_folder,"/","species_initial.rda"))
 }
