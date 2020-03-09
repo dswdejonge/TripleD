@@ -542,6 +542,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
 
       # Correct values and units
       are_StationIDs_unique(file, file_name)
+      # TODO: are EntryIDs unique.
       are_required_att_complete(file, file_name, required_attributes)
       are_alternative_required_att_complete(file, file_name, alternative_attributes)
       if(table$folder == "Stations"){
@@ -575,6 +576,8 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
     }
   }
 
+  # TODO: save species and stations AFTER the code below.
+  # TODO: Fix bug in one of the code snippets below (gives error but that shouldn't happen)
   missing_stationIDs <- as.character(
     unique(species$StationID[which(!species$StationID %in% stations$StationID)]))
   if(length(missing_stationIDs > 0)){
@@ -588,4 +591,5 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data"){
     stop(paste0("The StationID(s)" ,paste(stations$StationID[ID_is_duplicated], collapse = ", "),
                 " occur multiple times in differen files, but they must be unique. Please check."))
   }
+  #TODO: add argument that allows to write dataset also as CSV.
 }

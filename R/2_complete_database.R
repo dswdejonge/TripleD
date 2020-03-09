@@ -74,6 +74,7 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 #' \code{add_track_length_Odometer}, \code{add_water_depth}.
 #' @export
 complete_database <- function(data_folder = "data", out_folder = "data", bathymetry = NULL){
+  # TODO: add argument to allow writing data to CSV.
   # Load initial database
   message("Loading initial database...")
   load(paste0(data_folder,"/stations_initial.rda"))
@@ -105,6 +106,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", bathyme
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query"))
   save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
+  #TODO: give list of taxa that do not match to worms at all.
 }
 
 
