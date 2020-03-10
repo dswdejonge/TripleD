@@ -24,32 +24,7 @@ This vignette manual describes how specimens collected with the TripleD can be p
 
 
 # Conversion
-For all species and equation formulas, I changed the regression so that it includes all necessary conversion factors and the input is length in mm and the output is afdw in g. Concretely:  
-- I changed to conversion factor A_factor for Astropecten irregularis to 0.000005 (was 0.005) to avoid the extra conversion /1000.   
-- The regression of species with equation code 12 was done with widths. I included the length-to-width conversion in the regression formula to make the regression formula suitable to use with length.  
-- The formula for equation code 12 was changed so that the input can be mm instead of 0.5cm.  
-- If the regression formula provided output in the units wet weights, the conversion to AFDW was included in the formula so that the input could be length and output AFDW in g.  
-- The formula for equation code 3 was changed to a power functions with input length in mm and output afdw in g.  
-- Next equation 5.  
-
 Questions about the conversions:  
-- Per species (morphology) what measured body dimension is defined for Length?   
-- How did you get from Length to NewLength for Formula? i.e. No Length reported for Cucumaria elongata (entry 17) but NewLength for Formula is 69.64285714 mm. Is this an average? Yes, it is average.  
-- How was the conversion WW to AFDW in % determined?  
-- How was the convesion from length to width of vice versa determined?  
-- How was it decided to convert 0.5 cm to mm or cm? Why was there decided to round 0.5cm up in conversion to mm? So, 2x0.5cm is not 10 mm but 15 mm. I understand for the measurements <0.5cm thus 0x0.5cm, but maybe not for the other measurements. Doesn't this lead to overestimation? The conversion to cm does not add this half a cm, and simply divides the value in half, so 5x0.5cm is 2.5 cm.  
-- The conversion from length to width for Upogebia deltaura is supposed to be 0.28, but I get a regression which clearly better fits 0.29.  
+- How was it decided to convert 0.5 cm to mm or cm? Why was there decided to round 0.5cm up in conversion to mm? So, 2x0.5cm is not 10 mm but 15 mm. I understand for the measurements <0.5cm thus 0x0.5cm, but maybe not for the other measurements. Doesn't this lead to overestimation? The conversion to cm does not add this half a cm, and simply divides the value in half, so 5x0.5cm is 2.5 cm.
 - For Cirolana borealis, how was the conversion factor to go from gram Dry weight to gram AFDW determined?  
-
-
-
-Prepare for conversation with Marc:  
-- Images of species to draw how they were measured.  
-- Original regression lines to go from length to AFDW.  
-- How conversion factor for length to width were established.  
-- Uncertainties for all regressions, so standard errors can be calcualted for all estimations.  
-
-# Questions
-- NICO10: zijn de notes (e.g. breedte top) voor alle specimens van die soort?  
-- NICO10: Als er 'carapex' in de notes staat, is dat dan length of width?  
 
