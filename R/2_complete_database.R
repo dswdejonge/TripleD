@@ -135,13 +135,14 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::mutate(Size_mm =
            ifelse(Size_unit == "1/2cm", Size_value*5+5,
            ifelse(Size_unit == "cm", Size_value*10, Size_value))) %>%
-    # Calculate WW from size (ww = A*size^B)
+    # Calculate WW from size (ww = A*size^B -> multiply by count)
+    # If count is NA, WW_g_calc is NA.
     dplyr::mutate(WW_g_calc =
-           ifelse(Output_unit == "WW_g", A_factor*(Size_mm^B_exponent), NA)) %>%
-    # Calculate AFDW from size (AFDW = A*size^B OR AFDW = WW*convesion_factor)
+           ifelse(Output_unit == "WW_g", A_factor*(Size_mm^B_exponent)*Count, NA)) %>%
+    # Calculate AFDW from size (AFDW = A*size^B*Count OR AFDW = WW*convesion_factor)
     dplyr::mutate(AFDW_g_calc =
-           ifelse(Output_unit == "AFDW_g", A_factor*(Size_mm^B_exponent), WW_g_calc*WW_to_AFDW)) %>%
-    # Calculate AFDW from reported WW: ff reported WW is 0, use the scale threshold.
+           ifelse(Output_unit == "AFDW_g", A_factor*(Size_mm^B_exponent)*Count, WW_g_calc*WW_to_AFDW)) %>%
+    # Calculate AFDW from reported WW: if reported WW is 0, use the scale threshold.
     dplyr::mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
     dplyr::mutate(AFDW_g_from_reported_WW = WetWeight_g_threshold * WW_to_AFDW)
 
