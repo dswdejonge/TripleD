@@ -78,7 +78,7 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 #' @seealso \code{add_track_midpoints}, \code{add_track_length_GPS},
 #' \code{add_track_length_Odometer}, \code{add_water_depth}.
 #' @export
-complete_database <- function(data_folder = "data", out_folder = "data",
+complete_database <- function(data_folder = "data", out_folder = "data", input_folder = "inputfiles",
                               bathymetry = NULL, as_CSV = FALSE){
   # Load initial database
   message("Loading initial database...")
@@ -94,76 +94,93 @@ complete_database <- function(data_folder = "data", out_folder = "data",
   }
   message("Loading WoRMS taxonomic data...")
   load(paste0(data_folder,"/worms.rda"))
+  message("Loading size to weight conversion data...")
+  conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
 
-  # Add additional data to stations
+  # TODO: Check format of units and values with the attributes table
+  # TODO: size_unit must always be mm
+  # TODO: The same WW_to_AFDW for a single species in multiple rows.
+  message("Checking taxa in bioconversion.csv to the WoRMS database...")
+  worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
+  conversion_data <- left_join(conversion_data, select(worms_conversion, Query, valid_name),
+                               by = c("Taxon" = "Query"))
+
+  message("Adding additional data to stations...")
   stations_additions <- stations %>%
     add_track_midpoints() %>%
     add_track_length_GPS() %>%
     add_track_length_Odometer() %>%
     add_water_depth(bathymetry = bathymetry)
 
-  # Add additional data to species data
+  message("Adding additional data to species...")
   species_additions <- species %>%
     # Add taxonomic data
     dplyr::left_join(., dplyr::select(worms,
                         Query, valid_name, rank, phylum, class, order,
                         family, genus, hasNoMatch, isFuzzy),
-              by = c("Species_reported" = "Query"))
+              by = c("Species_reported" = "Query")) %>%
+    # Attach conversion factors (irrespective of Size_dimension)
+    dplyr::left_join(dplyr::select(conversion_data, valid_name, WW_to_AFDW, Reference_conversion_WW_AFDW),
+                     by = c("valid_name"),
+                     suffix = c("_species", "_conversion")) %>%
+    # Attach regression formula (taking into account Size_dimension)
+    dplyr::left_join(dplyr::select(conversion_data, -Taxon, -Size_unit,
+                                   -WW_to_AFDW, -Reference_conversion_WW_AFDW),
+                     by = c("valid_name", "Size_dimension"),
+                     suffix = c("_species", "_conversion")) %>%
+    # Convert length to mm from other units
+    # 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
+    # cm are simply multiplied x10.
+    # TODO: how to deal with mm2 and cm2?
+    dplyr::mutate(Size_mm =
+           ifelse(Size_unit == "1/2cm", Size_value*5+5,
+           ifelse(Size_unit == "cm", Size_value*10, Size_value))) %>%
+    # Calculate WW from size (ww = A*size^B)
+    dplyr::mutate(WW_g_calc =
+           ifelse(Output_unit == "WW_g", A_factor*(Size_mm^B_exponent), NA)) %>%
+    # Calculate AFDW from size (AFDW = A*size^B OR AFDW = WW*convesion_factor)
+    dplyr::mutate(AFDW_g_calc =
+           ifelse(Output_unit == "AFDW_g", A_factor*(Size_mm^B_exponent), WW_g_calc*WW_to_AFDW)) %>%
+    # Calculate AFDW from reported WW: ff reported WW is 0, use the scale threshold.
+    dplyr::mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
+    dplyr::mutate(AFDW_g_from_reported_WW = WetWeight_g_threshold * WW_to_AFDW)
 
   # Info / warnings
   # Give list of taxa that do not match to worms at all.
   no_match_i <- which(species_additions$hasNoMatch == 1)
-  #no_match_species <- unique(species_additions[no_match_i,"Species_reported"])
   if(length(no_match_i) > 0){
-    warning(paste0("These printed taxa name(s) from the corresponding files cannot be matched to the WoRMS database:"))
+    message(paste0("These printed taxa names from the corresponding files cannot be matched to the WoRMS database:"))
     print(species_additions[no_match_i,] %>%
             dplyr::select(File, Species_reported) %>%
-            distinct())
+            dplyr::distinct())
+  }
+  # Give list of taxa in bioconversion with no match to worms at all.
+  no_match_i <- which(is.na(worms_conversion$valid_name))
+  if(length(no_match_i) > 0){
+    message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:"))
+    print(unique(worms_conversion$Query[no_match_i]))
+  }
+  # Give list of taxa that do not have conversion factors
+  no_WW_to_AFDW <- which(is.na(species_additions$WW_to_AFDW))
+  if(length(no_WW_to_AFDW) > 0){
+    message("These taxa names have no conversion factor WW_to_AFDW in the bioconversion.csv file:")
+    print(unique(species_additions$valid_name[no_WW_to_AFDW]))
+  }
+  # Give list of taxa that do not have conversion factors
+  no_regression <- which(is.na(species_additions$A_factor))
+  if(length(no_regression) > 0){
+    message("These taxa names have no regression formula in the bioconversion.csv file:")
+    print(unique(species_additions$valid_name[no_regression]))
   }
   # TODO: average difference between bathymetry and reported depth.
 
-  # Save
+  message(paste0("Saving results to ",out_folder))
   save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
   save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
   if(as_CSV){
-    write.csv(stations_additions, "stations_additions.csv")
-    write.csv(species_additions, "species_additions.csv")
+    write.csv(stations_additions, paste0(out_folder,"stations_additions.csv"))
+    write.csv(species_additions, paste0(out_folder,"species_additions.csv"))
   }
 }
 
 
-
-# Open csv file that contains conversion data. Columns:
-# Species: species name for which the conversion data is valid.
-# WW_to_AFDW: fraction of wet weight (WW) that should be taken to obtain Ash Free Dry Weight (AFDW).
-# Length_to_Width: fraction of length that should be taken to obtain width.
-# A_factor: The factor A in the power function AFDW = A * Length^B as regression of AFDW vs. Length.
-# B_exponent: The exponent in the power function AFDW = A * Length^B as regression of AFDW vs. Length.
-#conversion_data <- read.csv(
-#  system.file("extdata", "bioconversion_data.csv", package = "TripleD"),
-#  stringsAsFactors = F)
-# Check names in the bioconversion data file
-#worms_conversion <- get_worms_taxonomy(conversion_data$Species)
-#conversion_data <- left_join(conversion_data, select(worms_conversion, Query, valid_name),
-#                             by = c("Species" = "Query"))
-
- #%>%
-  # Attach conversion data
-  #left_join(conversion_data, by = "valid_name") %>%
-  # Convert length to mm from other units
-  #mutate(Length_mm =
-  #         ifelse(Unit_Length == "0.5cm", Length*5+5,
-  #         ifelse(Unit_Length == "cm", Length*10+10, Length))) %>%
-  # Convert width to mm from other units
-  #mutate(Width_mm =
-  #         ifelse(Unit_Width == "0.5cm", Width*5+5,
-  #         ifelse(Unit_Width == "cm", Width*10+10, Width))) %>%
-  # Convert width in mm to length in mm
-  #mutate(Length_from_Width_mm = Width_mm/Length_to_Width) %>%
-  # Calculate AFDW from length and from length derived from width
-  #mutate(AFDW_g_calc_L = length_to_weight(Length_mm, A = A_factor, B = B_exponent)) %>%
-  #mutate(AFDW_g_calc_W = length_to_weight(Length_from_Width_mm, A = A_factor, B = B_exponent)) %>%
-  # If wet weight is reported as 0, use the scale threshold as wet weight.
-  #mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
-  # Calculate AFDW from wet weight
-  #mutate(AFDW_g_calc_WW = WetWeight_g_threshold * WW_to_AFDW)
