@@ -310,7 +310,7 @@ is_biomass_complete <- function(file, file_name){
   if(length(should_be_complete > 0)){
     isNA <- is.na(file[should_be_complete,
                        c("WeightType", "Threshold_Scale",
-                         "isWithShell", "isPartialWW")])
+                         "isShellRemoved", "isPartialWW")])
     if(TRUE %in% isNA){
       stop("Wet weight is reported, but the columns WeightType, Threshold_Scale, isWithShell and isPartialWW are not filled for all weights.")
     }
