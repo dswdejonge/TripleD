@@ -19,14 +19,14 @@
 #' @export
 combine_data_sources <- function(mytable, new_column_name = "new", order_of_preference){
   #TODO: check if the names in order_of_preference exist
-  mytable$new <- mytable[,order_of_preference[1]]
+  mytable$new <- dplyr::pull(mytable, order_of_preference[1])
   mytable$source <- order_of_preference[1]
   for(i in 2:length(order_of_preference)){
     NA_i <- which(is.na(mytable$new))
     if(length(NA_i) == 0){
       break
     }
-    mytable$new[NA_i] <- mytable[NA_i, order_of_preference[i]]
+    mytable$new[NA_i] <- dplyr::pull(mytable,order_of_preference[i])[NA_i]
     mytable$source[NA_i] <- order_of_preference[i]
   }
   colnames(mytable)[colnames(mytable) == "new"] <- new_column_name

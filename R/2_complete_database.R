@@ -132,6 +132,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     # 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
     # cm are simply multiplied x10.
     # TODO: how to deal with mm2 and cm2?
+    # TODO: how to deal with regression with/without shell?
     dplyr::mutate(Size_mm =
            ifelse(Size_unit == "1/2cm", Size_value*5+5,
            ifelse(Size_unit == "cm", Size_value*10, Size_value))) %>%
