@@ -48,21 +48,49 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
                               database_folder = NULL, as_CSV = FALSE){
   load(paste0(data_folder,"/species_additions.rda"))
   load(paste0(data_folder,"/stations_additions.rda"))
+
+  # Summarize species table
+  # Add columns if they did not exist in original files
+  if(!"AFDW_g" %in% colnames(species_additions)){
+    species_additions$AFDW_g <- NA
+    species_additions$WeightTypeAFDW <- NA
+  }
+
   # Clean species database
-  species_final <- species_additions %>%
-    # Remove species with no match to WoRMS database
-    .[-which(.$hasNoMatch == 1),] %>%
-    # Remove species that are not counted as organism (Count = -1)
-    dplyr::filter(Count != -1) %>%
-    # Upscale count based on fraction
-    dplyr::mutate(Count_scaled = Count / Fraction) %>%
-    # Only select revelant columns
-    ### !!!! Later add in columns for biomass !!!
-    dplyr::select(
-      File, StationID,
-      Count_scaled,
-      valid_name, rank, phylum, class, order, family, genus, isFuzzy
-    )
+  # Set sample weights from NA to 0
+  species_final <- species_additions
+  species_final[
+    which(species_final$WeightTypeAFDW == "Sample" &
+          is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
+  species_final[
+    which(species_final$WeightType == "Sample" &
+            is.na(species_final$AFDW_g_from_reported_WW)), "AFDW_g_from_reported_WW"] <- 0
+
+  species_final <- species_final %>%
+    # Remove species with no match to WoRMS database (avoid removing NA)
+    dplyr::filter(hasNoMatch != 1 | is.na(hasNoMatch)) %>%
+    # Remove species that are not counted as organism (Count = -1) (avoid removing NA)
+    dplyr::filter(Count != -1 | is.na(Count)) %>%
+    # Collapse to one count and biomas per station/species combi
+    # Select which variables to keep.
+    dplyr::group_by(StationID, valid_name, Fraction,
+                    File, rank, phylum, class, order, family, genus, isFuzzy) %>%
+    dplyr::summarize(
+      Count_sum = sum(Count),
+      AFDW_sum = sum(AFDW_g),
+      AFDW_from_WW_sum = sum(AFDW_g_from_reported_WW),
+      AFDW_calc_sum = sum(AFDW_g_calc)) %>%
+    # Get one biomass column
+    # Alternative workflow: combine AFDW per ENTRY in stead of per station/species combi, but takes more work.
+    combine_data_sources(
+      ., new_column_name = "Biomass_g", order_of_preference = c("AFDW_sum", "AFDW_from_WW_sum", "AFDW_calc_sum")
+    ) %>%
+    # Upscale count and biomass based on fraction
+    dplyr::mutate(
+      Count_scaled = Count_sum / Fraction,
+      Biomass_g_scaled = Biomass_g / Fraction) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-Fraction, -AFDW_sum, -AFDW_from_WW_sum, -AFDW_calc_sum, -Count_sum, -Biomass_g)
 
   # Clean station database
   stations_final <- stations_additions %>%
@@ -78,8 +106,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     combine_data_sources(
       ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_cruise", "Track_dist_m_Odometer")
     ) %>%
-    dplyr::mutate(Sample_area_m2 = Track_length_m * (Blade_width_cm/100)) %>%
-    dplyr::mutate(Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
+    dplyr::mutate(
+      Sample_area_m2 = Track_length_m * (Blade_width_cm/100),
+      Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
     dplyr::select(
       File, Vessel, CruiseID, StationID, Station_name,
       Date, Time_start, Time_stop,
@@ -92,15 +121,14 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   # Create one large table for the Shiny app
   # Deselect File in stations because it's double.
   st <- dplyr::select(stations_final, -File)
-  # Count all species per station
-  sp <- species_final %>%
-    dplyr::group_by(StationID, valid_name, rank, phylum, class, order, family, genus, isFuzzy) %>%
-    dplyr::summarise(Count = sum(Count_scaled, na.rm = T))
   # Join data into big table
-  database <- dplyr::inner_join(sp, st, by = "StationID") %>%
-    # Calculate density per site
-    dplyr::mutate(Density_nr_per_m2 = Count / Sample_area_m2) %>%
-    dplyr::mutate(Density_nr_per_m3 = Count / Sample_volume_m3)
+  database <- dplyr::inner_join(species_final, st, by = "StationID") %>%
+    # Calculate density and biomass per station
+    dplyr::mutate(
+      Density_nr_per_m2 = Count_scaled / Sample_area_m2,
+      Density_nr_per_m3 = Count_scaled / Sample_volume_m3,
+      Biomass_g_per_m2 = Biomass_g_scaled / Sample_area_m2,
+      Biomass_g_per_m3 = Biomass_g_scaled / Sample_volume_m3)
 
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
