@@ -45,7 +45,7 @@
 #' data) to be stores. Default is NULL, which will store the database in your working directory.
 #' @export
 finalize_database <- function(data_folder = "data", out_folder = "data",
-                              database_folder = NULL, as_CSV = FALSE){
+                              database_folder = NULL, as_CSV = TRUE){
   load(paste0(data_folder,"/species_additions.rda"))
   load(paste0(data_folder,"/stations_additions.rda"))
 
