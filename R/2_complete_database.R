@@ -79,7 +79,7 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 #' \code{add_track_length_Odometer}, \code{add_water_depth}.
 #' @export
 complete_database <- function(data_folder = "data", out_folder = "data", input_folder = "inputfiles",
-                              bathymetry = NULL, as_CSV = FALSE){
+                              bathymetry = NULL, as_CSV = TRUE){
   # Load initial database
   message("Loading initial database...")
   load(paste0(data_folder,"/stations_initial.rda"))
@@ -102,7 +102,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   # TODO: The same WW_to_AFDW for a single species in multiple rows.
   message("Checking taxa in bioconversion.csv to the WoRMS database...")
   worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
-  conversion_data <- left_join(conversion_data, select(worms_conversion, Query, valid_name),
+  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(worms_conversion, Query, valid_name),
                                by = c("Taxon" = "Query"))
 
   message("Adding additional data to stations...")

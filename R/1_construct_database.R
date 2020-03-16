@@ -487,7 +487,7 @@ pos2coord <- function(pos=NULL, coord=NULL, dim.mat=NULL) {
 #' your initial data. If there are no errors, it will store Rdata in the newly created folder 'out_folder'.
 #' @importFrom magrittr "%>%"
 #' @export
-construct_database <- function(in_folder = "inputfiles", out_folder = "data", as_CSV = FALSE){
+construct_database <- function(in_folder = "inputfiles", out_folder = "data", as_CSV = TRUE){
   # List of tables to import and check
   tables <- list(
     Stations <- list(folder = "Stations", att = "attributes_stations.csv"),

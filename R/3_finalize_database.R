@@ -133,8 +133,8 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
   if(as_CSV){
-    write.csv(species_final, "species_final.csv")
-    write.csv(stations_final, "stations_final.csv")
+    write.csv(species_final, paste0(out_folder,"species_final.csv"))
+    write.csv(stations_final, paste0(out_folder,"stations_final.csv"))
   }
   if(is.null(database_folder)){
     save(database, file = "database.rda")
