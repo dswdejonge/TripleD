@@ -120,19 +120,27 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query")) %>%
     # Attach conversion factors (irrespective of Size_dimension)
-    dplyr::left_join(dplyr::select(conversion_data, valid_name, WW_to_AFDW, Reference_conversion_WW_AFDW),
-                     by = c("valid_name"),
-                     suffix = c("_species", "_conversion")) %>%
-    # Attach regression formula (taking into account Size_dimension)
+    dplyr::left_join(
+      dplyr::filter(
+        dplyr::select(
+          conversion_data, valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
+          isShellRemoved, Comment_WW_to_AFDW
+        ),
+        WW_to_AFDW > 0
+      ),
+      by = c("valid_name", "isShellRemoved"),
+      suffix = c("_species", "_conversion")
+    ) %>%
+    # Attach regression formula (taking into account Size_dimension and isShellRemoved)
     dplyr::left_join(dplyr::select(conversion_data, -Taxon, -Size_unit,
-                                   -WW_to_AFDW, -Reference_conversion_WW_AFDW),
-                     by = c("valid_name", "Size_dimension"),
+                                   -WW_to_AFDW, -Reference_WW_to_AFDW, -Comment_WW_to_AFDW),
+                     by = c("valid_name", "Size_dimension", "isShellRemoved"),
                      suffix = c("_species", "_conversion")) %>%
+    # TODO: with join rows from species may not be duplicated!!
     # Convert length to mm from other units
     # 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
     # cm are simply multiplied x10.
     # TODO: how to deal with mm2 and cm2?
-    # TODO: how to deal with regression with/without shell?
     dplyr::mutate(Size_mm =
            ifelse(Size_unit == "1/2cm", Size_value*5+5,
            ifelse(Size_unit == "cm", Size_value*10, Size_value))) %>%
@@ -162,7 +170,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:"))
     print(unique(worms_conversion$Query[no_match_i]))
   }
-  # Give list of taxa that do not have conversion factors
+  # Give list of taxa in species_additions that do not have conversion factors
   no_WW_to_AFDW <- which(is.na(species_additions$WW_to_AFDW))
   if(length(no_WW_to_AFDW) > 0){
     message("These taxa names have no conversion factor WW_to_AFDW in the bioconversion.csv file:")
