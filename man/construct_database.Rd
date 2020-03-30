@@ -7,7 +7,7 @@
 construct_database(
   in_folder = "inputfiles",
   out_folder = "data",
-  as_CSV = FALSE
+  as_CSV = TRUE
 )
 }
 \arguments{

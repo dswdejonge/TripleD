@@ -9,6 +9,7 @@ collect_external_data(
   species = NULL,
   lats = NULL,
   lons = NULL,
+  input_folder = "inputfiles",
   data_folder = "data",
   out_folder = "data",
   as_CSV = FALSE
@@ -25,14 +26,18 @@ If not specified, the track midpoints in the database are used.}
 \item{lons}{(optional) You can specify longitudes you want to use to collect bathymetry.
 If not specified, the track midpoints in the database are used.}
 
+\item{input_folder}{The folder where to find the bioconversion.csv file. Default is 'inputfiles'.}
+
 \item{data_folder}{If the stations and/or species database are not provided, the function will search
 for it ('stations_initial.rda' and 'species_initial.rda') in this folder. Default is 'data'.}
 
 \item{out_folder}{The external data is stored in this folder. Default is 'data'.}
+
+\item{as_CSV}{If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.}
 }
 \value{
 This function does not return an object, but stores the information in the specified
-\code{out_folder} under the names 'bathymetry.rda' and 'worms.rds'.
+\code{out_folder} under the names 'bathymetry.rda' and 'worms.rda'.
 }
 \description{
 This function collects external data from NOAA and WoRMS.
@@ -46,6 +51,6 @@ if you have your own dataset.
 \cr
 Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
 You need internet connection to do this.
-The reported taxonomic names of the specimens in the initial database are matched against
-the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
+The reported taxonomic names of the specimens in the initial database and in the bioconversion.csv file
+are matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
 }

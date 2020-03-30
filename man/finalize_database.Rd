@@ -8,7 +8,7 @@ finalize_database(
   data_folder = "data",
   out_folder = "data",
   database_folder = NULL,
-  as_CSV = FALSE
+  as_CSV = TRUE
 )
 }
 \arguments{

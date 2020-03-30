@@ -7,8 +7,9 @@
 complete_database(
   data_folder = "data",
   out_folder = "data",
+  input_folder = "inputfiles",
   bathymetry = NULL,
-  as_CSV = FALSE
+  as_CSV = TRUE
 )
 }
 \arguments{
