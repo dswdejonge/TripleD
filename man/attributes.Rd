@@ -5,6 +5,7 @@
 \alias{attributes}
 \alias{stations_att}
 \alias{species_att}
+\alias{bioconversion_att}
 \title{Attributes for CSV input files TripleD database}
 \format{A dataframe with the following columns:
 \describe{
@@ -21,18 +22,24 @@ description of what the information of this attribute includes; how data should 
 stations_att
 
 species_att
+
+bioconversion_att
 }
 \description{
 Data frame with information on all attributes that should or could be
 included in the CSVs that act as input for the formation of the database.
 }
 \details{
-TripleD data is summarized per cruise in a CSVs that can be read by
+TripleD data is summarized per cruise in CSVs that can be read by
 the package in order to create a database. These CSVs either contain station
 or species data. The format of these CSVs, thus, the names of all variables
 and the exact meaning of the values in those columns, is explained here.
 \cr
 A dataframe exists for the station CSVs called 'stations_att' and for the species
 CSVs called 'species_att'.
+\cr
+It is also possible to include data to convert sizes and wet weights to ash-free dry weights.
+This data should be included in a file called 'bioconversion.csv'.
+The requirements for this file can be found in 'bioconversion_att'.
 }
 \keyword{datasets}
