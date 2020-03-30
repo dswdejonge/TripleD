@@ -106,16 +106,6 @@ are_att_names_valid <- function(file, file_name, my_attributes){
 # Check values validity
 # -----------------------
 
-#are_StationIDs_unique <- function(file, file_name, ID_column = NULL){
-#  ID_is_duplicated <- duplicated(file$StationID)
-#  if(!"Species_reported" %in% colnames(file)){
-#    if(TRUE %in% ID_is_duplicated){
-#      stop(paste0("The StationID(s) ", paste(file$StationID[ID_is_duplicated], collapse = ", "),
-#                  " in file ",file_name," is/are duplicated. StationID must be unique."))
-#    }
-#  }
-#}
-
 are_IDs_unique <- function(file, file_name, ID_column = NULL){
   if(!(ID_column %in% colnames(file))){
     stop("Unknown ID_column given.")
