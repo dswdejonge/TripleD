@@ -69,10 +69,11 @@ get_worms_taxonomy <- function(species_names){
     for(i in 1:length(multiple_matches)){
       record <- worms[[multiple_matches[i]]] %>%
         dplyr::filter(status == "accepted")
-      if(nrow(record) > 1){
+      #if(nrow(record) > 1){
+      if(length(unique(record$valid_name)) > 1){
         record <- empty_record
       }
-      worms[[multiple_matches[i]]] <- record
+      worms[[multiple_matches[i]]] <- record[1,]
     }
   }
 

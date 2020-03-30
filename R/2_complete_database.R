@@ -49,7 +49,163 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
     write.csv(bathymetry, file = "bathymetry.csv")
     write.csv(worms, file = "worms_taxonomy.csv")
   }
+}
+
+check_bioconversion_input <- function(conversion_data){
+  # Read attributes
+  message("Checken data format of bioconversion.csv...")
+  my_attributes <- read.csv(system.file("extdata", "attributes_bioconversion.csv", package = "TripleD"))
+
+  # Check presence required attributes
+  required_attributes <- dplyr::filter(my_attributes, Required_or_Optional == "Required")
+  att_is_missing <- !required_attributes$Attribute %in% colnames(conversion_data)
+  if(TRUE %in% (att_is_missing)){
+    stop(paste0("The required attribute(s) ", paste(required_attributes$Attribute[att_is_missing], collapse = ", "),
+                " is/are missing in bioconversion.csv."))
   }
+
+  # No NA values are allowed in the required columns.
+  columns <- colnames(conversion_data) %in% required_attributes$Attribute
+  subset <- conversion_data[,columns, drop = F]
+  if(TRUE %in% is.na(subset)){
+    rowi <- unique(which(is.na(subset), arr.ind = T)[,"row"]+1)
+    stop(paste0("NA values are not allowed for the required attributes ",
+                paste(required_attributes$Attribute, collapse = ", "),
+                ". Please check row(s): ",paste(sort(unique(rowi)), collapse = ", ")))
+  }
+
+  # Are groups complete
+  my_groups <- my_attributes %>%
+    dplyr::filter(!is.na(Group)) %>%
+    dplyr::group_by(Group) %>%
+    dplyr::group_split()
+  for(my_group in my_groups){
+    is_group_included <- colnames(conversion_data) %in% my_group$Attribute
+    if(TRUE %in% is_group_included &&
+       length(which(is_group_included)) != length(my_group$Attribute)){
+      stop(paste0("The attributes ",
+                  paste(my_group$Attribute, collapse = ", "),
+                  " are needed but only ",
+                  paste(colnames(conversion_data)[is_group_included], collapse = ", ")," are given."))
+    }
+  }
+
+  # Check doubles
+  doubles_attributes <- dplyr::filter(my_attributes, Datatype == "Double")
+  columns <- which(colnames(conversion_data) %in% doubles_attributes$Attribute)
+  if(length(columns) > 0){
+    for(j in 1:length(columns)){
+      if(!is.double(conversion_data[,columns[j]])){
+        stop(paste0("The column ", colnames(conversion_data)[columns[j]],
+                    " must contain only values of datatype ",doubles_attributes$Datatype[1]))
+      }
+    }
+  }
+
+  # Check integers
+  integer_attributes <- dplyr::filter(my_attributes, Datatype == "Integer")
+  columns <- which(colnames(conversion_data) %in% integer_attributes$Attribute)
+  if(length(columns) > 0){
+    for(j in 1:length(columns)){
+      if(!is.double(conversion_data[,columns[j]])){
+        stop(paste0("The column ", colnames(conversion_data)[columns[j]],
+                    " must contain only values of datatype ",integer_attributes$Datatype[1]))
+      }
+    }
+  }
+
+  # Check fractions
+  fraction_attributes <- dplyr::filter(my_attributes, Unit == "Fraction")
+  if(length(fraction_attributes$Attribute) > 0){
+    columns <- which(colnames(conversion_data) %in% fraction_attributes$Attribute)
+    subset <- conversion_data[,columns, drop = F]
+    is_not_fraction <- which(subset < 0 | subset > 1, arr.ind = T)[,"row"]+1
+    if(length(is_not_fraction) > 0){
+      stop(paste0("The attributes ", paste(colnames(conversion_data)[columns], collapse = ", "),
+                  " should lie between 0 and 1. Please check row(s) ",
+                  paste(sort(is_not_fraction), collapse = ", ")))
+    }
+  }
+
+  # Check booleans
+  boolean_attributes <- dplyr::filter(my_attributes, Datatype == "Boolean")
+  if(length(boolean_attributes$Attribute) > 0){
+    columns <- which(colnames(conversion_data) %in% boolean_attributes$Attribute)
+    subset <- conversion_data[,columns, drop = F]
+    if(dim(subset)[2] != 0){
+      is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
+      if(length(is_not_boolean) > 0){
+        stop(paste0("The boolean attributes ", paste(colnames(conversion_data)[columns], collapse = ", "),
+                    " may only be 0, 1, or NA. Please check row(s) ",
+                    paste(sort(is_not_boolean), collapse = ", ")))
+      }
+    }
+  }
+
+  # Check predefined units
+  remove_str <- "Predefined: "
+  split_at <- ", "
+  units <- my_attributes$Unit %>%
+    .[grep(remove_str, .)] %>%
+    gsub(remove_str, "", .) %>%
+    strsplit(., split_at)
+  names(units) <- my_attributes$Attribute[grep(remove_str, my_attributes$Unit)]
+  for(i in 1:length(units)){
+    att <- names(units)[i]
+    if(!att %in% colnames(conversion_data)){
+      next
+    }else{
+      subset <- conversion_data[,att]
+      is_not_predefined <- which(!subset %in% units[[i]] & !is.na(subset))+1
+      if(length(is_not_predefined) > 0){
+        stop(paste0("In column ",att,
+          " values exist that are not the predefined values ",
+          paste(units[[i]], collapse = ", "),
+          " or NA in row(s): ",paste(sort(is_not_predefined), collapse = ", ")
+        ))
+      }
+    }
+  }
+
+  # Get valid names from WoRMS
+  message("Checking taxa in bioconversion.csv to the WoRMS database...")
+  worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
+  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(worms_conversion, Query, valid_name),
+                                      by = c("Taxon" = "Query"))
+
+  # Give list of taxa in bioconversion with no match to worms at all.
+  no_match_i <- which(is.na(conversion_data$valid_name))
+  if(length(no_match_i) > 0){
+    stop(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
+                paste0(unique(conversion_data$Taxon[no_match_i]), collapse = ", ")))
+  }
+
+  # Split in conversion data and regression?
+  conversion_factors <- conversion_data %>%
+    dplyr::select(valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
+                  isShellRemoved, Comment_WW_to_AFDW, Taxon) %>%
+    dplyr::filter(WW_to_AFDW > 0) %>%
+    dplyr::distinct()
+
+  # Only one conversion factor is allowed for each combination of
+  # valid name and isShellRemoved
+  check_conv_f <- conversion_factors %>%
+     dplyr::filter(!is.na(valid_name)) %>%
+     dplyr::group_by(valid_name, isShellRemoved) %>%
+     dplyr::summarise(Count = dplyr::n())
+  are_double <- which(check_conv_f$Count > 1)
+  if(length(are_double) > 0){
+    stop(paste0("Multiple conversion factors WW_to_AFDW are present for the species ",
+                paste0(check_conv_f$valid_name[are_double], collapse = ", "),
+                ". Beware that these valid names might differ from the taxon name reported in bioconversion.csv."))
+  }
+
+  # The same WW_to_AFDW for a single species in multiple rows.
+
+  # Only keep AFDW regression if also WW regression is present
+
+  return(conversion_data)
+}
 
 #' Complete database with external data and calculations
 #'
@@ -96,14 +252,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   load(paste0(data_folder,"/worms.rda"))
   message("Loading size to weight conversion data...")
   conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-
-  # TODO: Check format of units and values with the attributes table
-  # TODO: size_unit must always be mm
-  # TODO: The same WW_to_AFDW for a single species in multiple rows.
-  message("Checking taxa in bioconversion.csv to the WoRMS database...")
-  worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
-  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(worms_conversion, Query, valid_name),
-                               by = c("Taxon" = "Query"))
+  conversion_data <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
   stations_additions <- stations %>%
@@ -121,16 +270,16 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
               by = c("Species_reported" = "Query")) %>%
     # Attach conversion factors (irrespective of Size_dimension)
     dplyr::left_join(
-      dplyr::filter(
+      dplyr::distinct(dplyr::filter(
         dplyr::select(
           conversion_data, valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
           isShellRemoved, Comment_WW_to_AFDW
         ),
         WW_to_AFDW > 0
-      ),
+      )),
       by = c("valid_name", "isShellRemoved"),
       suffix = c("_species", "_conversion")
-    ) %>%
+    ) #%>%
     # Attach regression formula (taking into account Size_dimension and isShellRemoved)
     dplyr::left_join(dplyr::select(conversion_data, -Taxon, -Size_unit,
                                    -WW_to_AFDW, -Reference_WW_to_AFDW, -Comment_WW_to_AFDW),
@@ -164,12 +313,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
             dplyr::select(File, Species_reported) %>%
             dplyr::distinct())
   }
-  # Give list of taxa in bioconversion with no match to worms at all.
-  no_match_i <- which(is.na(worms_conversion$valid_name))
-  if(length(no_match_i) > 0){
-    message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:"))
-    print(unique(worms_conversion$Query[no_match_i]))
-  }
+
   # Give list of taxa in species_additions that do not have conversion factors
   no_WW_to_AFDW <- which(is.na(species_additions$WW_to_AFDW))
   if(length(no_WW_to_AFDW) > 0){
