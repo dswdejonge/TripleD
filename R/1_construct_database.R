@@ -386,7 +386,7 @@ are_measurements_positive <- function(file, file_name){
   }
   # Species
   ct <- file$Count
-  sv <- file$Size_value #ln, wd
+  sv <- file$Size_value
   ww <- file$WetWeight_g
   aw <- file$AFDW_g
   tw <- file$Threshold_Scale
@@ -549,10 +549,10 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
         are_IDs_unique(file, file_name, ID_column = "EntryID")
         are_species_metadata_consistent(file, file_name)
         is_biomass_complete(file, file_name)
+        do_measurements_have_units(file, file_name)
         # TODO: check if there is only one sample weight for the species/station combi??
         # TODO: for sample weight all isWithShell should be the same??
       }
-      do_measurements_have_units(file, file_name)
       are_measurements_positive(file, file_name)
     }
     if(table$folder == "Stations"){
