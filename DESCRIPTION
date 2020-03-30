@@ -21,4 +21,4 @@ Imports:
     geosphere,
     marmap,
     worrms,
-    tibble (>= 3.4.4)
+    tibble
