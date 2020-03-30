@@ -15,7 +15,12 @@
 #' @return This function does not return an object, but stores the information in the specified
 #' \code{out_folder} under the names 'bathymetry.rda' and 'worms.rda'.
 #' @param stations The initial database for stations with track midpoints.
+#' If NULL (default) the function will automatically search the data_folder for 'stations_initial.rda'.
 #' @param species The initial database for species with reported specimen names.
+#' If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.
+#' @param conversion_taxa A vector with taxa names from the bioconversion.csv file that should be
+#' compared against the WoRMS database. If NULL (default) the function will automatically search the
+#' input_folder for the 'bioconversion.csv' file.
 #' @param lats (optional) You can specify latitudes you want to use to collect bathymetry.
 #' If not specified, the track midpoints in the database are used.
 #' @param lons (optional) You can specify longitudes you want to use to collect bathymetry.
@@ -26,7 +31,7 @@
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
-collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, lons = NULL,
+collect_external_data <- function(stations = NULL, species = NULL, conversion_taxa = NULL, lats = NULL, lons = NULL,
                                   input_folder = "inputfiles", data_folder = "data", out_folder = "data", as_CSV = FALSE){
   if(is.null(stations)){
     message("Loading intitial database with stations...")
@@ -37,7 +42,10 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
     load(paste0(data_folder,"/species_initial.rda"))
   }
   message("Loading size to weight conversion data...")
-  conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
+  if(is.null(conversion_taxa)){
+    conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
+    conversion_taxa <- conversion_data$Taxon
+  }
 
   # Collect bathymetry from NOAA
   message("Collecting bathymetry from NOAA. This can take a while...")
@@ -53,7 +61,7 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
 
   # Collect taxonomy of taxa in the bioconversion file
   message("Collecting taxonomy from the WoRMS database of taxa reported in the bioconversion.csv file. This can take a while...")
-  worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
+  worms_conversion <- get_worms_taxonomy(conversion_taxa)
   save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
 

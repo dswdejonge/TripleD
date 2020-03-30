@@ -7,6 +7,7 @@
 collect_external_data(
   stations = NULL,
   species = NULL,
+  conversion_taxa = NULL,
   lats = NULL,
   lons = NULL,
   input_folder = "inputfiles",
@@ -16,9 +17,15 @@ collect_external_data(
 )
 }
 \arguments{
-\item{stations}{The initial database for stations with track midpoints.}
+\item{stations}{The initial database for stations with track midpoints.
+If NULL (default) the function will automatically search the data_folder for 'stations_initial.rda'.}
 
-\item{species}{The initial database for species with reported specimen names.}
+\item{species}{The initial database for species with reported specimen names.
+If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.}
+
+\item{conversion_taxa}{A vector with taxa names from the bioconversion.csv file that should be
+compared against the WoRMS database. If NULL (default) the function will automatically search the
+input_folder for the 'bioconversion.csv' file.}
 
 \item{lats}{(optional) You can specify latitudes you want to use to collect bathymetry.
 If not specified, the track midpoints in the database are used.}
