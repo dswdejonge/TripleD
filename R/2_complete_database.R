@@ -10,22 +10,24 @@
 #' \cr
 #' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
 #' You need internet connection to do this.
-#' The reported taxonomic names of the specimens in the initial database are matched against
-#' the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
+#' The reported taxonomic names of the specimens in the initial database and in the bioconversion.csv file
+#' are matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
 #' @return This function does not return an object, but stores the information in the specified
-#' \code{out_folder} under the names 'bathymetry.rda' and 'worms.rds'.
+#' \code{out_folder} under the names 'bathymetry.rda' and 'worms.rda'.
 #' @param stations The initial database for stations with track midpoints.
 #' @param species The initial database for species with reported specimen names.
 #' @param lats (optional) You can specify latitudes you want to use to collect bathymetry.
 #' If not specified, the track midpoints in the database are used.
 #' @param lons (optional) You can specify longitudes you want to use to collect bathymetry.
 #' If not specified, the track midpoints in the database are used.
+#' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
 #' @param data_folder If the stations and/or species database are not provided, the function will search
 #' for it ('stations_initial.rda' and 'species_initial.rda') in this folder. Default is 'data'.
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
+#' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
 collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, lons = NULL,
-                                  data_folder = "data", out_folder = "data", as_CSV = FALSE){
+                                  input_folder = "inputfiles", data_folder = "data", out_folder = "data", as_CSV = FALSE){
   if(is.null(stations)){
     message("Loading intitial database with stations...")
     load(paste0(data_folder,"/stations_initial.rda"))
@@ -34,20 +36,31 @@ collect_external_data <- function(stations = NULL, species = NULL, lats = NULL, 
     message("Loading intitial database with species")
     load(paste0(data_folder,"/species_initial.rda"))
   }
+  message("Loading size to weight conversion data...")
+  conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
+
   # Collect bathymetry from NOAA
   message("Collecting bathymetry from NOAA. This can take a while...")
   bathymetry <- collect_bathymetry(stations, lats, lons)
   save(bathymetry, file = paste0(out_folder,"/bathymetry.rda"))
   message(paste0("Bathymetry stored as ",out_folder,"/bathymetry.rda."))
+
   # Collect taxonomy of species from WoRMs
-  message("Collecting taxonomy from the WoRMS database. This can take a while...")
+  message("Collecting taxonomy from the WoRMS database of taxa reported in TripleD data. This can take a while...")
   worms <- get_worms_taxonomy(as.character(species$Species_reported))
   save(worms, file = paste0(out_folder,"/worms.rda"))
   message(paste0("WoRMS taxonomic information is stored as ",out_folder,"/worms.rda."))
 
+  # Collect taxonomy of taxa in the bioconversion file
+  message("Collecting taxonomy from the WoRMS database of taxa reported in the bioconversion.csv file. This can take a while...")
+  worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
+  save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
+  message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
+
   if(as_CSV){
     write.csv(bathymetry, file = "bathymetry.csv")
     write.csv(worms, file = "worms_taxonomy.csv")
+    write.csv(worms_conversion, file = "worms_conversion.csv")
   }
 }
 
@@ -168,8 +181,8 @@ check_bioconversion_input <- function(conversion_data){
   }
 
   # Get valid names from WoRMS
+  # TODO: check
   message("Checking taxa in bioconversion.csv to the WoRMS database...")
-  worms_conversion <- get_worms_taxonomy(conversion_data$Taxon)
   conversion_data <- dplyr::left_join(conversion_data, dplyr::select(worms_conversion, Query, valid_name),
                                       by = c("Taxon" = "Query"))
 
