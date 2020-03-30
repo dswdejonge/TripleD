@@ -195,7 +195,6 @@ check_bioconversion_input <- function(conversion_data, worms_conversion){
     }
   }
 
-  # Give list of taxa in bioconversion with no match to worms at all.
   conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
     worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
     by = c("Taxon" = "Query"))
@@ -220,9 +219,7 @@ check_bioconversion_input <- function(conversion_data, worms_conversion){
                 ". Beware that these valid names might differ from the taxon name reported in bioconversion.csv."))
   }
 
-  # The same WW_to_AFDW for a single species in multiple rows.
-
-  # Only keep AFDW regression if also WW regression is present
+  #TODO: Only one combination for each taxa, size_dimension, output_unit, and isShellRemoved is allowed.
 
   return(conversion_data)
 }
