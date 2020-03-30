@@ -62,6 +62,11 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
   # Collect taxonomy of taxa in the bioconversion file
   message("Collecting taxonomy from the WoRMS database of taxa reported in the bioconversion.csv file. This can take a while...")
   worms_conversion <- get_worms_taxonomy(conversion_taxa)
+  no_match_i <- which(is.na(worms_conversion$valid_name))
+  if(length(no_match_i) > 0){
+    stop(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
+                paste0(unique(conversion_data$Taxon[no_match_i]), collapse = ", ")))
+  }
   save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
 
@@ -72,7 +77,7 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
   }
 }
 
-check_bioconversion_input <- function(conversion_data){
+check_bioconversion_input <- function(conversion_data, worms_conversion){
   # Read attributes
   message("Checken data format of bioconversion.csv...")
   my_attributes <- read.csv(system.file("extdata", "attributes_bioconversion.csv", package = "TripleD"))
@@ -110,6 +115,8 @@ check_bioconversion_input <- function(conversion_data){
                   paste(colnames(conversion_data)[is_group_included], collapse = ", ")," are given."))
     }
   }
+
+  #TODO: no NA values in grouped vars if a value is given.
 
   # Check doubles
   doubles_attributes <- dplyr::filter(my_attributes, Datatype == "Double")
@@ -188,18 +195,10 @@ check_bioconversion_input <- function(conversion_data){
     }
   }
 
-  # Get valid names from WoRMS
-  # TODO: check
-  message("Checking taxa in bioconversion.csv to the WoRMS database...")
-  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(worms_conversion, Query, valid_name),
-                                      by = c("Taxon" = "Query"))
-
   # Give list of taxa in bioconversion with no match to worms at all.
-  no_match_i <- which(is.na(conversion_data$valid_name))
-  if(length(no_match_i) > 0){
-    stop(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
-                paste0(unique(conversion_data$Taxon[no_match_i]), collapse = ", ")))
-  }
+  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
+    worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
+    by = c("Taxon" = "Query"))
 
   # Split in conversion data and regression?
   conversion_factors <- conversion_data %>%
@@ -271,9 +270,11 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   }
   message("Loading WoRMS taxonomic data...")
   load(paste0(data_folder,"/worms.rda"))
+  load(paste0(data_folder, "/worms_conversion.rda"))
+
   message("Loading size to weight conversion data...")
   conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-  conversion_data <- check_bioconversion_input(conversion_data)
+  conversion_data <- check_bioconversion_input(conversion_data, worms_conversion)
 
   message("Adding additional data to stations...")
   stations_additions <- stations %>%
