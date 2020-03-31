@@ -79,7 +79,7 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
 
 check_bioconversion_input <- function(conversion_data){
   # Read attributes
-  message("Checken data format of bioconversion.csv...")
+  message("Checking data format of bioconversion.csv...")
   my_attributes <- read.csv(system.file("extdata", "attributes_bioconversion.csv", package = "TripleD"))
 
   # Check presence required attributes
@@ -293,9 +293,9 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
   message("Adding WoRMS valid names to conversion data...")
   conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-    worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
+    worms_conversion, Query, valid_name, isFuzzy),
     by = c("Taxon" = "Query"))
-  conversion_data <- check_bioconversion_input(conversion_data)
+  conversion_list <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
   stations_additions <- stations %>%
@@ -311,27 +311,19 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
                         Query, valid_name, rank, phylum, class, order,
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query")) %>%
-    # Attach conversion factors (irrespective of Size_dimension)
-    dplyr::left_join(
-      dplyr::distinct(dplyr::filter(
-        dplyr::select(
-          conversion_data, valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
-          isShellRemoved, Comment_WW_to_AFDW
-        ),
-        WW_to_AFDW > 0
-      )),
-      by = c("valid_name", "isShellRemoved"),
-      suffix = c("_species", "_conversion")
-    ) #%>%
-    # Attach regression formula (taking into account Size_dimension and isShellRemoved)
-    dplyr::left_join(dplyr::select(conversion_data, -Taxon, -Size_unit,
-                                   -WW_to_AFDW, -Reference_WW_to_AFDW, -Comment_WW_to_AFDW),
-                     by = c("valid_name", "Size_dimension", "isShellRemoved"),
+    # Attach conversion factors
+    dplyr::left_join(., conversion_list$conversion_factors,
+                     by = c("valid_name", "isShellRemoved"),
                      suffix = c("_species", "_conversion")) %>%
-    # TODO: with join rows from species may not be duplicated!!
+    # Attach regression formulas
+    dplyr::left_join(., conversion_list$regressions,
+                     by = c("valid_name", "Size_dimension","isShellRemoved"),
+                     suffix = c("_species", "_conversion")) %>%
+    # TODO: with join rows from species may not be duplicated!! Does this work now?
+    # TODO: Only ONE regression is allowed per taxon and size dimension shell removed. so not both WW and AFDW. Write test.
     # Convert length to mm from other units
-    # 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
-    # cm are simply multiplied x10.
+    #   - 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
+    #   - cm are simply multiplied x10.
     # TODO: how to deal with mm2 and cm2?
     dplyr::mutate(Size_mm =
            ifelse(Size_unit == "1/2cm", Size_value*5+5,
