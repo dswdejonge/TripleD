@@ -64,8 +64,8 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
   worms_conversion <- get_worms_taxonomy(conversion_taxa)
   no_match_i <- which(is.na(worms_conversion$valid_name))
   if(length(no_match_i) > 0){
-    stop(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
-                paste0(unique(conversion_data$Taxon[no_match_i]), collapse = ", ")))
+    message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
+                paste0(unique(worms_conversion$Query[no_match_i]), collapse = ", ")))
   }
   save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
@@ -77,7 +77,7 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
   }
 }
 
-check_bioconversion_input <- function(conversion_data, worms_conversion){
+check_bioconversion_input <- function(conversion_data){
   # Read attributes
   message("Checken data format of bioconversion.csv...")
   my_attributes <- read.csv(system.file("extdata", "attributes_bioconversion.csv", package = "TripleD"))
@@ -195,31 +195,49 @@ check_bioconversion_input <- function(conversion_data, worms_conversion){
     }
   }
 
-  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-    worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
-    by = c("Taxon" = "Query"))
+  # TODO: check if all are positive?
+
+  #conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
+  #  worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
+  #  by = c("Taxon" = "Query"))
 
   # Split in conversion data and regression?
   conversion_factors <- conversion_data %>%
+    dplyr::filter(!is.na(valid_name)) %>%
     dplyr::select(valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
-                  isShellRemoved, Comment_WW_to_AFDW, Taxon) %>%
+                  isShellRemoved, Comment_WW_to_AFDW) %>%
     dplyr::filter(WW_to_AFDW > 0) %>%
+    dplyr::distinct()
+
+  regressions <- conversion_data %>%
+    dplyr::filter(!is.na(valid_name)) %>%
+    dplyr::select(valid_name, Size_dimension, A_factor, B_exponent, Output_unit,
+                  Reference_regression, Comment_regression, isShellRemoved) %>%
+    dplyr::filter(!is.na(Output_unit)) %>%
     dplyr::distinct()
 
   # Only one conversion factor is allowed for each combination of
   # valid name and isShellRemoved
   check_conv_f <- conversion_factors %>%
-     dplyr::filter(!is.na(valid_name)) %>%
      dplyr::group_by(valid_name, isShellRemoved) %>%
-     dplyr::summarise(Count = dplyr::n())
+     dplyr::summarise(Count = dplyr::n()) %>%
+     dplyr::filter(Count > 1)
   are_double <- which(check_conv_f$Count > 1)
   if(length(are_double) > 0){
-    stop(paste0("Multiple conversion factors WW_to_AFDW are present for the species ",
-                paste0(check_conv_f$valid_name[are_double], collapse = ", "),
-                ". Beware that these valid names might differ from the taxon name reported in bioconversion.csv."))
+    print(check_conv_f)
+    stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
   }
 
-  #TODO: Only one combination for each taxa, size_dimension, output_unit, and isShellRemoved is allowed.
+  # Only one combination for each taxa, size_dimension, output_unit, and isShellRemoved is allowed.
+  check_regressions <- regressions %>%
+    dplyr::group_by(valid_name, Size_dimension, Output_unit, isShellRemoved) %>%
+    dplyr::summarise(Count = dplyr::n()) %>%
+    dplyr::filter(Count > 1)
+  are_double <- which(check_regressions$Count > 1)
+  if(length(are_double) > 0){
+    print(check_regressions)
+    stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
+  }
 
   return(conversion_data)
 }
@@ -271,7 +289,11 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
 
   message("Loading size to weight conversion data...")
   conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-  conversion_data <- check_bioconversion_input(conversion_data, worms_conversion)
+  message("Adding WoRMS valid names to conversion data...")
+  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
+    worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
+    by = c("Taxon" = "Query"))
+  conversion_data <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
   stations_additions <- stations %>%
