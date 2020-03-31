@@ -239,7 +239,9 @@ check_bioconversion_input <- function(conversion_data){
     stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
   }
 
-  return(conversion_data)
+  return(list(
+    conversion_factors = conversion_factors,
+    regressions = regressions))
 }
 
 #' Complete database with external data and calculations
