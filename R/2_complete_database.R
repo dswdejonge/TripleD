@@ -360,11 +360,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::select(valid_name, isShellRemoved, WW_to_AFDW) %>%
     dplyr::filter(is.na(WW_to_AFDW)) %>%
     dplyr::distinct()
-  #no_WW_to_AFDW <- which(is.na(species_additions$WW_to_AFDW))
-  #if(length(no_WW_to_AFDW) > 0){
   if(nrow(no_conversion_factors) > 0){
     message("These taxa names have no conversion factor WW_to_AFDW in the bioconversion.csv file:")
-    #print(unique(species_additions$valid_name[no_WW_to_AFDW]))
     print(no_conversion_factors)
   }
   # Give list of taxa that do not have a regression formula
@@ -372,11 +369,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::select(valid_name, Size_dimension, isShellRemoved, A_factor) %>%
     dplyr::filter(!is.na(Size_dimension), is.na(A_factor)) %>%
     dplyr::distinct()
-  #no_regression <- which(is.na(species_additions$A_factor))
-  #if(length(no_regression) > 0){
   if(nrow(no_regressions) > 0){
     message("These taxa names have no regression formula in the bioconversion.csv file:")
-    #print(unique(species_additions$valid_name[no_regression]))
     print(no_regressions)
   }
   # Average difference between bathymetry and reported depth.
@@ -385,7 +379,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   message(paste0("The average difference between reported water depth and bathymetry depth is: ",
                  mean_diff_depth," meters."))
 
-  message(paste0("Saving results to ",out_folder))
+  message(paste0("Saving results to folder: ",out_folder))
   save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
   save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
   if(as_CSV){
