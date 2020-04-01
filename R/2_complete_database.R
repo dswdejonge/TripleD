@@ -321,8 +321,6 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::left_join(., conversion_list$regressions,
                      by = c("valid_name", "Size_dimension","isShellRemoved"),
                      suffix = c("_species", "_conversion")) %>%
-    # TODO: with join rows from species may not be duplicated!! Does this work now?
-    # TODO: Only ONE regression is allowed per taxon and size dimension shell removed. so not both WW and AFDW. Write test.
     # Convert length to mm from other units
     #   - 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
     #   - cm are simply multiplied x10.
@@ -342,6 +340,11 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::mutate(AFDW_g_from_reported_WW = WetWeight_g_threshold * WW_to_AFDW)
 
   # Info / warnings
+  # Check for duplicated samples
+  if(nrow(species) != nrow(species_additions)){
+    stop("Duplication has occurred.")
+  }
+
   # Give list of taxa that do not match to worms at all.
   no_match_i <- which(species_additions$hasNoMatch == 1)
   if(length(no_match_i) > 0){
@@ -352,16 +355,28 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   }
 
   # Give list of taxa in species_additions that do not have conversion factors
-  no_WW_to_AFDW <- which(is.na(species_additions$WW_to_AFDW))
-  if(length(no_WW_to_AFDW) > 0){
+  no_conversion_factors <- species_additions %>%
+    dplyr::select(valid_name, isShellRemoved, WW_to_AFDW) %>%
+    dplyr::filter(is.na(WW_to_AFDW)) %>%
+    dplyr::distinct()
+  #no_WW_to_AFDW <- which(is.na(species_additions$WW_to_AFDW))
+  #if(length(no_WW_to_AFDW) > 0){
+  if(nrow(no_conversion_factors) > 0){
     message("These taxa names have no conversion factor WW_to_AFDW in the bioconversion.csv file:")
-    print(unique(species_additions$valid_name[no_WW_to_AFDW]))
+    #print(unique(species_additions$valid_name[no_WW_to_AFDW]))
+    print(no_conversion_factors)
   }
-  # Give list of taxa that do not have conversion factors
-  no_regression <- which(is.na(species_additions$A_factor))
-  if(length(no_regression) > 0){
+  # Give list of taxa that do not have a regression formula
+  no_regressions <- species_additions %>%
+    dplyr::select(valid_name, Size_dimension, isShellRemoved, A_factor) %>%
+    dplyr::filter(is.na(A_factor)) %>%
+    dplyr::distinct()
+  #no_regression <- which(is.na(species_additions$A_factor))
+  #if(length(no_regression) > 0){
+  if(nrow(no_regressions) > 0){
     message("These taxa names have no regression formula in the bioconversion.csv file:")
-    print(unique(species_additions$valid_name[no_regression]))
+    #print(unique(species_additions$valid_name[no_regression]))
+    print(no_regressions)
   }
   # Average difference between bathymetry and reported depth.
   mean_diff_depth <- mean(stations_additions$Water_depth_m_Cruise) -
