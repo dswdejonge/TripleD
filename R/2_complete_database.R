@@ -380,8 +380,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     print(no_regressions)
   }
   # Average difference between bathymetry and reported depth.
-  mean_diff_depth <- mean(stations_additions$Water_depth_m_Cruise) -
-    mean(stations_additions$Water_depth_m_Bathy)
+  mean_diff_depth <- mean(stations_additions$Water_depth_m_cruise, na.rm = T) -
+    mean(stations_additions$Water_depth_m_Bathy, na.rm = T)
   message(paste0("The average difference between reported water depth and bathymetry depth is: ",
                  mean_diff_depth," meters."))
 
