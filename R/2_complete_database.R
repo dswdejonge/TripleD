@@ -226,7 +226,7 @@ check_bioconversion_input <- function(conversion_data){
      dplyr::filter(Count > 1)
   are_double <- which(check_conv_f$Count > 1)
   if(length(are_double) > 0){
-    print(check_conv_f)
+    print(check_conv_f, n=Inf)
     stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
   }
 
@@ -237,7 +237,7 @@ check_bioconversion_input <- function(conversion_data){
     dplyr::filter(Count > 1)
   are_double <- which(check_regressions$Count > 1)
   if(length(are_double) > 0){
-    print(check_regressions)
+    print(check_regressions, n=Inf)
     stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
   }
 
@@ -291,7 +291,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   #load(paste0(data_folder, "/worms_conversion.rda"))
   message("Loading size to weight conversion data...")
   #conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-  load(paste0(data_folder,"conversion_data.rda"))
+  load(paste0(data_folder,"/conversion_data.rda"))
   #message("Adding WoRMS valid names to conversion data...")
   #conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
   #  worms_conversion, Query, valid_name, isFuzzy),
@@ -349,9 +349,10 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   no_match_i <- which(species_additions$hasNoMatch == 1)
   if(length(no_match_i) > 0){
     message(paste0("These printed taxa names from the corresponding files cannot be matched to the WoRMS database:"))
-    print(species_additions[no_match_i,] %>%
-            dplyr::select(File, Species_reported) %>%
-            dplyr::distinct())
+    to_print <- species_additions[no_match_i,] %>%
+      dplyr::select(File, Species_reported) %>%
+      dplyr::distinct()
+    print(to_print)
   }
 
   # Give list of taxa in species_additions that do not have conversion factors
@@ -369,7 +370,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   # Give list of taxa that do not have a regression formula
   no_regressions <- species_additions %>%
     dplyr::select(valid_name, Size_dimension, isShellRemoved, A_factor) %>%
-    dplyr::filter(is.na(A_factor)) %>%
+    dplyr::filter(!is.na(Size_dimension), is.na(A_factor)) %>%
     dplyr::distinct()
   #no_regression <- which(is.na(species_additions$A_factor))
   #if(length(no_regression) > 0){
