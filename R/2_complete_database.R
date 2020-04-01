@@ -18,9 +18,9 @@
 #' If NULL (default) the function will automatically search the data_folder for 'stations_initial.rda'.
 #' @param species The initial database for species with reported specimen names.
 #' If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.
-#' @param conversion_taxa A vector with taxa names from the bioconversion.csv file that should be
-#' compared against the WoRMS database. If NULL (default) the function will automatically search the
-#' input_folder for the 'bioconversion.csv' file.
+#' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
+#' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
+#' loaded from the input_folder.
 #' @param lats (optional) You can specify latitudes you want to use to collect bathymetry.
 #' If not specified, the track midpoints in the database are used.
 #' @param lons (optional) You can specify longitudes you want to use to collect bathymetry.
@@ -31,7 +31,7 @@
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
-collect_external_data <- function(stations = NULL, species = NULL, conversion_taxa = NULL, lats = NULL, lons = NULL,
+collect_external_data <- function(stations = NULL, species = NULL, conversion_data = NULL, lats = NULL, lons = NULL,
                                   input_folder = "inputfiles", data_folder = "data", out_folder = "data", as_CSV = FALSE){
   if(is.null(stations)){
     message("Loading intitial database with stations...")
@@ -42,10 +42,10 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
     load(paste0(data_folder,"/species_initial.rda"))
   }
   message("Loading size to weight conversion data...")
-  if(is.null(conversion_taxa)){
+  if(is.null(conversion_data)){
     conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-    conversion_taxa <- conversion_data$Taxon
   }
+  conversion_taxa <- conversion_data$Taxon
 
   # Collect bathymetry from NOAA
   message("Collecting bathymetry from NOAA. This can take a while...")
@@ -67,13 +67,19 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_ta
     message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
                 paste0(unique(worms_conversion$Query[no_match_i]), collapse = ", ")))
   }
+  message("Adding WoRMS valid names to conversion data...")
+  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
+    worms_conversion, Query, valid_name, isFuzzy),
+    by = c("Taxon" = "Query"))
   save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
+  save(conversion_data, file = paste0(out_folder,"/conversion_data.rda"))
 
   if(as_CSV){
     write.csv(bathymetry, file = "bathymetry.csv")
     write.csv(worms, file = "worms_taxonomy.csv")
     write.csv(worms_conversion, file = "worms_conversion.csv")
+    write.csv(conversion_data, file = "conversion_data.csv")
   }
 }
 
@@ -197,11 +203,7 @@ check_bioconversion_input <- function(conversion_data){
 
   # TODO: check if all are positive?
 
-  #conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-  #  worms_conversion, Query, valid_name, hasNoMatch, isFuzzy),
-  #  by = c("Taxon" = "Query"))
-
-  # Split in conversion data and regression?
+  # Split in conversion data and regression
   conversion_factors <- conversion_data %>%
     dplyr::filter(!is.na(valid_name)) %>%
     dplyr::select(valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
@@ -230,7 +232,7 @@ check_bioconversion_input <- function(conversion_data){
 
   # Only one combination for each taxa, size_dimension, output_unit, and isShellRemoved is allowed.
   check_regressions <- regressions %>%
-    dplyr::group_by(valid_name, Size_dimension, Output_unit, isShellRemoved) %>%
+    dplyr::group_by(valid_name, Size_dimension, isShellRemoved) %>%
     dplyr::summarise(Count = dplyr::n()) %>%
     dplyr::filter(Count > 1)
   are_double <- which(check_regressions$Count > 1)
@@ -277,7 +279,6 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   message("Loading initial database...")
   load(paste0(data_folder,"/stations_initial.rda"))
   load(paste0(data_folder,"/species_initial.rda"))
-
   # Load external data
   if(is.null(bathymetry)){
     message("Loading bathymetric data...")
@@ -287,14 +288,14 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   }
   message("Loading WoRMS taxonomic data...")
   load(paste0(data_folder,"/worms.rda"))
-  load(paste0(data_folder, "/worms_conversion.rda"))
-
+  #load(paste0(data_folder, "/worms_conversion.rda"))
   message("Loading size to weight conversion data...")
-  conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-  message("Adding WoRMS valid names to conversion data...")
-  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-    worms_conversion, Query, valid_name, isFuzzy),
-    by = c("Taxon" = "Query"))
+  #conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
+  load(paste0(data_folder,"conversion_data.rda"))
+  #message("Adding WoRMS valid names to conversion data...")
+  #conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
+  #  worms_conversion, Query, valid_name, isFuzzy),
+  #  by = c("Taxon" = "Query"))
   conversion_list <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
@@ -303,6 +304,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     add_track_length_GPS() %>%
     add_track_length_Odometer() %>%
     add_water_depth(bathymetry = bathymetry)
+  #TODO: allow water depth estimation from calculated midpoints.
 
   message("Adding additional data to species...")
   species_additions <- species %>%
@@ -361,7 +363,11 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     message("These taxa names have no regression formula in the bioconversion.csv file:")
     print(unique(species_additions$valid_name[no_regression]))
   }
-  # TODO: average difference between bathymetry and reported depth.
+  # Average difference between bathymetry and reported depth.
+  mean_diff_depth <- mean(stations_additions$Water_depth_m_Cruise) -
+    mean(stations_additions$Water_depth_m_Bathy)
+  message(paste0("The average difference between reported water depth and bathymetry depth is: ",
+                 mean_diff_depth," meters."))
 
   message(paste0("Saving results to ",out_folder))
   save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
