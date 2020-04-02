@@ -70,7 +70,8 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_da
   message("Adding WoRMS valid names to conversion data...")
   conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
     worms_conversion, Query, valid_name, isFuzzy),
-    by = c("Taxon" = "Query"))
+    by = c("Taxon" = "Query")) %>%
+    dplyr::distinct()
   save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
   save(conversion_data, file = paste0(out_folder,"/conversion_data.rda"))
