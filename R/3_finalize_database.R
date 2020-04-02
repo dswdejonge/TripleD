@@ -118,11 +118,12 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   # Join data into big table
   database <- dplyr::inner_join(species_final, st, by = "StationID") %>%
   # Calculate density and biomass per station
-  dplyr::mutate(
-    Density_nr_per_m2 = Count_total / Sample_area_m2,
-    Density_nr_per_m3 = Count_total / Sample_volume_m3,
-    Biomass_g_per_m2 = Biomass_g / Sample_area_m2,
-    Biomass_g_per_m3 = Biomass_g / Sample_volume_m3)
+    dplyr::mutate(
+      Density_nr_per_m2 = Count_total / Sample_area_m2,
+      Density_nr_per_m3 = Count_total / Sample_volume_m3,
+      Biomass_g_per_m2 = Biomass_g / Sample_area_m2,
+      Biomass_g_per_m3 = Biomass_g / Sample_volume_m3) %>%
+    dplyr::select(-Count_total, -Biomass_g)
 
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
