@@ -50,12 +50,6 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   load(paste0(data_folder,"/stations_additions.rda"))
 
   # Summarize species table
-  # Add columns if they did not exist in original files
-  if(!"AFDW_g" %in% colnames(species_additions)){
-    species_additions$AFDW_g <- NA
-    species_additions$WeightTypeAFDW <- NA
-  }
-
   # Clean species database
   # Set sample weights from NA to 0
   species_final <- species_additions
@@ -111,13 +105,12 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       Sample_area_m2 = Track_length_m * (Blade_width_cm/100),
       Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
     dplyr::select(
-      File, Vessel, CruiseID, StationID, Station_name,
-      Date, Time_start, Time_stop,
-      Blade_depth_cm, Blade_width_cm,
-      Lat_DD, source_Lat_DD, Lon_DD, source_Lon_DD,
-      Water_depth_m, source_Water_depth_m, Track_length_m, source_Track_length_m,
-      Sample_area_m2, Sample_volume_m3
-    )
+      -Lat_DD_midpt, -Lon_DD_midpt,
+      -Lat_start_DD, -Lon_start_DD,
+      -Lat_stop_DD,	-Lon_stop_DD,
+      -Lon_DD_calc,	-Lat_DD_calc,
+      -Track_length_m_cruise, -Water_depth_m_cruise, -Odometer_count,
+      -Track_dist_m_GPS, -Track_dist_m_Odometer, -Water_depth_m_Bathy)
 
   # Create one large table for the Shiny app
   # Deselect File in stations because it's double.
