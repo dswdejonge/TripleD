@@ -461,6 +461,17 @@ pos2coord <- function(pos=NULL, coord=NULL, dim.mat=NULL) {
   }
 }
 
+add_missing_columns <- function(df, attributes){
+  missing_columns <- attributes[which(!attributes %in% colnames(df))]
+  if(length(missing_columns) > 0){
+    for(i in 1:length(missing_columns)){
+      df$newcol <- NA
+      colnames(df)[which(colnames(df) == "newcol")] <- missing_columns[i]
+    }
+  }
+  return(df)
+}
+
 #' Construct initial database
 #'
 #' This function loads CSV files, checks the data format, and constructs an initial table
@@ -557,9 +568,13 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
     }
     if(table$folder == "Stations"){
       stations <- dplyr::bind_rows(data, .id = "File")
+      # If certain columns do not exist, create them with values NA, to prevent errors down the line.
+      stations <- add_missing_columns(stations, as.character(my_attributes$Attribute))
     }
     if(table$folder == "Species"){
       species <- dplyr::bind_rows(data, .id = "File")
+      # If certain columns do not exist, create them with values NA, to prevent errors down the line.
+      species <- add_missing_columns(species, as.character(my_attributes$Attribute))
     }
   }
   # Test of all stationIDs used in the species files are also mentioned in the station files.
@@ -575,11 +590,12 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
     stop(paste0("The StationID(s)" ,paste(stations$StationID[ID_is_duplicated], collapse = ", "),
                 " occur multiple times in differen files, but they must be unique. Please check."))
   }
+
   # Save
   save(stations, file = paste0(out_folder,"/","stations_initial.rda"))
   save(species, file = paste0(out_folder,"/","species_initial.rda"))
   if(as_CSV){
-    write.csv(stations, file = "stations_initial.csv")
-    write.csv(stations, file = "species_initial.csv")
+    write.csv(stations, file = paste0(out_folder, "/stations_initial.csv"))
+    write.csv(species, file = paste0(out_folder, "/species_initial.csv"))
   }
 }
