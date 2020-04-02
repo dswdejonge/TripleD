@@ -383,8 +383,9 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   save(stations_additions, file = paste0(out_folder,"/stations_additions.rda"))
   save(species_additions, file = paste0(out_folder,"/species_additions.rda"))
   if(as_CSV){
-    write.csv(stations_additions, paste0(out_folder,"stations_additions.csv"))
-    write.csv(species_additions, paste0(out_folder,"species_additions.csv"))
+    message(paste0("CSV files written to: ",out_folder))
+    write.csv(stations_additions, file = paste0(out_folder,"/stations_additions.csv"))
+    write.csv(species_additions, file = paste0(out_folder,"/species_additions.csv"))
   }
 }
 
