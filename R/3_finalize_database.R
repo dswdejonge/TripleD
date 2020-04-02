@@ -64,33 +64,34 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
           is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
   species_final[
     which(species_final$WeightType == "Sample" &
-            is.na(species_final$AFDW_g_from_reported_WW)), "AFDW_g_from_reported_WW"] <- 0
+          is.na(species_final$AFDW_g_from_reported_WW)), "AFDW_g_from_reported_WW"] <- 0
 
   species_final <- species_final %>%
     # Remove species with no match to WoRMS database (avoid removing NA)
     dplyr::filter(hasNoMatch != 1 | is.na(hasNoMatch)) %>%
     # Remove species that are not counted as organism (Count = -1) (avoid removing NA)
     dplyr::filter(Count != -1 | is.na(Count)) %>%
+    # Upscale all values with the Fraction
+    dplyr::mutate_at(
+      vars(Count, AFDW_g, AFDW_g_from_reported_WW, AFDW_g_calc),
+      function(x){x/.$Fraction}) %>%
     # Collapse to one count and biomas per station/species combi
     # Select which variables to keep.
-    dplyr::group_by(StationID, valid_name, Fraction,
-                    File, rank, phylum, class, order, family, genus, isFuzzy) %>%
+    dplyr::group_by(StationID, valid_name,
+                    File, rank, phylum, class, order, family, genus) %>%
     dplyr::summarize(
-      Count_sum = sum(Count),
+      Count_total = sum(Count),
       AFDW_sum = sum(AFDW_g),
       AFDW_from_WW_sum = sum(AFDW_g_from_reported_WW),
-      AFDW_calc_sum = sum(AFDW_g_calc)) %>%
+      AFDW_calc_sum = sum(AFDW_g_calc),
+      isFuzzy = mean(isFuzzy)) %>%
     # Get one biomass column
-    # Alternative workflow: combine AFDW per ENTRY in stead of per station/species combi, but takes more work.
+    # TODO: Alternative workflow: combine AFDW per ENTRY in stead of per station/species combi, but takes more work.
     combine_data_sources(
       ., new_column_name = "Biomass_g", order_of_preference = c("AFDW_sum", "AFDW_from_WW_sum", "AFDW_calc_sum")
     ) %>%
-    # Upscale count and biomass based on fraction
-    dplyr::mutate(
-      Count_scaled = Count_sum / Fraction,
-      Biomass_g_scaled = Biomass_g / Fraction) %>%
     dplyr::ungroup() %>%
-    dplyr::select(-Fraction, -AFDW_sum, -AFDW_from_WW_sum, -AFDW_calc_sum, -Count_sum, -Biomass_g)
+    dplyr::select(-AFDW_sum, -AFDW_from_WW_sum, -AFDW_calc_sum)
 
   # Clean station database
   stations_final <- stations_additions %>%
@@ -104,7 +105,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       ., new_column_name = "Water_depth_m", order_of_preference = c("Water_depth_m_cruise", "Water_depth_m_Bathy")
     ) %>%
     combine_data_sources(
-      ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_cruise", "Track_dist_m_Odometer")
+      ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_cruise", "Track_dist_m_Odometer", "Track_dist_m_GPS")
     ) %>%
     dplyr::mutate(
       Sample_area_m2 = Track_length_m * (Blade_width_cm/100),
@@ -123,18 +124,18 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   st <- dplyr::select(stations_final, -File)
   # Join data into big table
   database <- dplyr::inner_join(species_final, st, by = "StationID") %>%
-    # Calculate density and biomass per station
-    dplyr::mutate(
-      Density_nr_per_m2 = Count_scaled / Sample_area_m2,
-      Density_nr_per_m3 = Count_scaled / Sample_volume_m3,
-      Biomass_g_per_m2 = Biomass_g_scaled / Sample_area_m2,
-      Biomass_g_per_m3 = Biomass_g_scaled / Sample_volume_m3)
+  # Calculate density and biomass per station
+  dplyr::mutate(
+    Density_nr_per_m2 = Count_total / Sample_area_m2,
+    Density_nr_per_m3 = Count_total / Sample_volume_m3,
+    Biomass_g_per_m2 = Biomass_g / Sample_area_m2,
+    Biomass_g_per_m3 = Biomass_g / Sample_volume_m3)
 
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
   if(as_CSV){
-    write.csv(species_final, paste0(out_folder,"species_final.csv"))
-    write.csv(stations_final, paste0(out_folder,"stations_final.csv"))
+    write.csv(species_final, paste0(out_folder,"/species_final.csv"))
+    write.csv(stations_final, paste0(out_folder,"/stations_final.csv"))
   }
   if(is.null(database_folder)){
     save(database, file = "database.rda")
