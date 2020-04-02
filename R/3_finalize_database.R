@@ -67,7 +67,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::filter(Count != -1 | is.na(Count)) %>%
     # Upscale all values with the Fraction
     dplyr::mutate_at(
-      vars(Count, AFDW_g, AFDW_g_from_reported_WW, AFDW_g_calc),
+      dplyr::vars(Count, AFDW_g, AFDW_g_from_reported_WW, AFDW_g_calc),
       function(x){x/.$Fraction}) %>%
     # Collapse to one count and biomas per station/species combi
     # Select which variables to keep.
