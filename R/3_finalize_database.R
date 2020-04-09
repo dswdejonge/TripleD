@@ -69,23 +69,33 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::mutate_at(
       dplyr::vars(Count, AFDW_g, AFDW_g_from_reported_WW, AFDW_g_calc),
       function(x){x/.$Fraction}) %>%
-    # Collapse to one count and biomas per station/species combi
-    # Select which variables to keep.
+    # Find conflicting weight type fields between
+    # WeightType (WW and AFDW_from_WW) and WeightTypeAFDW (AFDW_g)
+    dplyr::mutate(is_conflict = ifelse(
+      WeightType == "Sample" & !is.na(WeightTypeAFDW), TRUE, FALSE
+    ))
+  # Set all conflicting fields to NA, so they are skipped in combine_sources
+  tempdf <- species_final %>%
+    dplyr::filter(WeightType == "Sample", is_conflict == TRUE) %>%
+    dplyr::select(valid_name, WeightType, is_conflict) %>%
+    dplyr::distinct() %>%
+    dplyr::rename(skip_WW_sample = is_conflict)
+  species_final <- species_final %>%
+    dplyr::left_join(., tempdf, by = c("valid_name", "WeightType"))
+  species_final$AFDW_g_from_reported_WW[species_final$skip_WW_sample] <- NA
+  species_final$WeightType[species_final$skip_WW_sample] <- NA
+  species_final <- combine_data_sources(species_final, new_column_name = "AFDW_g_combined", order_of_preference = c("AFDW_g", "AFDW_g_from_reported_WW", "AFDW_g_calc"))
+
+  # Collapse to one count and biomas per station/species combi
+  species_final <- species_final %>%
     dplyr::group_by(StationID, valid_name,
                     File, rank, phylum, class, order, family, genus) %>%
     dplyr::summarize(
       Count_total = sum(Count),
-      AFDW_sum = sum(AFDW_g),
-      AFDW_from_WW_sum = sum(AFDW_g_from_reported_WW),
-      AFDW_calc_sum = sum(AFDW_g_calc),
-      isFuzzy = mean(isFuzzy)) %>%
-    # Get one biomass column
-    # TODO: Alternative workflow: combine AFDW per ENTRY in stead of per station/species combi, but takes more work.
-    combine_data_sources(
-      ., new_column_name = "Biomass_g", order_of_preference = c("AFDW_sum", "AFDW_from_WW_sum", "AFDW_calc_sum")
+      Biomass_g = sum(AFDW_g_combined),
+      isFuzzy = sum(isFuzzy) # TODO: ugly way of doing this
     ) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-AFDW_sum, -AFDW_from_WW_sum, -AFDW_calc_sum)
+    dplyr::ungroup()
 
   # Clean station database
   stations_final <- stations_additions %>%
