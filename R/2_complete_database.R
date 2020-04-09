@@ -337,7 +337,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::mutate(AFDW_g_calc =
            ifelse(Output_unit == "AFDW_g", A_factor*(Size_mm^B_exponent)*Count, WW_g_calc*WW_to_AFDW)) %>%
     # Calculate AFDW from reported WW: if reported WW is 0, use the scale threshold.
-    dplyr::mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale, WetWeight_g)) %>%
+    dplyr::mutate(WetWeight_g_threshold = ifelse(WetWeight_g == 0, Threshold_Scale/2, WetWeight_g)) %>%
     dplyr::mutate(AFDW_g_from_reported_WW = WetWeight_g_threshold * WW_to_AFDW)
 
   # Info / warnings
