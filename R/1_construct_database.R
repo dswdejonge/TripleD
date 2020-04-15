@@ -185,11 +185,11 @@ is_time_format_correct <- function(file, file_name){
   }
 }
 
-is_cruise_objective_correct <- function(file, file_name){
-  incomplete <- (file$Cruise_objective == "Incomplete")
+is_Station_objective_correct <- function(file, file_name){
+  incomplete <- (file$Station_objective == "Incomplete")
   if(TRUE %in% incomplete){
     if(is.null(file$Excluded)){
-      stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
+      stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
     }
     incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
     if(length(incomplete_and_NA) > 0){
@@ -199,16 +199,16 @@ is_cruise_objective_correct <- function(file, file_name){
     }
   }
 
-  focus <- (file$Cruise_objective == "Focus")
+  focus <- (file$Station_objective == "Focus")
   if(TRUE %in% focus){
     if(is.null(file$Focus)){
-      stop(paste0("In file ",file_name,", some entries in column 'Cruise_objective' are 'Focus', but the necessary extra column 'Focus' does not exist."))
+      stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Focus', but the necessary extra column 'Focus' does not exist."))
     }
     focus_and_NA <- which(focus & is.na(file$Focus))
     if(length(focus_and_NA > 0)){
       stop(paste0("In file ",file_name,", the entries in row(s) ",
                   paste(sort(focus_and_NA+1), collapse = ", "),
-                  " are defined 'Focus' in the column 'Cruise_objective', but no taxons that were focussed on are given in the extra column 'Focus'."
+                  " are defined 'Focus' in the column 'Station_objective', but no taxons that were focussed on are given in the extra column 'Focus'."
                   ))
     }
   }
@@ -284,25 +284,25 @@ are_species_metadata_consistent <- function(file, file_name){
 
   n_unique_Obs <- file %>%
     dplyr::group_by(Species_reported, StationID) %>%
-    dplyr::select(Species_reported, StationID, Fraction, isFractionAssumed) %>%
+    dplyr::select(Species_reported, StationID, Fraction, is_Fraction_assumed) %>%
     dplyr::distinct() %>%
     dplyr::mutate(mistake_count = n())
 
   if(dim(n_unique_Expect)[1] != dim(n_unique_Obs)[1]){
     print(dplyr::filter(n_unique_Obs, mistake_count > 1))
-    stop(paste0("In file ", file_name," the reported Fraction and isFractionAssumed must be equal for all species in a sample."))
+    stop(paste0("In file ", file_name," the reported Fraction and is_Fraction_assumed must be equal for all species in a sample."))
   }
 }
 
 is_biomass_complete <- function(file, file_name){
   # WW
-  should_be_complete <- which(!is.na(file$WetWeight_g))
+  should_be_complete <- which(!is.na(file$WW_g))
   if(length(should_be_complete > 0)){
     isNA <- is.na(file[should_be_complete,
-                       c("WeightType", "Threshold_Scale",
-                         "isShellRemoved", "isPartialWW")])
+                       c("Weight_type", "Threshold_scale",
+                         "is_Shell_removed", "is_Partial_WW")])
     if(TRUE %in% isNA){
-      stop("Wet weight is reported, but the columns WeightType, Threshold_Scale, isWithShell and isPartialWW are not filled for all weights.")
+      stop("Wet weight is reported, but the columns Weight_type, Threshold_scale, isWithShell and is_Partial_WW are not filled for all weights.")
     }
   }
 
@@ -310,10 +310,10 @@ is_biomass_complete <- function(file, file_name){
   should_be_complete <- which(!is.na(file$AFDW_g))
   if(length(should_be_complete > 0)){
     isNA <- is.na(file[should_be_complete,
-                       c("WeightTypeAFDW", "Threshold_ScaleAFDW",
-                         "isPartialAFDW")])
+                       c("Weight_type_AFDW", "Threshold_scale_AFDW",
+                         "is_Partial_AFDW")])
     if(TRUE %in% isNA){
-      stop("AFDW is reported, but the columns WeightTypeAFDW, Threshold_ScaleAFDW, and isPartialAFDW are not filled for all weights.")
+      stop("AFDW is reported, but the columns Weight_type_AFDW, Threshold_scale_AFDW, and is_Partial_AFDW are not filled for all weights.")
     }
   }
 }
@@ -336,7 +336,7 @@ do_measurements_have_units <- function(file, file_name){
 
 are_measurements_positive <- function(file, file_name){
   # Stations
-  tl <- file$Track_length_m_cruise
+  tl <- file$Track_length_m_preset
   bd <- file$Blade_depth_cm
   bw <- file$Blade_width_cm
   ts <- file$Tow_speed_knots
@@ -387,10 +387,10 @@ are_measurements_positive <- function(file, file_name){
   # Species
   ct <- file$Count
   sv <- file$Size_value
-  ww <- file$WetWeight_g
+  ww <- file$WW_g
   aw <- file$AFDW_g
-  tw <- file$Threshold_Scale
-  ta <- file$Threshold_ScaleAFDW
+  tw <- file$Threshold_scale
+  ta <- file$Threshold_scale_AFDW
 
   if(!is.null(ct)){
     ct <- ct  < 0
@@ -409,7 +409,7 @@ are_measurements_positive <- function(file, file_name){
   if(!is.null(ww)){
     ww <- ww  < 0
     if(TRUE %in% ww){
-      stop(paste0("In file ",file_name," column WetWeight_g the values in row(s) ",
+      stop(paste0("In file ",file_name," column WW_g the values in row(s) ",
                   paste(sort(which(ww)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
@@ -423,14 +423,14 @@ are_measurements_positive <- function(file, file_name){
   if(!is.null(tw)){
     tw <- tw  <= 0
     if(TRUE %in% tw){
-      stop(paste0("In file ",file_name," column Threshold_Scale the values in row(s) ",
+      stop(paste0("In file ",file_name," column Threshold_scale the values in row(s) ",
                   paste(sort(which(tw)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ta)){
     ta <- ta  <= 0
     if(TRUE %in% ta){
-      stop(paste0("In file ",file_name," column Threshold_ScaleAFDW the values in row(s) ",
+      stop(paste0("In file ",file_name," column Threshold_scale_AFDW the values in row(s) ",
                   paste(sort(which(ta)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
@@ -554,7 +554,7 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
         data[[i]]$Date <- as.Date(data[[i]]$Date, format = "%d/%m/%Y")
         are_dates_converted(file = data[[i]], file_name)
         is_time_format_correct(file, file_name)
-        is_cruise_objective_correct(file, file_name)
+        is_Station_objective_correct(file, file_name)
       }
       if(table$folder == "Species"){
         are_IDs_unique(file, file_name, ID_column = "EntryID")
