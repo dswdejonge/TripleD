@@ -502,7 +502,9 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
     print(paste0("Checking the files in folder ", in_folder, "/", table$folder, ". Importing data."))
 
     # Read in attribute requirements
-    my_attributes <- read.csv(system.file("extdata", table$att, package = "TripleD"))
+    my_attributes <- read.csv(system.file("extdata", table$att, package = "TripleD")) %>%
+      dplyr::filter(Attribute != "IGNORE")
+
 
     # Read in data
     data <- import_data(paste0(in_folder,"/",table$folder))
