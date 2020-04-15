@@ -10,132 +10,76 @@ test_Lavaleye: The raw data included station info together with biological data.
 The RWS data do not have a cruise ID, so instead the cleaned csv files are named RWS_<zaaknr>. The "zaaknummer" is the number sequence at the start of the original data files as stored in DAS. For the RWS data 2018 and 2019, stations with a failed dredge were removed, to prevent double stationIDs.
 
 ## StationID
-For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO.
 test_Lavaleye: The column 'StCode' is used as StationID.
-RWS2018: Station ID is RWS31135633#<station nr reported before _ in the column Loc_name> using the Excelcode: ="RWS31135633#"&LEFT(A2,FIND("_",A2)-1).
 RWS2019: Station ID is RWS31144108#<station nr reported before _ in the column Loc_name> using the Excelcode: ="RWS31144108#"&LEFT(A2,FIND("_",A2)-1).
 
 ## Date
-For the NICO10 cruise (64PE438) the date for all samples is taken from the cruise report.
 test_Lavaleye: Already reported in correct format.
 RWS2018/2019: "DATE_SMP" is Date.
 
 ## Lat_start_DD and Lon_start_DD
-For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge touched bottom. Taken from CASINO extract in cruise report.
 test_Lavaleye: Not available.
 RWS2018/2019: "Position_x, begin"	"Position_y, begin" are Lon_start_DD and Lat_start_DD. The coordinate system was "EPSG4258".
 
 
 ## Lat_stop_DD and Lon_stop_DD
-For the NICO10 cruise (64PE438) these correspond to the position of the ship when the dredge was heaved. Taken from CASINO extract in cruise report.
 test_Lavaleye: Not available. 
 RWS2018/2019: "Position_x, eind"	"Position_y, eind" are Lon_stop_DD and Lat_stop_DD. The coordinate system was "EPSG4258".
 
 ## Lat_DD_midpt and Lon_DD_midpt
-The Lat(DD) and Lon(DD) for the NICO10 cruise (64PE438) are calculated from the position of the ship, the position of the antenna on the ship, the estimated angle of the veered cable, and the length of the veered cable as follows:  
-**CODE BY ROB**
-Taken from the excel file provided by Rob Witbaard.
 test_Lavaleye: Reported, but unclear how these were obtained: ship or dredge positions? Midpoint of track?
 RWS2018/2019: "COORD_Y" is Lat_DD_midpt and "COORD_X" is Lon_DD_midpt. The coordinate system was "EPSG4258".
 
 ## Track_length_m_Odo
-For the NICO10 cruise (64PE438) these correspond to the odometer. Taken from CASINO extract in cruise report.
-test_Lavaleye: Track length is Track_dist(m). Are these all measured with odometers, or also other methods to derive track distance?
 RWS2018/2019: The variable "AMT_MEAS" is the area that was measured in m2. Because the blade width is 20 cm, the track length can be deduced from area and blade width (2018: all track lengths are 100m, 2019: track lengths are all near 100m).
 
 ## Blade_depth_cm
-During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
 test_Laveleye: depth of blade is not recorded. For now assumed 20 cm, is this correct for all data? In prototype paper other possible depths were also recorded.
 RWS2018: "Schaafdiepte (cm)" used for blade depth.
 
 ## Blade_width_cm
-During the NICO10 cruise (64PE438) a blade of 20x20 cm was used.
 test_Laveleye: width is blade width in meters, so multiplied x100 to obtain value in cm. 
 RWS2018/2019: Blade width assumed to be 20 cm?
 
 ## Vessel
-NICO10 cruise (64PE438): RV Pelagia
 test_Laveleye: Not available.
 RWS2018/2019: NA.
 
 ## CruiseID
-NICO10 cruise (64PE438)
 test_Laveleye: CruiseID is Cruise in raw data.
 RWS2018/2019: NA.
 
 ## Cruise_name
-NICO10 cruise (64PE438)
 test_Laveleye: Cruise_name is CruiseName in raw data.
 RWS2018/2019: NA.
 
 ## Station_name
-NICO10 cruise (64PE438): station names can be used to relate to other samples taken at these locations (boxcores, nutrient samples, etc.) as reported in the cruise report.
 test_Laveleye: can we use Station in raw data for this field?
 RWS2018/2019: "Loc_name" used.
 
 ## Region
-NICO10 cruise (64PE438): not included
 test_Laveleye: Available in raw data.
 RWS2018: All data from Frysian Front, so set to FF.
 RWS2019: Regions were manually added based on the station name. Bruinebank = BB, Doggersbank = DB, FrieseFront = FF, Oestergronden = OG, Oestergronden_ov = OG, Offshore = NA.
 
 ## Time_start and Time_stop
-NICO10 cruise (64PE438): Time when dredge touched bottom, taken from CASINO extract in cruise report is start. Time when dredge was heaved, taken from CASINO extract in cruise report is end.
 test_Laveleye: Not available.
-RWS2018: "TIME_OBS" used for Time_start. Time_stop set to NA.
 RWS2019: "TIME_OBS" used for Time_start. Time_stop set to NA. Original times were reported as "HHMM", so they were converted to the correct format "HH:MM:SS" by using the Excel code <=LEFT(A1,2)&":"&RIGHT(A1,2)&":00">.
 
 ## Tow_speed_knots
-NICO10 cruise (64PE438): not included.
 test_Laveleye: Not available.
 RWS2018/2019: NA.
-
-## Water_depth_start_m
-NICO10 cruise (64PE438): not included.
-test_Laveleye: Not available.
-RWS2018/2019: NA.
-
-## Water_depth_stop_m
-NICO10 cruise (64PE438): not included.
-test_Laveleye: Not available.
-RWS2018/2019: Na.
 
 ## Water_depth_m_cruise
-NICO10 cruise (64PE438): how is this measured? Taken from CASINO extract in cruise report.
 test_Laveleye: Available, unclear how these values are obtained.
 RWS2018: The variable "MONSDTE" is used as depth in meters, as the column "UNT_MONSDTE" specifies "m" for all entries.
 RWS2019: The variable "MONSDTE (m t.o.v. NAP)" is used. The original negative values are converted to be positive. The unit of water depth is reported relative to NAP (Normalized Amsterdam Reference).
 
-## Pre-run_setting
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
-RWS2018/2019: NA.
-
-## Cable_length_m
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
-RWS2018/2019: NA.
-
-## SB_count
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
-RWS2018/2019: NA.
 
 ## BB_count
-NICO10 cruise (64PE438): ? Taken from CASINO extract in cruise report.
 test_Laveleye: Not available.
 RWS2018/2019: NA.
 
-## isBladeDeployed
-NICO10 cruise (64PE438): Taken from CASINO extract in cruise report. Column Plate was used, so that OK was isBladeDeployed = 1, No was isBladeDeployed = 0, and NA was kept NA.
-test_Laveleye: Not available.
-RWS2018/2019: NA.
-
-
-## Quality
-NICO10 cruise (64PE438): included, based on the performance parameters of the dredge track. Taken from CASINO extract in cruise report.
-test_Laveleye: Not available.
-RWS2018/2019: NA.
 
 ## Comment
 RWS2019: "smp_memo" is used.
@@ -144,167 +88,89 @@ RWS2019: "smp_memo" is used.
 
 # Species
 ## General remarks
-*Nucula* spp. without reported lengths were removed from the NICO10 file; based on the original handwritten files they were identified to be false entries.  
-
+ 
 The density, biomass, and length data in the RWS2018 and RWS2019 dataset are reported in different tabs. These were merged manually into a CSV in the right format as required for this package as described below.
 
 ## StationID
-For the NICO10 cruise (64PE438) the station numbers are the same as in CASINO. A station was accidentally named 64PE438#49 which should have been 64PE438#53, so this was changed.    
-
 test_Lavaleye: StCode is same as StationID.   
-
-RWS2018: Station ID is RWS31135633#<station nr reported before _FrieseFront in the column Loc_name> using the Excelcode: ="RWS31135633#"&LEFT(A2,FIND("_",A2)-1).  
 
 RWS2019: Station ID is RWS31144108#<station nr reported before _ column Loc_name> using the Excelcode: ="RWS31144108#"&LEFT(A2,FIND("_",A2)-1).  
 
 ## Fraction
-NICO10 cruise (64PE438): Fractions reported as 1/1, 1/2, 1/4 and 1/8 were reported as 1.0, 0.5, 0.25, and 0.125. There were some double entries (combination species - station with differing fractions), which were solved by going back to the original handwritten files:  
-
-Arctica islandica 64PE438#122    0.5 -> mistake in file, fraction set to 1.  
-Arctica islandica 64PE438#122    1      
-
-Porifera          64PE438#122    0.5 -> mistake in file, fraction set to 1.                      
-Porifera          64PE438#122    1               
-
-Nucula spp        64PE438#214    1 -> mistake in file, fraction set to 0.25. 
-Nucula spp        64PE438#214    0.25           
-
-Polychaeta spp    64PE438#215    1 -> These are from different taxa, new entry:                     
-Polychaeta spp    64PE438#215    0.125 -> ""
-
-Row 2003 (station 215). Unit cm. Fraction: 1/1. Poly spp becomes Nereis spp. N=1. Size is 12.  
-Row 2004 (station 215). Unit cm. Fraction: 1/8. Poly spp becomes Owenia fusiformis, N=1 Size=7.  
-Row 2099 (station 215). Unit mm. Fraction: 1/8. Polych. becomes Polychaeta spp, N=10, not measured so NA.
-
 test_Lavaleye: Taken from raw data.  
-
-RWS2018: " FCT-A " is used as Fraction. Additionally:  
-Species_reported    StationID      Fraction isFractionAssumed mistake_count
-1 Goneplax rhomboides RWS31135633#87   0.0625                 0             2
-2 Goneplax rhomboides RWS31135633#87   1                      0             2 -> Mistake, comment: "manually set to 0.0625"
-3 Ophiura albida      RWS31135633#85   0.0313                 0             2
-4 Ophiura albida      RWS31135633#85   1                      0             2 -> Correct fraction calculated: total number of processed individuals (includion the Ophiura subsample with a reported fraction of 1) divided by the total number of caught individuals. New fraction: 0.032440403.
 
 RWS2019: Fraction was calculated as 1/"FCT-A".
 
 ## isFractionAssumed
-NICO10 cruise (64PE438): Fractions were specifically reported so isFractionAssumed = 0.  
-
 test_Lavaleye: isFractionAssumed is based on the column AssumedFraction in raw data. In this case the column was empty, so all fractions were set to isFractionAssumed = 0.
 
 RWS2018/2019: Specifically given in original data file, so set to 0.
 
 ## Species_reported
-NICO10 cruise (64PE438): Species name taken for Species_reported.    
 test_Lavaleye: Taken from raw data.    
 RWS2018/2019: "PAR_Name" is used.  
 
 ## Count
-NICO10 cruise (64PE438): reported in raw data.  
-
 test_Lavaleye: "Number" column is taken as Count.   
-
-RWS2018: "AMT_MEAS" from tab 'Analyse bestand densiteit' is used. Some species were recorded with an 'AMT_MEAS' of 0 and a 'IND_MEAS' of >, meaning they could not be counted properly or that it was decided not to count them (which was the case for Calianassa and Upogebia during this specific cruise). The count of these species was set to NA. If biomass (tab 'Analyse bestand biomassa') or length (tab 'Analyse bestand lengte') measurements were done on smaller groups than indicated in the tab 'Analyse bestand densiteit', the 'AMT_MEAS' of the tab that resulted in the most entries for that species/location combination was used. For example: the 'AMT_MEAS' of a species in the density tab was 5, but were measured in the length tab individually: then they are included as individual entries. Additionally:  
-- Callianassa subterranea was reported as >0 in the density tab, but reported with both a count and a fraction in the biomass tab. Therefore, the count and fraction from the biomass tab were used.  
-- Sometimes the comment in the density tab said: 'x indidivu <5mm niet opgenomen' (' x individuals <5mm not counted). However, these individuals were included for the biomass measurements, therefore the originally omitted individuals were added to the count and the comment was removed.  
 
 RWS2019: "AMT_MEAS" was used. Some species were recorded with an 'AMT_MEAS' of 0 and a 'IND_MEAS' of >, meaning they could not be counted properly or that it was decided not to count them. The count of these species was set to NA.
 
 ## Unit_Length
-NICO10 cruise (64PE438): The column 'Maatvoering' is taken for Unit_Length. 1/2 cm (with space) was converted to 1/2cm (without space).   
-
 test_Lavaleye: 'unit length' taken for Unit_Length. 0.5cm was converted to 1/2cm. na was converted to NA.  
 RWS2018/2019: From the tab 'Analyse bestand lengte' can be seen all measurements were reported in mm.  
 
 ## Length
-NICO10 cruise (64PE438): Column 'Size' is taken for Length.   
-
 test_Lavaleye: reported in raw data.  
-RWS2018: Length values are reported seperately from the density and biomass measurements, thus, in some cases the length cannot be traced back to the (group of) specimens the lengths belong to. Only for entries where the length could be unambiguously matches to a density or biomass entry was the length recorded. The rest of the fields was set to NA.
 RWS2019: The lengths from the tab 'Analyse bestand lengte' was used. If length was not recorded for species that were present in tabs 'Analyse bestand densiteit' and 'Analyse bestand biomassa' Length was set to NA.
 
 ## Unit_Width
-NICO10 cruise (64PE438): The column 'Maatvoering' is taken for Unit_Width IF the comment denotes the measurement concerned width not length. Unit_Length is set to NA for these entries.    
+NICO10 cruise (64PE438):    
 
 test_Lavaleye: 'unit length' taken for Unit_Width if the notes in the original file mention the measured dimension is in fact width not length.  
 
 ## Width
-NICO10 cruise (64PE438): Values reported in 'Size' with a comment that it concerned width of the individual were reported in Width, Length for these entries was set to NA.  
-
 test_Lavaleye: The values reported in 'Width' are used, or the values in 'Length' if the notes/comments in the file mention that the value actually concerns a width not length.    
 
-## WetWeight_g  
-NICO10 cruise (64PE438): Reported in raw data. Entries of '<0.5' were set to 0. Not all individuals of Pennatula phosphorea at station 141 were included; 3 were missing. Added these three specimens with the lengths 35, 24 and 30 mm, and changed the wet weight to 7.5 g (missing data from hand written sheets).  
-
+## WetWeight_g
 test_Lavaleye: scale gWweight with shell is WetWeight(g).  
-
-RWS2018: Not recorded (weight was recorded as Ash Free Dry Weight).   
-
 RWS2019: The values reported in the column 'WW_MEAS' in the tab 'Analyse bestand biomassa' and 'Analyse bestand biomassa (Vis)' was used, and multiplied by 1000 to get from the reported kg to the required g. If wet weight was not reported it was set to NA. If wet weight was below the threshold it was set to 0.  
 
 ## WeightType
-NICO10 cruise (64PE438): Was set to 'Single' if the weight only concerned one individual. Was set to NA if there was no weight reported. Was set to 'Entry' when the biomass only concerned one entry (i.e. the row). Was set to 'Sample' for all other entries.   
-
-RWS2018: NA (no wet weights reported).  
+NICO10 cruise (64PE438):  
 RWS2019: Most of the reported wet weights were sample bulk weights, so BulkWeightType = Sample. This was changed to NA if only one individual was reported.  
 
 ## Threshold_Scale
-NICO10 cruise (64PE438): All specimens were measured with the same scale with a threshold of 0.5 grams.  
 test_Lavaleye: NA.  
-RWS2018: NA (no wet weights reported).  
 RWS2019: Some species are reported as < 0.0005 kg, so the threshold of the scale was 0.5 g.  
 
 ## isWithShell
-NICO10 cruise (64PE438): Assumed all organisms are weighted as a whole (i.e. isWithShell = 1), unless the comment indicates otherwise.  
-
 test_Lavaleye: NA (for now).  
-RWS2018: NA (no wet weights reported).  
 RWS2019: Set to 0, unless specified in the comments that it concerns a weight includion shell or tube 'inclusief schelp'.  
 
 ## isPartialWW
-NICO10 cruise (64PE438): Based on the comments column isPartialWW was set to 1 if it was suspected the reported weight only concerns part of the organism.  
-
 test_Lavaleye: NA (for now).  
-RWS2018: NA (no wet weights reported).  
 RWS2019: Set to 0, unless specified in the comments that it concerns fragments.  
 
 ## AFDW_g
-NICO10 cruise (64PE438): NA.  
-
-RWS2018: The column 'AFDW_MEAS' in the tab 'Analyse bestand biomassa' contains the ash-free dry weight in kilograms. These values were used after multiplying by 1000 (kg to g).  
 RWS2019: NA (no AFDW reported).  
 
 ## BulkWeightTypeAFDW
-NICO10 cruise (64PE438): NA.  
-
-RWS2018: All AFDW values were either for individuals or groups of individuals, never only for the whole sample. Was set using the isBulkWeightAFDW column using Excel: =IF(I2 = 0, "NA", "Entry"). When lengths were reported on a finer scale than the AFDW (quite often) and could be included (see 'Length'), the BulkWeightTypeAFDW was set to 'Sample'.  
-
 RWS2019: NA (no AFDW reported).  
 
 ## Threshold_ScaleAFDW
-NICO10 cruise (64PE438): NA.  
-
-RWS2018: All AFDW values had an accuracy of 0.5 grams. Therefore, the threshold was set at 0.5. 
 RWS2019: NA (no AFDW reported).  
 
 ## isPartialAFDW
-NICO10 cruise (64PE438): NA.   
-
-RWS2018: Set to 0, unless specified in the comment that a (group of) specimen(s) was broken.  
 RWS2019: NA (no AFDW reported).  
 
 ## ID_by
-NICO10 cruise (64PE438): Not reported in raw data.   
-
 RWS2018/2019: "Controle" is used. Empty spaces filled with NA using Excel Find & Select > Go To Special > Select Blanks > OK > "NA" > ctrl+enter.
 
 ## isPreserved
-NICO10 cruise (64PE438): Not reported in raw data.   
-
 test_Lavaleye: Preserved is isPreserved. NA (for now).  
 
 ## Comment
-NICO10 cruise (64PE438): Used comments from raw data (in Dutch).   
+NICO10 cruise (64PE438):  
 
 test_Lavaleye: Remark is used for Comment. Empty cells filled with NA.  
 
