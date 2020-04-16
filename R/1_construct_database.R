@@ -3,7 +3,7 @@
 # -----------------------
 import_data <- function(folder) {
   files <- list.files(folder)
-  data <- lapply(paste0(folder,"/",files), read.csv)
+  data <- lapply(paste0(folder,"/",files), read.csv, strip.white = T)
   names(data) <- files
   return(data)
 }
@@ -178,6 +178,9 @@ are_dates_converted <- function(file, file_name){
 is_time_format_correct <- function(file, file_name){
   is_wrong_time_start <- gsub("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]","", file$Time_start) != ""
   is_wrong_time_stop <- gsub("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]","", file$Time_stop) != ""
+  if(TRUE %in% is_wrong_time_stop){
+    is_wrong_time_stop <- !all(is.na(file$Time_stop))
+  }
   if(TRUE %in% is_wrong_time_start | TRUE %in% is_wrong_time_stop){
     stop(paste0("The time in column 'Time_start' and/or 'Time_stop' and row(s) ",
                 paste(sort(which(c(is_wrong_time_start, is_wrong_time_stop))+1), collapse = ", "),

@@ -208,21 +208,21 @@ check_bioconversion_input <- function(conversion_data){
   conversion_factors <- conversion_data %>%
     dplyr::filter(!is.na(valid_name)) %>%
     dplyr::select(valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
-                  isShellRemoved, Comment_WW_to_AFDW) %>%
+                  is_Shell_removed, Comment_WW_to_AFDW) %>%
     dplyr::filter(WW_to_AFDW > 0) %>%
     dplyr::distinct()
 
   regressions <- conversion_data %>%
     dplyr::filter(!is.na(valid_name)) %>%
     dplyr::select(valid_name, Size_dimension, A_factor, B_exponent, Output_unit,
-                  Reference_regression, Comment_regression, isShellRemoved) %>%
+                  Reference_regression, Comment_regression, is_Shell_removed) %>%
     dplyr::filter(!is.na(Output_unit)) %>%
     dplyr::distinct()
 
   # Only one conversion factor is allowed for each combination of
-  # valid name and isShellRemoved
+  # valid name and is_Shell_removed
   check_conv_f <- conversion_factors %>%
-     dplyr::group_by(valid_name, isShellRemoved) %>%
+     dplyr::group_by(valid_name, is_Shell_removed) %>%
      dplyr::summarise(Count = dplyr::n()) %>%
      dplyr::filter(Count > 1)
   are_double <- which(check_conv_f$Count > 1)
@@ -231,9 +231,9 @@ check_bioconversion_input <- function(conversion_data){
     stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
   }
 
-  # Only one combination for each taxa, size_dimension, output_unit, and isShellRemoved is allowed.
+  # Only one combination for each taxa, size_dimension, output_unit, and is_Shell_removed is allowed.
   check_regressions <- regressions %>%
-    dplyr::group_by(valid_name, Size_dimension, isShellRemoved) %>%
+    dplyr::group_by(valid_name, Size_dimension, is_Shell_removed) %>%
     dplyr::summarise(Count = dplyr::n()) %>%
     dplyr::filter(Count > 1)
   are_double <- which(check_regressions$Count > 1)
@@ -316,11 +316,11 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
               by = c("Species_reported" = "Query")) %>%
     # Attach conversion factors
     dplyr::left_join(., conversion_list$conversion_factors,
-                     by = c("valid_name", "isShellRemoved"),
+                     by = c("valid_name", "is_Shell_removed"),
                      suffix = c("_species", "_conversion")) %>%
     # Attach regression formulas
     dplyr::left_join(., conversion_list$regressions,
-                     by = c("valid_name", "Size_dimension","isShellRemoved"),
+                     by = c("valid_name", "Size_dimension","is_Shell_removed"),
                      suffix = c("_species", "_conversion")) %>%
     # Convert length to mm from other units
     #   - 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
@@ -358,7 +358,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
 
   # Give list of taxa in species_additions that do not have conversion factors
   no_conversion_factors <- species_additions %>%
-    dplyr::select(valid_name, isShellRemoved, WW_to_AFDW) %>%
+    dplyr::select(valid_name, is_Shell_removed, WW_to_AFDW) %>%
     dplyr::filter(is.na(WW_to_AFDW)) %>%
     dplyr::distinct()
   if(nrow(no_conversion_factors) > 0){
@@ -367,7 +367,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   }
   # Give list of taxa that do not have a regression formula
   no_regressions <- species_additions %>%
-    dplyr::select(valid_name, Size_dimension, isShellRemoved, A_factor) %>%
+    dplyr::select(valid_name, Size_dimension, is_Shell_removed, A_factor) %>%
     dplyr::filter(!is.na(Size_dimension), is.na(A_factor)) %>%
     dplyr::distinct()
   if(nrow(no_regressions) > 0){
