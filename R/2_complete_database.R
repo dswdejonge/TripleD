@@ -168,10 +168,11 @@ check_bioconversion_input <- function(conversion_data){
     columns <- which(colnames(conversion_data) %in% boolean_attributes$Attribute)
     subset <- conversion_data[,columns, drop = F]
     if(dim(subset)[2] != 0){
-      is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
+      #is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
+      is_not_boolean <- which(is.na(subset), arr.ind = T)[,"row"]+1
       if(length(is_not_boolean) > 0){
-        stop(paste0("The boolean attributes ", paste(colnames(conversion_data)[columns], collapse = ", "),
-                    " may only be 0, 1, or NA. Please check row(s) ",
+        stop(paste0("The boolean attributes in the bioconversion file", paste(colnames(conversion_data)[columns], collapse = ", "),
+                    " may only be 0 or 1. Please check row(s) ",
                     paste(sort(is_not_boolean), collapse = ", ")))
       }
     }
@@ -297,6 +298,9 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   #conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
   #  worms_conversion, Query, valid_name, isFuzzy),
   #  by = c("Taxon" = "Query"))
+  conversion_data <- conversion_data %>% dplyr::mutate(
+    is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE, FALSE)
+  )
   conversion_list <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
@@ -356,8 +360,9 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     print(to_print)
   }
 
-  # Give list of taxa in species_additions that do not have conversion factors
+  # Give list of taxa in species_additions that did not have conversion factors
   no_conversion_factors <- species_additions %>%
+    dplyr::filter(WW_g > 0 | WW_g_calc > 0) %>%
     dplyr::select(valid_name, is_Shell_removed, WW_to_AFDW) %>%
     dplyr::filter(is.na(WW_to_AFDW)) %>%
     dplyr::distinct()
@@ -367,6 +372,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   }
   # Give list of taxa that do not have a regression formula
   no_regressions <- species_additions %>%
+    dplyr::filter(Size_value > 0) %>%
     dplyr::select(valid_name, Size_dimension, is_Shell_removed, A_factor) %>%
     dplyr::filter(!is.na(Size_dimension), is.na(A_factor)) %>%
     dplyr::distinct()

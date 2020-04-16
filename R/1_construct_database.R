@@ -589,12 +589,12 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
   species <- species %>% dplyr::mutate(
     is_Fraction_assumed = ifelse(is_Fraction_assumed == 0, FALSE, TRUE),
     is_ID_confident = ifelse(is_ID_confident == 0, FALSE, TRUE),
-    is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE, FALSE),
+    is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE,FALSE),
     is_Partial_WW = ifelse(is_Partial_WW == 1, TRUE, FALSE),
     is_Partial_AFDW = ifelse(is_Partial_AFDW == 1, TRUE, FALSE),
     is_Preserved = ifelse(is_Preserved == 1, TRUE, FALSE)
   )
-
+  species$is_Shell_removed[which(is.na(species$is_Shell_removed))] <- FALSE
   # Count = 0 is Count = NA
   species$Count[which(species$Count == 0)] <- NA
 
