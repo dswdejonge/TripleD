@@ -84,7 +84,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::left_join(., tempdf, by = c("valid_name", "WeightType"))
   species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
   species_final$WeightType[species_final$skip_WW_sample] <- NA
-  species_final <- combine_data_sources(species_final, new_column_name = "AFDW_g_combined", order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
+  species_final <- combine_data_sources(species_final,
+                                        new_column_name = "AFDW_g_combined",
+                                        order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
 
   # Collapse to one count and biomas per station/species combi
   species_final <- species_final %>%
