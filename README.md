@@ -43,5 +43,5 @@ load("database.rda")
 View(database)
 ```
 
-![size dimensions diagram](https://raw.githubusercontent.com/ddejonge/TripleD/master/inst/extdata/_morphologies.png)
+![size dimensions diagram](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/_morphologies.png)
 
