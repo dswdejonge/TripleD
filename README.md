@@ -3,7 +3,7 @@ Scaffold script for the TripleD database of NIOZ.
 
 NOTE: Code is not yet functional. In development stage.
 
-This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does NOT contain data; data can be requested from the NIOZ Data Archiving System (DAS).
+This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does NOT contain data; data can be requested from the [NIOZ Data Archiving System (DAS)](https://www.nioz.nl/en/expertise/north-sea-research-centre/nwa-north-sea-in-transition/das).
 
 ## Installation
 ```R
@@ -42,3 +42,6 @@ finalize_database()
 load("database.rda")
 View(database)
 ```
+
+![size dimensions diagram](https://raw.githubusercontent.com/ddejonge/TripleD/master/inst/extdata/_morphologies.png)
+
