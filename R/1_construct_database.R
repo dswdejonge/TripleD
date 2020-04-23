@@ -442,7 +442,7 @@ are_measurements_positive <- function(file, file_name){
   ta <- file$Threshold_scale_AFDW
 
   if(!is.null(ct)){
-    ct <- ct  < 0
+    ct <- ct  < -1
     if(TRUE %in% ct){
       stop(paste0("In file ",file_name," column Count the values in row(s) ",
                   paste(sort(which(ct)+1), collapse = ", "), " are negative but should be positive."))
