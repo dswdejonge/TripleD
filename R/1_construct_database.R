@@ -188,19 +188,20 @@ is_time_format_correct <- function(file, file_name){
   }
 }
 
+# TODO: update according to new attributes
 is_Station_objective_correct <- function(file, file_name){
-  incomplete <- (file$Station_objective == "Incomplete")
-  if(TRUE %in% incomplete){
-    if(is.null(file$Excluded)){
-      stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
-    }
-    incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
-    if(length(incomplete_and_NA) > 0){
-      stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  paste(sort(incomplete_and_NA+1), collapse = ", "),
-                  " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
-    }
-  }
+  #incomplete <- (file$Station_objective == "Incomplete")
+  #if(TRUE %in% incomplete){
+  #  if(is.null(file$Excluded)){
+  #    stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
+  #  }
+  #  incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
+  #  if(length(incomplete_and_NA) > 0){
+  #    stop(paste0("In file ",file_name,", the entries in row(s) ",
+  #                paste(sort(incomplete_and_NA+1), collapse = ", "),
+  #                " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
+  #  }
+  #}
 
   focus <- (file$Station_objective == "Focus")
   if(TRUE %in% focus){
@@ -299,24 +300,69 @@ are_species_metadata_consistent <- function(file, file_name){
 
 is_biomass_complete <- function(file, file_name){
   # WW
-  should_be_complete <- which(!is.na(file$WW_g))
-  if(length(should_be_complete > 0)){
-    isNA <- is.na(file[should_be_complete,
-                       c("Weight_type", "Threshold_scale",
-                         "is_Shell_removed", "is_Partial_WW")])
-    if(TRUE %in% isNA){
-      stop("Wet weight is reported, but the columns Weight_type, Threshold_scale, isWithShell and is_Partial_WW are not filled for all weights.")
+  if("WW_g" %in% colnames(file)){
+    should_be_complete <- which(!is.na(file$WW_g))
+    if(length(should_be_complete > 0)){
+      isNA <- is.na(file[should_be_complete,
+                         c("Weight_type", "Threshold_scale",
+                           "is_Shell_removed", "is_Partial_WW")])
+      if(TRUE %in% isNA){
+        stop("Wet weight is reported, but the columns Weight_type, Threshold_scale, isWithShell and is_Partial_WW are not filled for all weights.")
+      }
+    }
+    # Entry weight type
+    should_be_empty <- which(is.na(file$WW_g) & file$Weight_type == "Entry")
+    if(length(should_be_empty > 0)){
+      stop(paste0("If WW_g is 'NA' then Weight_type cannot be 'Entry'. Check row(s): ",
+                  paste0(should_be_empty+1, collapse = ",")))
+    }
+    # Sample weight type
+    check <- file %>%
+      dplyr::group_by(StationID, Species_reported) %>%
+      dplyr::filter(Weight_type == "Sample") %>%
+      dplyr::summarise(
+        nr_rows = n(),
+        nr_NAs = length(which(is.na(WW_g)))
+      ) %>%
+      dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
+      dplyr::filter(incorrect_weight_type == TRUE)
+    if(dim(check)[1] > 0){
+      print(check)
+      stop("For the station-species combination as printed the WW_g of all 'Sample' entries is NA. Either include a value for WW_g or set Weight_type to 'NA'.")
     }
   }
 
   # AFDW
-  should_be_complete <- which(!is.na(file$AFDW_g))
-  if(length(should_be_complete > 0)){
-    isNA <- is.na(file[should_be_complete,
-                       c("Weight_type_AFDW", "Threshold_scale_AFDW",
-                         "is_Partial_AFDW")])
-    if(TRUE %in% isNA){
-      stop("AFDW is reported, but the columns Weight_type_AFDW, Threshold_scale_AFDW, and is_Partial_AFDW are not filled for all weights.")
+  if("AFDW_g" %in% colnames(file)){
+    should_be_complete <- which(!is.na(file$AFDW_g))
+    if(length(should_be_complete > 0)){
+      isNA <- is.na(file[should_be_complete,
+                         c("Weight_type_AFDW", "Threshold_scale_AFDW",
+                           "is_Partial_AFDW")])
+      if(TRUE %in% isNA){
+        stop("AFDW is reported, but the columns Weight_type_AFDW, Threshold_scale_AFDW, and is_Partial_AFDW are not filled for all weights.")
+      }
+    }
+
+    # Entry weight type
+    should_be_empty <- which(is.na(file$AFDW_g) & file$Weight_type_AFDW == "Entry")
+    if(length(should_be_empty > 0)){
+      stop(paste0("If AFDW_g is 'NA' then Weight_type_AFDW cannot be 'Entry'. Check row(s): ",
+                  paste0(should_be_empty+1, collapse = ",")))
+    }
+    # Sample weight type
+    check <- file %>%
+      dplyr::group_by(StationID, Species_reported) %>%
+      dplyr::filter(Weight_type_AFDW == "Sample") %>%
+      dplyr::summarise(
+        nr_rows = n(),
+        nr_NAs = length(which(is.na(AFDW_g)))
+      ) %>%
+      dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
+      dplyr::filter(incorrect_weight_type == TRUE)
+    if(dim(check)[1] > 0){
+      print(check)
+      stop("For the station-species combination as printed the AFDW_g of all 'Sample' entries is NA. Either include a value for AFDW_g or set Weight_type_AFDW to 'NA'.")
     }
   }
 }
@@ -566,8 +612,6 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
         are_species_metadata_consistent(file, file_name)
         is_biomass_complete(file, file_name)
         do_measurements_have_units(file, file_name)
-        # TODO: check if there is only one sample weight for the species/station combi??
-        # TODO: for sample weight all isWithShell should be the same??
       }
       are_measurements_positive(file, file_name)
     }
