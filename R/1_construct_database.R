@@ -190,30 +190,33 @@ is_time_format_correct <- function(file, file_name){
 
 # TODO: update according to new attributes
 is_Station_objective_correct <- function(file, file_name){
-  #incomplete <- (file$Station_objective == "Incomplete")
-  #if(TRUE %in% incomplete){
-  #  if(is.null(file$Excluded)){
-  #    stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Incomplete', but the necessary column 'Excluded' does not exist."))
-  #  }
-  #  incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
-  #  if(length(incomplete_and_NA) > 0){
-  #    stop(paste0("In file ",file_name,", the entries in row(s) ",
-  #                paste(sort(incomplete_and_NA+1), collapse = ", "),
-  #                " are defined 'Incomplete' but no excluded taxons are given in the column 'Excluded'."))
-  #  }
-  #}
-
-  focus <- (file$Station_objective == "Focus")
-  if(TRUE %in% focus){
-    if(is.null(file$Focus)){
-      stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Focus', but the necessary extra column 'Focus' does not exist."))
-    }
-    focus_and_NA <- which(focus & is.na(file$Focus))
-    if(length(focus_and_NA > 0)){
-      stop(paste0("In file ",file_name,", the entries in row(s) ",
-                  paste(sort(focus_and_NA+1), collapse = ", "),
-                  " are defined 'Focus' in the column 'Station_objective', but no taxons that were focussed on are given in the extra column 'Focus'."
-                  ))
+  incomplete <- (file$Station_objective == "Incomplete")
+  no_excl <- is.null(file$Excluded)
+  no_focus <- is.null(file$Focus)
+  if(TRUE %in% incomplete){
+    if(no_excl & no_focus){
+      stop(paste0("In file ",file_name,", some entries in column 'Station_objective' are 'Incomplete', but the necessary columns 'Excluded' or 'Focus' do not exist."))
+    }else if(no_excl){
+      incomplete_and_NA <- which(incomplete & is.na(file$Focus))
+      if(length(incomplete_and_NA) > 0){
+        stop(paste0("In file ",file_name,", the entries in row(s) ",
+                    paste(sort(incomplete_and_NA+1), collapse = ", "),
+                    " are defined 'Incomplete' but no taxa are provided in the column 'Focus' or 'Excluded'."))
+      }
+    }else if(no_focus){
+      incomplete_and_NA <- which(incomplete & is.na(file$Excluded))
+      if(length(incomplete_and_NA) > 0){
+        stop(paste0("In file ",file_name,", the entries in row(s) ",
+                    paste(sort(incomplete_and_NA+1), collapse = ", "),
+                    " are defined 'Incomplete' but no taxa are provided in the column 'Focus' or 'Excluded'."))
+      }
+    }else{
+      incomplete_and_NA <- which(incomplete & is.na(file$Excluded) & is.na(file$Focus))
+      if(length(incomplete_and_NA) > 0){
+        stop(paste0("In file ",file_name,", the entries in row(s) ",
+                    paste(sort(incomplete_and_NA+1), collapse = ", "),
+                    " are defined 'Incomplete' but no taxa are provided in the column 'Focus' or 'Excluded'."))
+      }
     }
   }
 }
