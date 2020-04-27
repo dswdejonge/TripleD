@@ -88,7 +88,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
                                         new_column_name = "AFDW_g_combined",
                                         order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
 
-  # Collapse to one count and biomas per station/species combi
+  # Collapse to one count and biomass per station/species combi
   species_final <- species_final %>%
     dplyr::group_by(StationID, valid_name,
                     File, rank, phylum, class, order, family, genus) %>%
