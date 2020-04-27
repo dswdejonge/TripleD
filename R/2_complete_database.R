@@ -21,10 +21,12 @@
 #' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
 #' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
 #' loaded from the input_folder.
-#' @param lats (optional) You can specify latitudes you want to use to collect bathymetry.
-#' If not specified, the track midpoints in the database are used.
-#' @param lons (optional) You can specify longitudes you want to use to collect bathymetry.
-#' If not specified, the track midpoints in the database are used.
+#' @param lats (optional) You can specify latitudes you want to use to collect bathymetry:
+#' a numeric vector with latitudes of which the min and max are found and used.
+#' If not specified, the latitudes from the database are used.
+#' @param lons (optional) You can specify longitudes you want to use to collect bathymetry:
+#' a numeric vector with longitudes of which the min and max are found and used.
+#' If not specified, the longitudes from the database are used.
 #' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
 #' @param data_folder If the stations and/or species database are not provided, the function will search
 #' for it ('stations_initial.rda' and 'species_initial.rda') in this folder. Default is 'data'.
@@ -49,9 +51,10 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_da
 
   # Collect bathymetry from NOAA
   message("Collecting bathymetry from NOAA. This can take a while...")
-  lats <- unlist(stations[,c("Lat_DD_midpt","Lat_start_DD", "Lat_stop_DD")])
-  lons <- unlist(stations[,c("Lon_DD_midpt","Lon_start_DD", "Lon_stop_DD")])
-  #bathymetry <- collect_bathymetry(stations, lats, lons)
+  if(is.null(lats) & is.null(lons)){
+    lats <- unlist(stations[,c("Lat_DD_midpt","Lat_start_DD", "Lat_stop_DD")])
+    lons <- unlist(stations[,c("Lon_DD_midpt","Lon_start_DD", "Lon_stop_DD")])
+  }
   bathymetry <- collect_bathymetry(lats, lons)
   save(bathymetry, file = paste0(out_folder,"/bathymetry.rda"))
   message(paste0("Bathymetry stored as ",out_folder,"/bathymetry.rda."))

@@ -7,9 +7,9 @@
 collect_from_worms(species_names, fuzzy = FALSE)
 }
 \arguments{
-\item{species_names}{Only the species names.}
+\item{species_names}{Character vector with taxa names.}
 
-\item{fuzzy}{Uses the TAXAMATCH algorithm to match species names.}
+\item{fuzzy}{Uses the TAXAMATCH algorithm to fuzzy match species names.}
 }
 \description{
 This function collects WoRMS entries from their database using the reported taxa.

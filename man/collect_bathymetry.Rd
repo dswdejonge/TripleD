@@ -4,16 +4,14 @@
 \alias{collect_bathymetry}
 \title{Collect NOAA bathymetry}
 \usage{
-collect_bathymetry(
-  stations = NULL,
-  lats = NULL,
-  lons = NULL,
-  buffer = 2,
-  resolution = 1
-)
+collect_bathymetry(lats = NULL, lons = NULL, buffer = 2, resolution = 1)
 }
 \arguments{
-\item{stations}{Dataframe (tibble) with the attributes "Lat_DD_midpt" and "Lon_DD_midpt".}
+\item{lats}{(optional) You can specify latitudes you want to use to collect bathymetry.
+If not specified, the track midpoints in the database are used.}
+
+\item{lons}{(optional) You can specify longitudes you want to use to collect bathymetry.
+If not specified, the track midpoints in the database are used.}
 
 \item{buffer}{The size of the buffer zone in decimal degrees around the
 min and max coordinates in the dataframe. Default = 2.}
@@ -21,6 +19,8 @@ min and max coordinates in the dataframe. Default = 2.}
 \item{resolution}{The resolution in minutes the bathymetry is collected in.
 A lower resolution provides better depth estimates from bathymetry, but takes
 a longer time to collect from the NOAA database. Default resolution is 1 minute.}
+
+\item{stations}{Dataframe (tibble) with the attributes "Lat_DD_midpt" and "Lon_DD_midpt".}
 }
 \value{
 Returns a xyz dataframe (x = lon, y = lat, z = altitude i.e. negative values are depth)

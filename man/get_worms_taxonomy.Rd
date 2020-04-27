@@ -7,7 +7,7 @@
 get_worms_taxonomy(species_names)
 }
 \arguments{
-\item{species_names}{Only the species names.}
+\item{species_names}{Character vector with taxa names.}
 }
 \description{
 This function checks all reported taxa against the WoRMS databse.

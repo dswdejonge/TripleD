@@ -4,7 +4,7 @@
 \alias{add_water_depth}
 \title{Add water depth}
 \usage{
-add_water_depth(stations, bathymetry = NULL)
+add_water_depth(stations, bathymetry = NULL, col_lon, col_lat, col_name)
 }
 \arguments{
 \item{stations}{Dataframe (tibble) with the attributes "Lat_DD_midpt" and "Lon_DD_midpt".}

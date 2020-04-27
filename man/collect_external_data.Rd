@@ -7,7 +7,7 @@
 collect_external_data(
   stations = NULL,
   species = NULL,
-  conversion_taxa = NULL,
+  conversion_data = NULL,
   lats = NULL,
   lons = NULL,
   input_folder = "inputfiles",
@@ -23,15 +23,17 @@ If NULL (default) the function will automatically search the data_folder for 'st
 \item{species}{The initial database for species with reported specimen names.
 If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.}
 
-\item{conversion_taxa}{A vector with taxa names from the bioconversion.csv file that should be
-compared against the WoRMS database. If NULL (default) the function will automatically search the
-input_folder for the 'bioconversion.csv' file.}
+\item{conversion_data}{Dataframe with bioconversion data matching the given requirements from the
+attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
+loaded from the input_folder.}
 
-\item{lats}{(optional) You can specify latitudes you want to use to collect bathymetry.
-If not specified, the track midpoints in the database are used.}
+\item{lats}{(optional) You can specify latitudes you want to use to collect bathymetry:
+a numeric vector with latitudes of which the min and max are found and used.
+If not specified, the latitudes from the database are used.}
 
-\item{lons}{(optional) You can specify longitudes you want to use to collect bathymetry.
-If not specified, the track midpoints in the database are used.}
+\item{lons}{(optional) You can specify longitudes you want to use to collect bathymetry:
+a numeric vector with longitudes of which the min and max are found and used.
+If not specified, the longitudes from the database are used.}
 
 \item{input_folder}{The folder where to find the bioconversion.csv file. Default is 'inputfiles'.}
 
