@@ -2,8 +2,8 @@
 #'
 #' This function collects WoRMS entries from their database using the reported taxa.
 #' @references worrms R-package
-#' @param species_names Only the species names.
-#' @param fuzzy Uses the TAXAMATCH algorithm to match species names.
+#' @param species_names Character vector with taxa names.
+#' @param fuzzy Uses the TAXAMATCH algorithm to fuzzy match species names.
 #' @details Searches in batches of 50.
 #' @export
 collect_from_worms <- function(species_names, fuzzy = FALSE){
@@ -30,7 +30,7 @@ collect_from_worms <- function(species_names, fuzzy = FALSE){
 #'
 #' This function checks all reported taxa against the WoRMS databse.
 #' @references worrms R-package
-#' @param species_names Only the species names.
+#' @param species_names Character vector with taxa names.
 #' @details This function collects WoRMS entries based on the given species names, and reports the valid name
 #' and rank that is found. It first finds all direct matches, and then does a fuzzy match for queries that do
 #' not have a direct match against the database.

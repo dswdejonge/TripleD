@@ -3,9 +3,10 @@ Scaffold script for the TripleD database of NIOZ.
 
 NOTE: Code is not yet functional. In development stage.
 
-This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does NOT contain data; data can be requested from the [NIOZ Data Archiving System (DAS)](https://www.nioz.nl/en/expertise/north-sea-research-centre/nwa-north-sea-in-transition/das).
+This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does *not* contain data; data can be requested from the [NIOZ Data Archiving System (DAS)](https://www.nioz.nl/en/expertise/north-sea-research-centre/nwa-north-sea-in-transition/das).
 
 ## Installation
+You can install the `TripleD` R-package by running the following command (beware you need to have the R-package `devtools` installed):
 ```R
 #install.packages("devtools")
 devtools::install_github("dswdejonge/TripleD")
@@ -14,9 +15,9 @@ devtools::install_github("dswdejonge/TripleD")
 ## Contructing the database
 Set up your working directory as follows in order to start with the NIOZ TripleD database:  
 
-1. Go to the NIOZ Data Archiving System (DAS) and request the formatted TripleD data files.  
+1. Go to the NIOZ Data Archiving System (DAS) and request the formatted TripleD data CSV files.  
 2. In your working directory create a folder called 'inputfiles'. Within this folder you have to create two other folders called 'Species' and 'Stations'.   
-3. Put the CSVs with all species data in the folder 'inputfiles/Species' and the CSVs with all station data in the foldr 'inputfiles/Stations' (do not put any files in these folders that are not csv data files formatted for the TripleD database).  
+3. Put the CSVs with all species data in the folder 'inputfiles/Species' and the CSVs with all station data in the folder 'inputfiles/Stations' (do not put any files in these folders that are not csv data files formatted for the TripleD database).  
 4. Add and run the following R-script to your working directory:
 
 ```R
