@@ -277,11 +277,10 @@ check_bioconversion_input <- function(conversion_data){
 #' @export
 complete_database <- function(data_folder = "data", out_folder = "data", input_folder = "inputfiles",
                               bathymetry = NULL, as_CSV = TRUE){
-  # Load initial database
   message("Loading initial database...")
   load(paste0(data_folder,"/stations_initial.rda"))
   load(paste0(data_folder,"/species_initial.rda"))
-  # Load external data
+
   if(is.null(bathymetry)){
     message("Loading bathymetric data...")
     load(paste0(data_folder,"/bathymetry.rda"))
@@ -290,17 +289,12 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   }
   message("Loading WoRMS taxonomic data...")
   load(paste0(data_folder,"/worms.rda"))
-  #load(paste0(data_folder, "/worms_conversion.rda"))
   message("Loading size to weight conversion data...")
-  #conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
   load(paste0(data_folder,"/conversion_data.rda"))
-  #message("Adding WoRMS valid names to conversion data...")
-  #conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-  #  worms_conversion, Query, valid_name, isFuzzy),
-  #  by = c("Taxon" = "Query"))
-  conversion_data <- conversion_data %>% dplyr::mutate(
-    is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE, FALSE)
-  )
+  conversion_data <- conversion_data %>%
+    dplyr::mutate(
+      is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE, FALSE)
+      )
   conversion_list <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
@@ -308,8 +302,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     add_track_midpoints() %>%
     add_track_length_GPS() %>%
     add_track_length_Odometer() %>%
-    add_water_depth(bathymetry = bathymetry)
-  #TODO: allow water depth estimation from calculated midpoints.
+    add_water_depth(bathymetry = bathymetry, col_lon = "Lon_DD_midpt", col_lat = "Lat_DD_midpt", col_name = "Water_depth_m_Bathy") %>%
+    add_water_depth(bathymetry = bathymetry, col_lon = "Lon_DD_calc", col_lat = "Lat_DD_calc", col_name = "Water_depth_m_Bathy2")
 
   message("Adding additional data to species...")
   species_additions <- species %>%

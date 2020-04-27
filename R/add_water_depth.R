@@ -46,13 +46,16 @@ collect_bathymetry <- function(stations = NULL, lats = NULL, lons = NULL, buffer
 #' @return Returns a xyz dataframe (x = lon, y = lat, z = altitude i.e. negative values are depth)
 #' with bathymetry of a resolution of 1 minute.
 #' @export
-add_water_depth <- function(stations, bathymetry = NULL){
+add_water_depth <- function(stations, bathymetry = NULL, col_lon, col_lat, col_name){
   if(is.null(bathymetry)){
     bathymetry <- collect_bathymetry(stations)
   }
-  stations$Water_depth_m_Bathy <- -(marmap::get.depth(
+  #stations$Water_depth_m_Bathy <- -(marmap::get.depth(
+  stations$new_col <- -(marmap::get.depth(
       mat = marmap::as.bathy(bathymetry),
-      x = as.matrix(stations[,c("Lon_DD_midpt", "Lat_DD_midpt")]),
+      #x = as.matrix(stations[,c("Lon_DD_midpt", "Lat_DD_midpt")]),
+      x = as.matrix(stations[,c(col_lon, col_lat)]),
       locator = F)$depth)
+  colnames(stations)[which(colnames(stations) == "new_col")] <- col_name
   return(stations)
 }
