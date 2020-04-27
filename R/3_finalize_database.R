@@ -54,10 +54,10 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   # Set sample weights from NA to 0
   species_final <- species_additions
   species_final[
-    which(species_final$WeightTypeAFDW == "Sample" &
+    which(species_final$Weight_typeAFDW == "Sample" &
           is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
   species_final[
-    which(species_final$WeightType == "Sample" &
+    which(species_final$Weight_type == "Sample" &
           is.na(species_final$AFDW_g_from_WW)), "AFDW_g_from_WW"] <- 0
 
   species_final <- species_final %>%
@@ -70,20 +70,20 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
       function(x){x/.$Fraction}) %>%
     # Find conflicting weight type fields between
-    # WeightType (WW and AFDW_from_WW) and WeightTypeAFDW (AFDW_g)
+    # Weight_type (WW and AFDW_from_WW) and Weight_typeAFDW (AFDW_g)
     dplyr::mutate(is_conflict = ifelse(
-      WeightType == "Sample" & !is.na(WeightTypeAFDW), TRUE, FALSE
+      Weight_type == "Sample" & !is.na(Weight_typeAFDW), TRUE, FALSE
     ))
   # Set all conflicting fields to NA, so they are skipped in combine_sources
   tempdf <- species_final %>%
-    dplyr::filter(WeightType == "Sample", is_conflict == TRUE) %>%
-    dplyr::select(valid_name, WeightType, is_conflict) %>%
+    dplyr::filter(Weight_type == "Sample", is_conflict == TRUE) %>%
+    dplyr::select(valid_name, Weight_type, is_conflict) %>%
     dplyr::distinct() %>%
     dplyr::rename(skip_WW_sample = is_conflict)
   species_final <- species_final %>%
-    dplyr::left_join(., tempdf, by = c("valid_name", "WeightType"))
+    dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
   species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
-  species_final$WeightType[species_final$skip_WW_sample] <- NA
+  species_final$Weight_type[species_final$skip_WW_sample] <- NA
   species_final <- combine_data_sources(species_final,
                                         new_column_name = "AFDW_g_combined",
                                         order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
