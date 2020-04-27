@@ -49,7 +49,10 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_da
 
   # Collect bathymetry from NOAA
   message("Collecting bathymetry from NOAA. This can take a while...")
-  bathymetry <- collect_bathymetry(stations, lats, lons)
+  lats <- unlist(stations[,c("Lat_DD_midpt","Lat_start_DD", "Lat_stop_DD")])
+  lons <- unlist(stations[,c("Lon_DD_midpt","Lon_start_DD", "Lon_stop_DD")])
+  #bathymetry <- collect_bathymetry(stations, lats, lons)
+  bathymetry <- collect_bathymetry(lats, lons)
   save(bathymetry, file = paste0(out_folder,"/bathymetry.rda"))
   message(paste0("Bathymetry stored as ",out_folder,"/bathymetry.rda."))
 

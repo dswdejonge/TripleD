@@ -4,6 +4,10 @@
 #' based on the min and max coordinates in the database.
 #' @references marmap R-package
 #' @param stations Dataframe (tibble) with the attributes "Lat_DD_midpt" and "Lon_DD_midpt".
+#' @param lats (optional) You can specify latitudes you want to use to collect bathymetry.
+#' If not specified, the track midpoints in the database are used.
+#' @param lons (optional) You can specify longitudes you want to use to collect bathymetry.
+#' If not specified, the track midpoints in the database are used.
 #' @param buffer The size of the buffer zone in decimal degrees around the
 #' min and max coordinates in the dataframe. Default = 2.
 #' @param resolution The resolution in minutes the bathymetry is collected in.
@@ -12,22 +16,29 @@
 #' @return Returns a xyz dataframe (x = lon, y = lat, z = altitude i.e. negative values are depth)
 #' with bathymetry of a resolution of 1 minute.
 #' @export
-collect_bathymetry <- function(stations = NULL, lats = NULL, lons = NULL, buffer = 2, resolution = 1){
-  if(!is.null(lats) & !is.null(lons)){
-    lats <- lats ; lons <- lons
-  }else if(!is.null(stations)){
+#collect_bathymetry <- function(stations = NULL, lats = NULL, lons = NULL, buffer = 2, resolution = 1){
+collect_bathymetry <- function(lats = NULL, lons = NULL, buffer = 2, resolution = 1){
+  #if(!is.null(lats) & !is.null(lons)){
+  #  lats <- lats ; lons <- lons
+  #}else if(!is.null(stations)){
     # Window of coordinates within which to collect bathymetry
-    all_Lat <- unlist(stations[,"Lat_DD_midpt"])
-    all_Lon <- unlist(stations[,"Lon_DD_midpt"])
-    lats <- c(min(all_Lat, na.rm = T)-buffer, max(all_Lat, na.rm = T)+buffer)
-    lons <- c(min(all_Lon, na.rm = T)-buffer, max(all_Lon, na.rm = T)+buffer)
-  }else{
-    stop("To execute the function needs a dataframe with station latitudes and longitudes, or manually provided latitudes and longitudes.")
-  }
+  #  all_Lat <- unlist(stations[,"Lat_DD_midpt"])
+  #  all_Lon <- unlist(stations[,"Lon_DD_midpt"])
+  #  lats <- c(min(all_Lat, na.rm = T)-buffer, max(all_Lat, na.rm = T)+buffer)
+  #  lons <- c(min(all_Lon, na.rm = T)-buffer, max(all_Lon, na.rm = T)+buffer)
+  #}else{
+  #  stop("To execute the function needs a dataframe with station latitudes and longitudes, or manually provided latitudes and longitudes.")
+  #}
+
+  lon1 <- min(lons, na.rm = T)-buffer
+  lon2 <- max(lons, na.rm = T)+buffer
+  lat1 <- min(lats, na.rm = T)-buffer
+  lat2 <- max(lats, na.rm = T)+buffer
 
   # Download bathymetry data from NOAA
   bathy <- marmap::getNOAA.bathy(
-    lon1 = lons[1], lon2 = lons[2], lat1 = lats[1], lat2 = lats[2],
+    #lon1 = lons[1], lon2 = lons[2], lat1 = lats[1], lat2 = lats[2],
+    lon1 = lon1, lon2 = lon2, lat1 = lat1, lat2 = lat2,
     resolution = resolution, keep = T)
 
   # Convert to dataframe
@@ -47,15 +58,20 @@ collect_bathymetry <- function(stations = NULL, lats = NULL, lons = NULL, buffer
 #' with bathymetry of a resolution of 1 minute.
 #' @export
 add_water_depth <- function(stations, bathymetry = NULL, col_lon, col_lat, col_name){
-  if(is.null(bathymetry)){
-    bathymetry <- collect_bathymetry(stations)
-  }
+  coordinates <- as.matrix(stations[,c(col_lon, col_lat)])
+  rows_i <- !is.na(coordinates[,1])
+  coordinates_no_NA <- coordinates[rows_i,]
+  depths <- -(marmap::get.depth(
+    mat = marmap::as.bathy(bathymetry),
+    x = coordinates_no_NA,
+    locator = F)$depth)
+  stations$new_col <- NA
+  stations$new_col[rows_i] <- depths
+
   #stations$Water_depth_m_Bathy <- -(marmap::get.depth(
-  stations$new_col <- -(marmap::get.depth(
-      mat = marmap::as.bathy(bathymetry),
+    #  mat = marmap::as.bathy(bathymetry),
       #x = as.matrix(stations[,c("Lon_DD_midpt", "Lat_DD_midpt")]),
-      x = as.matrix(stations[,c(col_lon, col_lat)]),
-      locator = F)$depth)
+      #locator = F)$depth)
   colnames(stations)[which(colnames(stations) == "new_col")] <- col_name
   return(stations)
 }
