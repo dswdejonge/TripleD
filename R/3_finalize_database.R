@@ -111,7 +111,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       ., new_column_name = "Water_depth_m", order_of_preference = c("Water_depth_m_cruise", "Water_depth_m_Bathy")
     ) %>%
     combine_data_sources(
-      ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_cruise", "Track_dist_m_Odometer", "Track_dist_m_GPS")
+      ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_preset", "Track_dist_m_Odometer", "Track_dist_m_GPS")
     ) %>%
     dplyr::mutate(
       Sample_area_m2 = Track_length_m * (Blade_width_cm/100),
@@ -121,7 +121,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Lat_start_DD, -Lon_start_DD,
       -Lat_stop_DD,	-Lon_stop_DD,
       -Lon_DD_calc,	-Lat_DD_calc,
-      -Track_length_m_cruise, -Water_depth_m_cruise, -Odometer_count,
+      -Track_length_m_preset, -Water_depth_m_cruise, -Odometer_count,
       -Track_dist_m_GPS, -Track_dist_m_Odometer, -Water_depth_m_Bathy)
 
   # Create one large table for the Shiny app
