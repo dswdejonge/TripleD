@@ -188,7 +188,6 @@ is_time_format_correct <- function(file, file_name){
   }
 }
 
-# TODO: update according to new attributes
 is_Station_objective_correct <- function(file, file_name){
   incomplete <- (file$Station_objective == "Incomplete")
   no_excl <- is.null(file$Excluded)
@@ -384,6 +383,20 @@ do_measurements_have_units <- function(file, file_name){
                 " size dimensions are missing in row(s) ",
                 paste(sort(no_dimensions), collapse = ", ")))
   }
+
+  no_measurements <- which(is.na(file$Size_value))
+  but_units <- which(!is.na(file$Size_unit[no_measurements]))+1
+  but_dimensions <- which(!is.na(file$Size_dimension[no_measurements]))+1
+  if(length(but_units) > 0){
+    stop(paste0("In file ",file_name,
+                " size units are reported without a size value in row(s) ",
+                paste(sort(but_units), collapse = ", ")))
+  }
+  if(length(but_dimensions) > 0){
+    stop(paste0("In file ",file_name,
+                " size dimensions are reported without a size value in row(s) ",
+                paste(sort(but_dimensions), collapse = ", ")))
+  }
 }
 
 are_measurements_positive <- function(file, file_name){
@@ -445,42 +458,47 @@ are_measurements_positive <- function(file, file_name){
   ta <- file$Threshold_scale_AFDW
 
   if(!is.null(ct)){
-    ct <- ct  < -1
-    if(TRUE %in% ct){
+    ct_l <- ct < -1
+    if(TRUE %in% ct_l){
       stop(paste0("In file ",file_name," column Count the values in row(s) ",
-                  paste(sort(which(ct)+1), collapse = ", "), " are negative but should be positive."))
+                  paste(sort(which(ct_l)+1), collapse = ", "), " are negative but should be positive."))
+    }
+    ct_l <- ct == 0
+    if(TRUE %in% ct_l){
+      stop(paste0("In file ",file_name," column Count the values in row(s) ",
+                  paste(sort(which(ct_l)+1), collapse = ", "), " are zero. Please check for typos or set to 'NA' instead."))
     }
   }
   if(!is.null(sv)){
-    sv <- sv  < 0
+    sv <- sv < 0
     if(TRUE %in% sv){
       stop(paste0("In file ",file_name," column Size_value the values in row(s) ",
                   paste(sort(which(sv)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ww)){
-    ww <- ww  < 0
+    ww <- ww < 0
     if(TRUE %in% ww){
       stop(paste0("In file ",file_name," column WW_g the values in row(s) ",
                   paste(sort(which(ww)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(aw)){
-    aw <- aw  < 0
+    aw <- aw < 0
     if(TRUE %in% aw){
       stop(paste0("In file ",file_name," column AFDW_g the values in row(s) ",
                   paste(sort(which(aw)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(tw)){
-    tw <- tw  <= 0
+    tw <- tw <= 0
     if(TRUE %in% tw){
       stop(paste0("In file ",file_name," column Threshold_scale the values in row(s) ",
                   paste(sort(which(tw)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
   if(!is.null(ta)){
-    ta <- ta  <= 0
+    ta <- ta <= 0
     if(TRUE %in% ta){
       stop(paste0("In file ",file_name," column Threshold_scale_AFDW the values in row(s) ",
                   paste(sort(which(ta)+1), collapse = ", "), " are negative but should be positive."))
@@ -556,7 +574,6 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
     # Read in attribute requirements
     my_attributes <- read.csv(system.file("extdata", table$att, package = "TripleD")) %>%
       dplyr::filter(Attribute != "IGNORE")
-
 
     # Read in data
     data <- import_data(paste0(in_folder,"/",table$folder))
@@ -642,8 +659,6 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
     is_Preserved = ifelse(is_Preserved == 1, TRUE, FALSE)
   )
   species$is_Shell_removed[which(is.na(species$is_Shell_removed))] <- FALSE
-  # Count = 0 is Count = NA
-  species$Count[which(species$Count == 0)] <- NA
 
   # Test of all stationIDs used in the species files are also mentioned in the station files.
   missing_stationIDs <- as.character(
