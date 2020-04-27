@@ -54,7 +54,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   # Set sample weights from NA to 0
   species_final <- species_additions
   species_final[
-    which(species_final$Weight_typeAFDW == "Sample" &
+    which(species_final$Weight_type_AFDW == "Sample" &
           is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
   species_final[
     which(species_final$Weight_type == "Sample" &
@@ -70,9 +70,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
       function(x){x/.$Fraction}) %>%
     # Find conflicting weight type fields between
-    # Weight_type (WW and AFDW_from_WW) and Weight_typeAFDW (AFDW_g)
+    # Weight_type (WW and AFDW_from_WW) and Weight_type_AFDW (AFDW_g)
     dplyr::mutate(is_conflict = ifelse(
-      Weight_type == "Sample" & !is.na(Weight_typeAFDW), TRUE, FALSE
+      Weight_type == "Sample" & !is.na(Weight_type_AFDW), TRUE, FALSE
     ))
   # Set all conflicting fields to NA, so they are skipped in combine_sources
   tempdf <- species_final %>%
