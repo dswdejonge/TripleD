@@ -85,6 +85,14 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
   species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
   species_final$Weight_type[species_final$skip_WW_sample] <- NA
+  # If AFDW or WW is_Partial, use AFDW_calc unless it does not exist.
+  species_final <- species_final %>%
+    dplyr::mutate(
+      skip_partial_WW = ifelse(is_Partial_WW & !is.na(AFDW_g_calc), TRUE, FALSE),
+      skip_partial_AFDW = ifelse(is_Partial_AFDW & !is.na(AFDW_g_calc), TRUE, FALSE)
+    )
+  species_final$AFDW_g_from_WW[species_final$skip_partial_WW] <- NA
+  species_final$AFDW_g[species_final$skip_partial_AFDW] <- NA
   # Combine AFDW columns
   species_final <- combine_data_sources(species_final,
                                         new_column_name = "AFDW_g_combined",
