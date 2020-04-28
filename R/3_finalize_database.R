@@ -93,6 +93,10 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       incomplete_count = ifelse(is.na(Count), 1, 0),
       incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
     ) %>%
+    # Set Count = NA to Count = 1 (there was see at least 1)
+    dplyr::mutate(
+      Count = ifelse(is.na(Count), 1, Count)
+    ) %>%
     # Collapse to one count and biomass per station/species combi
     # Keep column with info if the count/biomass was complete or not
     dplyr::group_by(StationID, valid_name,
