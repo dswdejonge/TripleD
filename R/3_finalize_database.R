@@ -49,8 +49,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   load(paste0(data_folder,"/species_additions.rda"))
   load(paste0(data_folder,"/stations_additions.rda"))
 
-  # Summarize species table
-  # Clean species database
+  ## Clean species table ## -----------
   # Set sample weights from NA to 0
   species_final <- species_additions
   species_final[
@@ -84,18 +83,26 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
   species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
   species_final$Weight_type[species_final$skip_WW_sample] <- NA
+  # Combine AFDW columns
   species_final <- combine_data_sources(species_final,
                                         new_column_name = "AFDW_g_combined",
                                         order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
-
-  # Collapse to one count and biomass per station/species combi
   species_final <- species_final %>%
+    # Identify rows with unknown Count or Biomass
+    dplyr::mutate(
+      incomplete_count = ifelse(is.na(Count), 1, 0),
+      incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
+    ) %>%
+    # Collapse to one count and biomass per station/species combi
+    # Keep column with info if the count/biomass was complete or not
     dplyr::group_by(StationID, valid_name,
                     File, rank, phylum, class, order, family, genus) %>%
     dplyr::summarize(
-      Count_total = sum(Count),
-      Biomass_g = sum(AFDW_g_combined),
-      isFuzzy = sum(isFuzzy) # TODO: ugly way of doing this
+      Count_total = sum(Count, na.rm = T),
+      Biomass_g = sum(AFDW_g_combined, na.rm = T),
+      isFuzzy = ifelse(sum(isFuzzy) > 0, TRUE, FALSE),
+      incomplete_count = ifelse(sum(incomplete_count) > 0, TRUE, FALSE),
+      incomplete_biomass = ifelse(sum(incomplete_biomass) > 0, TRUE, FALSE)
     ) %>%
     dplyr::ungroup()
 
@@ -108,7 +115,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       ., new_column_name = "Lon_DD", order_of_preference = c("Lon_DD_midpt", "Lon_DD_calc")
     ) %>%
     combine_data_sources(
-      ., new_column_name = "Water_depth_m", order_of_preference = c("Water_depth_m_cruise", "Water_depth_m_Bathy")
+      ., new_column_name = "Water_depth_m", order_of_preference = c("Water_depth_m_cruise", "Water_depth_m_Bathy", "Water_depth_m_Bathy2")
     ) %>%
     combine_data_sources(
       ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_preset", "Track_dist_m_Odometer", "Track_dist_m_GPS")
@@ -122,7 +129,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Lat_stop_DD,	-Lon_stop_DD,
       -Lon_DD_calc,	-Lat_DD_calc,
       -Track_length_m_preset, -Water_depth_m_cruise, -Odometer_count,
-      -Track_dist_m_GPS, -Track_dist_m_Odometer, -Water_depth_m_Bathy)
+      -Track_dist_m_GPS, -Track_dist_m_Odometer, -Water_depth_m_Bathy, -Water_depth_m_Bathy2)
 
   # Create one large table for the Shiny app
   # Deselect File in stations because it's double.

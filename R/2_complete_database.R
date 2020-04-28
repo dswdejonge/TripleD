@@ -290,9 +290,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   if(is.null(bathymetry)){
     message("Loading bathymetric data...")
     load(paste0(data_folder,"/bathymetry.rda"))
-  }else{
-    # TODO: CHECK FORMAT BATHYMETRY WHEN GIVEN
   }
+
   message("Loading WoRMS taxonomic data...")
   load(paste0(data_folder,"/worms.rda"))
   message("Loading size to weight conversion data...")
