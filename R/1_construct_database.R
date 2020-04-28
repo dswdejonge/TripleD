@@ -285,11 +285,13 @@ are_predefined_atts_correct <- function(file, file_name, predefined_attributes){
 are_species_metadata_consistent <- function(file, file_name){
   n_unique_Expect <- file %>%
     dplyr::group_by(Species_reported, StationID) %>%
+    dplyr::filter(Count > -1) %>%
     dplyr::select(Species_reported, StationID) %>%
     dplyr::distinct()
 
   n_unique_Obs <- file %>%
     dplyr::group_by(Species_reported, StationID) %>%
+    dplyr::filter(Count > -1) %>%
     dplyr::select(Species_reported, StationID, Fraction, is_Fraction_assumed) %>%
     dplyr::distinct() %>%
     dplyr::mutate(mistake_count = n())
