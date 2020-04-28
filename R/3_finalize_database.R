@@ -68,6 +68,8 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::mutate_at(
       dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
       function(x){x/.$Fraction}) %>%
+    # Round Count to integer (e.g. 3 * 0.333 = 0.999 = 1)
+    dplyr::mutate(Count = round(Count)) %>%
     # Find conflicting weight type fields between
     # Weight_type (WW and AFDW_from_WW) and Weight_type_AFDW (AFDW_g)
     dplyr::mutate(is_conflict = ifelse(
