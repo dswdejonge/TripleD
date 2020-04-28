@@ -91,7 +91,7 @@ get_worms_taxonomy <- function(species_names){
 
   # Merge into tibble and return
   worms_df <- dplyr::bind_rows(worms, .id = "Query") %>%
-    dplyr::mutate(isFuzzy = NA)
+    dplyr::mutate(isFuzzy = 0)
   worms_df[fuzzy_matches,"isFuzzy"] <- 1
 
   return(worms_df)
