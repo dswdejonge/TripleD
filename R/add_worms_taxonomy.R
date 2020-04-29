@@ -96,7 +96,7 @@ get_worms_taxonomy <- function(species_names){
   if(is.null(worms_df$hasNoMatch)){
     worms_df$hasNoMatch <- 0
   }else{
-    worms_df$hasNoMatch[which(hasNoMatch != 1)] <- 0
+    worms_df$hasNoMatch[which(worms_df$hasNoMatch != 1)] <- 0
   }
 
   return(worms_df)
