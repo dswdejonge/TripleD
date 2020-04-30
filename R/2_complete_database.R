@@ -364,7 +364,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::filter(WW_g > 0 | WW_g_calc > 0) %>%
     dplyr::select(valid_name, is_Shell_removed, WW_to_AFDW) %>%
     dplyr::filter(is.na(WW_to_AFDW)) %>%
-    dplyr::distinct()
+    dplyr::distinct() %>%
+    dplyr::arrange(valid_name)
   if(nrow(no_conversion_factors) > 0){
     message("These taxa names have no conversion factor WW_to_AFDW in the bioconversion.csv file:")
     print(no_conversion_factors)
@@ -374,7 +375,8 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     dplyr::filter(Size_value > 0) %>%
     dplyr::select(valid_name, Size_dimension, is_Shell_removed, A_factor) %>%
     dplyr::filter(!is.na(Size_dimension), is.na(A_factor)) %>%
-    dplyr::distinct()
+    dplyr::distinct() %>%
+    dplyr::arrange(valid_name)
   if(nrow(no_regressions) > 0){
     message("These taxa names have no regression formula in the bioconversion.csv file:")
     print(no_regressions)
