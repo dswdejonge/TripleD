@@ -1,9 +1,9 @@
 # TripleD
-Scaffold script for the TripleD database of NIOZ.
+R-package to read and transform TripleD sample data to produce a database with presence-absence, density, and biomass data for benthic megafauna. The TripleD is a special quantitative sampling dredge produced and used by the NIOZ Royal Netherlands Institute for Sea Research.  
 
-NOTE: Code is not yet functional. In development stage.
+This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does *not* contain data; data can be requested from the [NIOZ Data Archiving System (DAS)](https://www.nioz.nl/en/expertise/north-sea-research-centre/nwa-north-sea-in-transition/das).  
 
-This package contains all the code necessary to set up the TripleD database with time-series data collected by NIOZ. This package does *not* contain data; data can be requested from the [NIOZ Data Archiving System (DAS)](https://www.nioz.nl/en/expertise/north-sea-research-centre/nwa-north-sea-in-transition/das).
+The database output of the package can be visually interacted with using a developed [Shiny app](https://www.github.com/dswdejonge/TripleD-app).
 
 ## Installation
 You can install the `TripleD` R-package by running the following command (beware you need to have the R-package `devtools` installed):
@@ -44,5 +44,12 @@ load("database.rda")
 View(database)
 ```
 
+## Cheat sheet
+If you feel lost with the workflow and all the files, use this cheat sheet:
+![cheat sheet](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png)  
+
+
+## Size dimension
+A quick reference and reminder of which size dimensions are measured for different morphological groups. The names in the diagram correspond exactly with the names in the species CSVs and bioconversion CSV that can be requested from the NIOZ Data Archiving System.  
 ![size dimensions diagram](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/_morphologies.png)
 
