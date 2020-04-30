@@ -321,20 +321,23 @@ is_biomass_complete <- function(file, file_name){
                   paste0(should_be_empty+1, collapse = ",")))
     }
     # Sample weight type
-    check <- file %>%
-      dplyr::group_by(StationID, Species_reported) %>%
-      dplyr::filter(Weight_type == "Sample") %>%
-      dplyr::summarise(
-        nr_rows = n(),
-        nr_NAs = length(which(is.na(WW_g)))
-      ) %>%
-      dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
-      dplyr::filter(incorrect_weight_type == TRUE)
-    if(dim(check)[1] > 0){
-      print(check)
-      stop("For the station-species combination as printed the WW_g of all 'Sample' entries is NA. Either include a value for WW_g or set Weight_type to 'NA'.")
+    if("Sample" %in% file$Weight_type){
+      check <- file %>%
+        dplyr::group_by(StationID, Species_reported) %>%
+        dplyr::filter(Weight_type == "Sample") %>%
+        dplyr::summarise(
+          nr_rows = n(),
+          nr_NAs = length(which(is.na(WW_g)))
+        ) %>%
+        dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
+        dplyr::filter(incorrect_weight_type == TRUE)
+      if(dim(check)[1] > 0){
+        print(check)
+        stop("For the station-species combination as printed the WW_g of all 'Sample' entries is NA. Either include a value for WW_g or set Weight_type to 'NA'.")
+      }
     }
   }
+
 
   # AFDW
   if("AFDW_g" %in% colnames(file)){
@@ -355,18 +358,20 @@ is_biomass_complete <- function(file, file_name){
                   paste0(should_be_empty+1, collapse = ",")))
     }
     # Sample weight type
-    check <- file %>%
-      dplyr::group_by(StationID, Species_reported) %>%
-      dplyr::filter(Weight_type_AFDW == "Sample") %>%
-      dplyr::summarise(
-        nr_rows = n(),
-        nr_NAs = length(which(is.na(AFDW_g)))
-      ) %>%
-      dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
-      dplyr::filter(incorrect_weight_type == TRUE)
-    if(dim(check)[1] > 0){
-      print(check)
-      stop("For the station-species combination as printed the AFDW_g of all 'Sample' entries is NA. Either include a value for AFDW_g or set Weight_type_AFDW to 'NA'.")
+    if("Sample" %in% file$Weight_type_AFDW){
+      check <- file %>%
+        dplyr::group_by(StationID, Species_reported) %>%
+        dplyr::filter(Weight_type_AFDW == "Sample") %>%
+        dplyr::summarise(
+          nr_rows = n(),
+          nr_NAs = length(which(is.na(AFDW_g)))
+        ) %>%
+        dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
+        dplyr::filter(incorrect_weight_type == TRUE)
+      if(dim(check)[1] > 0){
+        print(check)
+        stop("For the station-species combination as printed the AFDW_g of all 'Sample' entries is NA. Either include a value for AFDW_g or set Weight_type_AFDW to 'NA'.")
+      }
     }
   }
 }
