@@ -1,6 +1,10 @@
 ---
 title: "Using the Triple-D database"
-output: rmarkdown::html_vignette
+author: "Danielle S.W. de Jonge"
+date: `r Sys.Date()`
+output: 
+  rmarkdown::html_vignette:
+    toc: true
 vignette: >
   %\VignetteIndexEntry{vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -8,40 +12,37 @@ vignette: >
 bibliography: bibliography.bib
 ---
 
-```{r, include = FALSE}
-library(knitr)
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
-
 ```{r setup}
 library(TripleD)
 ```
 
-The TripleD package includes the collected Triple-D data by the NIOZ Royal Netherlands Institute for Sea Research. The Triple-D is a dredge designed by NIOZ that can easily sample relatively large areas of seabed in order to better quantitatively study the distribution of megafauna that has generally low abundances. The Triple-D is mostly used on the Dutch Continental Shelf, North Sea.   
+# Short summary
+- The NIOZ Royal Netherlands Institute for Sea Research owns a special dredge called the **Triple-D (Deep Digging Dredge)** to sample megafauna from sedimentary habitats.  
+- **Time series** data collected over the years (so far only from the North Sea) are stored in CSV files (one file per research cruise) in the NIOZ Data Archiving System (DAS).  
+- The goal of the TripleD package is to read the CSV files, and employ pre-written workflows to obtain a database-style table with **presence-absence, density, and biomass data** of benthic megafauna.  
+- The **transparancy and elaborate documentation** allows users of the package to exactly retrace the source of data, how calculations were performed, and which assumptions underly the data in the final database.  
+- This workflow also allows the user to **rewrite (part of) the workflow** to process the original data if they have specific wishes/assumptions they would like to use.  
+- The output of the TripleD package can directly be used in a developed **Shiny app to visually interact with the data**.  
 
-It was chosen to collect the data in an R package in order to allow easy sharing of the data, its description in elaborate documentation, and the code used to clean, mutate, and explore the data. The package also includes a template that can be used when more Triple-D is collected to allow easy later incorporation into this database. How to add data to the database is included in a seperate vignette. The package is hosted on GitHub to allow version control.  
+# Introduction
+The Triple-D (Deep Digging Dredge) is a dredge designed by NIOZ Royal Netherlands Institute for Sea Research that can easily sample relatively large areas of seabed to quantitatively study the distribution of megafauna that generally occurs in low abundances. So far, the Triple-D is only used in the North Sea, mostly on the Dutch Continental Shelf.  
 
-The Triple-D data is collected over a great many years, over which methodology changed gradually. In order to allow comparison data collected in different years by different people, elaborate documentation has been added to the database. It allows the user of the database to review the assumptions underlying the data.
+The Triple-D was introduced in the last century and has been happily sampling every since. The data collected over the years forms a valuable time series and it was decided to more systematically archive the data to allow easier exploration of this wealth of data and easier incorporation of new data in the future. This Triple-D R-package is the result of this decision, and this vignette explains why.
 
-This vignette includes the following chapters:  
-1. Triple-D: Information on the Triple-D,  
-2. Raw data: Description of the raw data used to construct the dataset,  
-3. Quality control: Elaborate documentation of how the raw data was used to construct the final database,  
-4. Database: How to use the Triple-D database,  
-5. Bibliography: The papers referred to in this vignette.
+The basic idea is three-fold:  
+1. All original sampling data is collected in CSV files (one file per research cruise) formatted in a specific way as specified by the Triple-D package. This data is original data, meaning with as few underlying assumptions as possible. This original data - that should not be mutated - is archived in the NIOZ Data Archiving System (DAS). The data is owned by NIOZ and can be requested by potential users.    
+2. The TripleD R-package can read the CSV files with original data, and processes this data using pre-written workflows to produce a single database-like table with presence-absence, density, and biomass data that can be used in ecological analyses. So, by running the package with requested CSV files you can construct a local database on your own machine. The R-package is available to everyone with completely transparent workflows and elaborate documentation. Therefore, the user is able to completely retrace all data mutations and can even re-write (part of) the workflow if (s)he wishes to produce a personal database that uses other calculations and assumptions from the default workflow.  
+3. A Shiny app is developed to visually interact with the database as produced by the default workflow in the TripleD package. It allows the user to intuitively filter and browse the data in order to better grasp what data is available, and how the data can be employed for the research question at hand. 
 
-Database dashboard:  
-Summary of current database. 
+This vignette contains background information on the Triple-D itself, explains how to use the Triple-D package, and provided guidelines how you can add new data to the Triple-D data archive.
 
 # Acknowledgements
 Magda Bergman  
 Rob Witbaard  
 Marc Lavaleye  
 
-# 1. TripleD
+# The Triple-D: Deep Diggin Dredge
+## Description
 A prototype of the Triple-D was introduced by Bergman & Santbrink [@Bergman1994]. It was developed in order to better quantitatively study the distribution of generally sparsly abundant megafauna. The prototype Triple-D was 2.0 m long, 1.5 m wide and 1.5 m high and weighted about 600 kg. The current Triple-D is 2.4 m long, 2.6 m wide, 1.2 m high and weights about 1200 kg. The dredge contains a blade of 20 cm width that is pushed into the sediment to a depth of 20 cm and consequently towed over the seabed at a speed of 3 knots. The tow track length is measured by an odometer (a wheel tracking the distance) set to 100 m that also controls the pneumatic opening-closing mechanism. The sediment that is exised from the seabed passes through a tailing 6 m with a mesh size of 7 mm. The remaining fauna in the net representing a total area of 20 m2 are brought aboard for identification and measurements.  
 
 More information: http://ipt.nioz.nl/resource?r=triple-d_dredge  
@@ -49,11 +50,27 @@ More information: http://ipt.nioz.nl/resource?r=triple-d_dredge
 Video:  
 [![TripleD operations video](http://img.youtube.com/vi/O3XIFzbljWk/0.jpg)](https://www.youtube.com/watch?v=O3XIFzbljWk "NIOZ Triple D Operations clip")
 
+## Sampling procedure
+The dredge is lowered to the seabed and towed over the sediment until it's stable (the pre-track distance). The blade is pushed into the sediment to start the actual sampling track. All sediment exised by the blade pass through a net that retains the organisms. After the intended track distance the blad is taken out of the sediment, and the catch is brought up to the ship.  
+
+On board, any remaining sediment is washed from the organisms. The organisms are identified and grouped. Preferably all specimens are counted, measured, and weighed. However, due to the sometimes large number of specimens only a representative fraction of the species is measured and weighed. For example, 100 specimens of *Asterias rubens* (common sea star) are caught. Due to time constraints, 20 representative specimens are selected, measured and weighed (the other 80 are discarded). These measurements are noted together with a fraction of 0.2. This fraction is later used to upscale the measured values to an estimation for the complete catch.
+
+## Limitations
+- The blade width and blade depth dimension are the intended sampling width and depth. However due to sediment types, objects in the sediment, and unevenness of the sediment, the actual track width and depth may differ somewhat. No study is yet done to quantify these effects.  
+- Polychaetes are caught by the Triple-D, but the Triple-D is not suitable for a quantitative analysis of polychaete abundance.  
+
+# The TripleD R-package
+
+## General structure
+The Triple-D R-package and all related files can be found in its GitHub repository: github.com/dswdejonge/TripleD. The location of different files where certain information can be found are noted as `TripleD/folder/file.txt`.
+
+
+
 # 2. Raw data
 TripleD biological data and corresponding metadata was collected and kept intact to refer back if inconsistencies would occur. The raw data is not included in the package to save space, but instead it should be available through the NIOZ data archiving system (DAS). The current database in based on the following sources of data:   
 ```{r}
-raw_data_sources <- read.csv(system.file("extdata", "data_sources.csv", package = "TripleD"))
-knitr::kable(raw_data_sources)
+#raw_data_sources <- read.csv(system.file("extdata", "data_sources.csv", package = "TripleD"))
+#knitr::kable(raw_data_sources)
 ```
 
 If you would like to include new data in the database, please add a description of the raw data file(s) to the "data_sources.csv" found in the package folder "extdata".
