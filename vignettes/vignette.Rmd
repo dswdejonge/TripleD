@@ -1,7 +1,7 @@
 ---
 title: "Using the Triple-D database"
 author: "Danielle S.W. de Jonge"
-date: `r Sys.Date()`
+date: 28-05-2020
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -24,25 +24,28 @@ library(TripleD)
 - This workflow also allows the user to **rewrite (part of) the workflow** to process the original data if they have specific wishes/assumptions they would like to use.  
 - The output of the TripleD package can directly be used in a developed **Shiny app to visually interact with the data**.  
 
-# Introduction
+# 1. Introduction
 The Triple-D (Deep Digging Dredge) is a dredge designed by NIOZ Royal Netherlands Institute for Sea Research that can easily sample relatively large areas of seabed to quantitatively study the distribution of megafauna that generally occurs in low abundances. So far, the Triple-D is only used in the North Sea, mostly on the Dutch Continental Shelf.  
 
 The Triple-D was introduced in the last century and has been happily sampling every since. The data collected over the years forms a valuable time series and it was decided to more systematically archive the data to allow easier exploration of this wealth of data and easier incorporation of new data in the future. This Triple-D R-package is the result of this decision, and this vignette explains why.
 
-The basic idea is three-fold:  
-1. All original sampling data is collected in CSV files (one file per research cruise) formatted in a specific way as specified by the Triple-D package. This data is original data, meaning with as few underlying assumptions as possible. This original data - that should not be mutated - is archived in the NIOZ Data Archiving System (DAS). The data is owned by NIOZ and can be requested by potential users.    
-2. The TripleD R-package can read the CSV files with original data, and processes this data using pre-written workflows to produce a single database-like table with presence-absence, density, and biomass data that can be used in ecological analyses. So, by running the package with requested CSV files you can construct a local database on your own machine. The R-package is available to everyone with completely transparent workflows and elaborate documentation. Therefore, the user is able to completely retrace all data mutations and can even re-write (part of) the workflow if (s)he wishes to produce a personal database that uses other calculations and assumptions from the default workflow.  
-3. A Shiny app is developed to visually interact with the database as produced by the default workflow in the TripleD package. It allows the user to intuitively filter and browse the data in order to better grasp what data is available, and how the data can be employed for the research question at hand. 
+The basic idea is three-fold:   
+
+1. All original sampling data is collected in CSV files (one file per research cruise) formatted in a specific way as specified by the Triple-D package. This data is original data, meaning with as few underlying assumptions as possible. This original data - that should not be mutated - is archived in the NIOZ Data Archiving System (DAS). The data is owned by NIOZ and can be requested by potential users.     
+2. The TripleD R-package can read the CSV files with original data, and processes this data using pre-written workflows to produce a single database-like table with presence-absence, density, and biomass data that can be used in ecological analyses. So, by running the package with requested CSV files you can construct a local database on your own machine. The R-package is available to everyone with completely transparent workflows and elaborate documentation. Therefore, the user is able to completely retrace all data mutations and can even re-write (part of) the workflow if (s)he wishes to produce a personal database that uses other calculations and assumptions from the default workflow.   
+3. A Shiny app is developed to visually interact with the database as produced by the default workflow in the TripleD package. It allows the user to intuitively filter and browse the data in order to better grasp what data is available, and how the data can be employed for the research question at hand.   
+
 
 This vignette contains background information on the Triple-D itself, explains how to use the Triple-D package, and provided guidelines how you can add new data to the Triple-D data archive.
 
-# Acknowledgements
+## Acknowledgements
 Magda Bergman  
 Rob Witbaard  
 Marc Lavaleye  
+Dick van Oevelen
 
-# The Triple-D: Deep Diggin Dredge
-## Description
+# 2. The Triple-D: Deep Digging Dredge
+## 2.A. Description
 A prototype of the Triple-D was introduced by Bergman & Santbrink [@Bergman1994]. It was developed in order to better quantitatively study the distribution of generally sparsly abundant megafauna. The prototype Triple-D was 2.0 m long, 1.5 m wide and 1.5 m high and weighted about 600 kg. The current Triple-D is 2.4 m long, 2.6 m wide, 1.2 m high and weights about 1200 kg. The dredge contains a blade of 20 cm width that is pushed into the sediment to a depth of 20 cm and consequently towed over the seabed at a speed of 3 knots. The tow track length is measured by an odometer (a wheel tracking the distance) set to 100 m that also controls the pneumatic opening-closing mechanism. The sediment that is exised from the seabed passes through a tailing 6 m with a mesh size of 7 mm. The remaining fauna in the net representing a total area of 20 m2 are brought aboard for identification and measurements.  
 
 More information: http://ipt.nioz.nl/resource?r=triple-d_dredge  
@@ -50,100 +53,66 @@ More information: http://ipt.nioz.nl/resource?r=triple-d_dredge
 Video:  
 [![TripleD operations video](http://img.youtube.com/vi/O3XIFzbljWk/0.jpg)](https://www.youtube.com/watch?v=O3XIFzbljWk "NIOZ Triple D Operations clip")
 
-## Sampling procedure
+## 2.B. Sampling procedure
 The dredge is lowered to the seabed and towed over the sediment until it's stable (the pre-track distance). The blade is pushed into the sediment to start the actual sampling track. All sediment exised by the blade pass through a net that retains the organisms. After the intended track distance the blad is taken out of the sediment, and the catch is brought up to the ship.  
 
-On board, any remaining sediment is washed from the organisms. The organisms are identified and grouped. Preferably all specimens are counted, measured, and weighed. However, due to the sometimes large number of specimens only a representative fraction of the species is measured and weighed. For example, 100 specimens of *Asterias rubens* (common sea star) are caught. Due to time constraints, 20 representative specimens are selected, measured and weighed (the other 80 are discarded). These measurements are noted together with a fraction of 0.2. This fraction is later used to upscale the measured values to an estimation for the complete catch.
+On board, any remaining sediment is washed from the organisms. The organisms are identified and grouped. Preferably all specimens are counted, measured, and weighed. However, due to the sometimes large number of specimens only a representative fraction of the species is measured and weighed. For example, 100 specimens of *Asterias rubens* (common sea star) are caught. Due to time constraints, 20 representative specimens are selected, measured and weighed (the other 80 are discarded). These measurements (size and weight) are noted together with a fraction of 0.2 (i.e. 20 of 100 specimens processed). This fraction is later used to upscale the measured values to an estimation for the complete catch.  
 
-## Limitations
+If you want to use the TripleD to collect organisms, follow these guidelines to easily convert your documented work into data for the TripleD database:  
+
+1) For each research cruise eventually a stations CSV data file, a species CSV data file, and a readme text file should be created. Take a look at the required attributes and detailed definitions first (see 3.B.). You can even create and print a template sheet to fill in your data while working onboard.  
+2) Write down the specs of the TripleD: What blade depth and width are you using? What is your net mesh size? And other important information. Document this as explained in the attributes file.  
+3) Decide beforehand if you are going to process the full catch, or if you are going to ignore certain groups? Perhaps you only want to study a certain group (e.g. bivalves) and you will ignore the rest. Document this as explained in the attributes file.  
+4) While sampling, keep good track of the date, time (UTC+0), and position (WGS84) of the ship and the dredge track. Preferably also document other information like tow speed, bearing, and water depth.  
+5) When the TripleD is back on board, assess the confidence of the sampled track. If something appears to have gone wrong, document this. If the catch cannot be used quantitatively, but the information is usefull for presence-absence or relative abundances withint the sample, document this as explained in the attributes files.  
+6) Identify and sort the catch. The process will be smoother if the full catch is properly sorted before starting the measurements. You can document who identified the species and if that identification is confident (i.e. no doubt).  
+7) Preferably, each individual is measured and weighed. However, sometimes it is easier to pool some organisms together. For example, if multiple organisms have the same size, you can decide to pool and weigh them together. Each entry must have a unique ID. You can start assigning these onboard already. This is especially usefull when you want to store the organisms for later analysis in the lab (e.g. AFDW measurements). Make sure to consistently use this ID! Document if you will preserve certain organisms and where a user of the database may find these specimens in the future.  
+7) For each taxon, measure the size of all organisms. You can also only process a fraction of the catch, document this accordingly. Below is a diagram that explains for each general morphological group what size dimensions may be measured and what unit is the most appropriate. Hanging this diagram onboard as a large A1 poster, and providing it as laminated hand-out may help your colleagues/studnets/volunteers in the process. Sticking to the defined size dimensions and documenting their names strictly as written on the diagram will ease digitizing your measurements!  
+![TripleD size diagram](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/_morphologies.png)
+
+8) For each taxon: weigh the wet weight. You can also only process a fraction of the catch, document this accordingly. Document the threshold of the scale you are using. If an organism is broken/missing body parts, write down that the wet weight is an underestimation because it only concerns a partial wet weight. If an organism naturally occurs with a hard external structure, like a shell (also hermit crabs!) or a tube (tube worms), write down if this shell was removed before weighing! If your weight does NOT concern a single entry but is a bulk weight (e.g. all specimens of a certain taxon are weighed together but measured for size seperately), document this accordingly!  
+9) If you decide to take specimens back to the lab (read point 6!) for ash-free dry weight measurements, also document the scale threshold, if the organisms were broken, and if the weight is a bulk weight or not. Ash-free dry weight only concerns biologically active tissue, so external hard structures like shells are always removed. Make sure you match the AFDW measurement to the right entry (use the unique IDs).  
+
+Following these guidelines should make it easy to digitize your data as required by the TripleD package (see 3.B.).  
+
+## 2.C. Limitations
 - The blade width and blade depth dimension are the intended sampling width and depth. However due to sediment types, objects in the sediment, and unevenness of the sediment, the actual track width and depth may differ somewhat. No study is yet done to quantify these effects.  
 - Polychaetes are caught by the Triple-D, but the Triple-D is not suitable for a quantitative analysis of polychaete abundance.  
 
-# The TripleD R-package
+# 3. The TripleD R-package
 
-## General structure
-The Triple-D R-package and all related files can be found in its GitHub repository: github.com/dswdejonge/TripleD. The location of different files where certain information can be found are noted as `TripleD/folder/file.txt`.
+## 3.A. General structure
+The Triple-D R-package and all related files can be found in its GitHub repository: github.com/dswdejonge/TripleD. The general structure of the package, and how files relate to each other, are explained in this cheatsheet:  
 
+![TripleD package cheatsheet](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png)
+  
+## 3.B.Input files
+The TripleD package can only read in CSV data files - one with sampling station data and one with species data per research cruise - that meet the specified requirements. The attribute files included in the package describe these requirements. This may require cleaning of your raw data files. A description of this cleaning process must be logged in a corresponding readme file.   
 
+General requirements:    
 
-# 2. Raw data
+- Per research cruise you need three files: 1) Station data ('Year_CruiseID_stations.csv'), 2) Species data ('Year_CruiseID_species.csv'), and 3) a readme file explaining how the former two files were constructued ('Year_CruiseID_README.txt').  
+- Fields may **never** be empty.   
+- Always be aware of the difference between 'NA' (not measured) and '0' (measured and value is 0).   
+- A sampling station corresponds to a single unique sampling event (i.e. dredge track), and NOT to a geographical location.   
+- Do not include columns where all values are NA (otherwise R will treat them as characters in stead of missing values).    
+- Following from the former statement, it is not necessary to include all columns in the attributes files. The attributes files note which columns are 'Required' (i.e. they must always be included) and which are 'Optional' (i.e. if you haven't measured this data, simply leave this column out).   
+- Coordinates must be in WGS84.   
+- Time must be in UTC+0.   
+
+Stations CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_stations.csv), and species CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_species.csv). Alternatively, you can view the requirements in R:  
+```{r view_att, eval=FALSE}
+library(TripleD)
+print(stations_att)
+print(species_att)
+```
+
+## Available data from DAS
 TripleD biological data and corresponding metadata was collected and kept intact to refer back if inconsistencies would occur. The raw data is not included in the package to save space, but instead it should be available through the NIOZ data archiving system (DAS). The current database in based on the following sources of data:   
 ```{r}
 #raw_data_sources <- read.csv(system.file("extdata", "data_sources.csv", package = "TripleD"))
 #knitr::kable(raw_data_sources)
 ```
 
-If you would like to include new data in the database, please add a description of the raw data file(s) to the "data_sources.csv" found in the package folder "extdata".
-
-# 3. Data cleaning
-Data can be added to the database by depositing cleaned csv files with station and sample information in the respective package folders "Sampling_stations" and "Species" under "data-raw". These csv files must fulfill certain requirements (see below). Please describe below under "Description of cleaning process" how you had to adjust the raw data in order to fulfil these requirements if you add new data to the database
-
-## Requirements
-Two types of files can be distinguished: a csv file with station data i.e. information about every sampling event like location and track length, and a csv file with biological data, i.e. the analysis of the TripleD content after dredging. Files from separate cruises are preferably kept separate. Additionally, two metadata files were created, one for station data and one for biological data, called ‘Attributes.csv’ that includes information of each column variable/attribute, its unit if applicable, and a description. If different variables were measured on different cruises, thus different variables will be present in the different csv files, the explanation of all variables can be found in this one attribute explanation file. This metadata is important to prevent confusion about the meaning of values and allow easy transfer of the data to someone that is not familiar with the dataset. These raw datafiles with the correct format in csv extension can be found in the TripleD R-package, under ‘data_raw’ > ‘Sampling_stations’ or ‘Species’ > ‘files’.
-
-### Sampling_stations
-This dataframe includes information on all sampled station, i.e. on every dredge.  
-Columns:  
-- File: File name of the csv that contained the data entry.  
-- Station: A unique sampling ID. Usually the cruiseID combined with a number. Multiple sampling stations can occur at the same geographic location (i.e. have the same station name).  
-- Station_name: A generic name of the station that may contain some information on the location.  
-- Year: The year when the specific station was sampled.  
-- Month: The month when the specific station was sampled (1 to 12, Jan to Dec).  
-- Day: The day of the month when the specific station was sampled (1 to 31).  
-- Time: The time when the specific station was sampled.  
-- Lat: The average latitude (GPS coordinates) of the sampling station (in between the start and end position of the ship during the dredge) expressed in decimal degrees. Reference coordinate system is WGS84.  
-- Lon: The average longitude (GPS coordinates) of the sampling station (in between the start and end position of the ship during the dredge) expressed in decimal degrees. Reference coordinate system is WGS84.  
-- Distance: Distance dredged at this sampling location expressed in meters.  
-- Direction: Average bearing of the ship during the dredge, expressed in ??.  
-- Blade_width: The width of the used blade expressed in cm.  
-- Blade_depth: The depth of the used blade expressed in cm. 
-
-### Species
-This dataframe includes information on the species found in each sample, i.e. in every dredge.
-Columns:
-- File: File name of the csv that contained the data entry.  
-- Station: A unique sampling ID. Usually a cruiseID combined with a number. Is used for cross-referencing with the sampling station information.  
-- Unit: Unit used for expressing the size of the individual. ??  
-- Factor: ??  
-- Species: Scientific species name of the sampled individual.  
-- Common_name: Common name of the sampled individual.  
-- Count: How many individuals are included in this data entry? Should be 1 if the reported information is per individual.  
-- Size: The size of the individual reported by the unit reported in the column "Unit".  
-- WetWeight: The wet weight of the (group of) individuals reported in grams. If sizes are reported for individuals, but wet weight is only known for the collection of individuals per species, then report a wet weight of zero, except for one individual. In the analysis the total wet weight per species is calculated.
-
-## Description of cleaning process
-### 2019_NICO_10.csv
-	The column variables in all files were translated to English. The unit of the variable was added to the column name and no spaces were allowed. For example, ‘water depth’ was changed to ‘water_depth(m)’. Empty cells were not allowed. If a value was missing it was set to NA. Entries with a value 0 that did not have a numerical meaning were changed to NA. 
-For the species data a binary column called BulkWeight(Y/N) was added (either Yes or No) to indicate if a reported wet weight represents the weight of the one individual in the observation (BulkWeigth(Y/N) = N) or if it concerns the combined weight of multiple individuals, either in one row (count > 1) or in multiple rows (multiple individuals reported for size measurements, but weight in bulk) (BulkWeigth(Y/N) = Y) so when the wet weight can only be reported as average value. This column was added to aid analysis downstream if biomasses of individuals are important. Wet weight measurements of 0, originally meant to indicate that the individual was not measured, was changed to NA to avoid confusion in later downstream analysis.
-	For station data, the date of each sampling event was recorded in a column ‘Year’, column ‘Month’ and column ‘Day’. The start and end time of each sampling event was reported in their respective columns as ‘HH:MM:SS”. Start and stop latitude and longitude were reported in their respective columns in decimal degrees.
-
-# 4. Database
-
-# 5. Community matrices
- 
-## 1. Environmental data
-•	Sediment depth samples
-•	Species caught
-•	Number of individuals
-•	Biomass / size of individuals
-•	Sex of individuals
-•	Age of individuals
-•	Overall density sample
-•	Overall biomass sample
-•	Discarded (surviving) species
-
-## 3. How to include more data
-When including data in this database, try to provide as much information as possible and beware of units!!
-
-# Raw data
-Add information on the raw data to the file "data_sources.csv" in the "data-raw folder."
-If possible, add the raw data files to DAS (Data Archiving System of NIOZ).
-
-
-Include information on the sampling stations:  
-In order to interpret the biological data, metadata on the sampling is necessary.
-1. Create a CSV file that include as many as the columns as mentioned in "Data format" as possible.  
-2. Add the CSV file to the 'data-raw/Sampling_stations' folder in this package.  
-3. Run the file 'Sampling_stations.R' in order to store the new data. It will create a new CSV file in the 'data-raw' folder, and an RData file in the 'data' folder.  
 
 # Bibliography
