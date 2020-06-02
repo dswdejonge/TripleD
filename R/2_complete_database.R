@@ -1,54 +1,34 @@
-#' Collect external data
+#' Collect bathymetry from NOAA
 #'
-#' This function collects external data from NOAA and WoRMS.
+#' This function collects bathymetry data from NOAA.
 #' @details
 #' Bathymetry data is collected from the NOAA database using the \code{marmap} R-package.
 #' You need internet connection to do this. The default resolution is 1 minute.
 #' You can also choose to collect your own bathymetry with a different resolution from NOAA by using the
 #' package function \code{collect_bathymetry}, or not to collect bathymetry externally at all
 #' if you have your own dataset.
-#' \cr
-#' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
-#' You need internet connection to do this.
-#' The reported taxonomic names of the specimens in the initial database and in the bioconversion.csv file
-#' are matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
 #' @return This function does not return an object, but stores the information in the specified
-#' \code{out_folder} under the names 'bathymetry.rda' and 'worms.rda'.
+#' \code{out_folder} under the names 'bathymetry.rda'.
 #' @param stations The initial database for stations with track midpoints.
 #' If NULL (default) the function will automatically search the data_folder for 'stations_initial.rda'.
-#' @param species The initial database for species with reported specimen names.
-#' If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.
-#' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
-#' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
-#' loaded from the input_folder.
 #' @param lats (optional) You can specify latitudes you want to use to collect bathymetry:
 #' a numeric vector with latitudes of which the min and max are found and used.
 #' If not specified, the latitudes from the database are used.
 #' @param lons (optional) You can specify longitudes you want to use to collect bathymetry:
 #' a numeric vector with longitudes of which the min and max are found and used.
 #' If not specified, the longitudes from the database are used.
-#' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
-#' @param data_folder If the stations and/or species database are not provided, the function will search
-#' for it ('stations_initial.rda' and 'species_initial.rda') in this folder. Default is 'data'.
+#' @param data_folder If the stations database is not provided, the function will search
+#' for it ('stations_initial.rda') in this folder. Default is 'data'.
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
-collect_external_data <- function(stations = NULL, species = NULL, conversion_data = NULL, lats = NULL, lons = NULL,
-                                  input_folder = "inputfiles", data_folder = "data", out_folder = "data", as_CSV = FALSE){
+collect_from_NOAA <- function(stations = NULL,
+                              data_folder = "data", out_folder = "data",
+                              lats = NULL, lons = NULL, as_CSV = FALSE){
   if(is.null(stations)){
     message("Loading intitial database with stations...")
     load(paste0(data_folder,"/stations_initial.rda"))
   }
-  if(is.null(species)){
-    message("Loading intitial database with species")
-    load(paste0(data_folder,"/species_initial.rda"))
-  }
-  message("Loading size to weight conversion data...")
-  if(is.null(conversion_data)){
-    conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-  }
-  conversion_taxa <- conversion_data$Taxon
-
   # Collect bathymetry from NOAA
   message("Collecting bathymetry from NOAA. This can take a while...")
   if(is.null(lats) & is.null(lons)){
@@ -58,12 +38,146 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_da
   bathymetry <- collect_bathymetry(lats, lons)
   save(bathymetry, file = paste0(out_folder,"/bathymetry.rda"))
   message(paste0("Bathymetry stored as ",out_folder,"/bathymetry.rda."))
+  if(as_CSV){
+    write.csv(bathymetry, file = "bathymetry.csv")
+  }
+}
 
+
+#' Check reported species names against WoRMS
+#'
+#' This function checks reported species names against WoRMS.
+#' @details
+#' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
+#' You need internet connection to do this.
+#' The reported taxonomic names of the specimens in the initial database
+#' is matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
+#' @return This function does not return an object, but stores the information in the specified
+#' \code{out_folder} under the name 'worms.rda'.
+#' @param species The initial database for species with reported specimen names.
+#' If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.
+#' @param data_folder If the species database is not provided, the function will search
+#' for it (species_initial.rda') in this folder. Default is 'data'.
+#' @param out_folder The external data is stored in this folder. Default is 'data'.
+#' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
+#' @export
+check_species_WORMS <- function(species = NULL,
+                                data_folder = "data", out_folder = "data",
+                                as_CSV = FALSE){
+  if(is.null(species)){
+    message("Loading intitial database with species")
+    load(paste0(data_folder,"/species_initial.rda"))
+  }
   # Collect taxonomy of species from WoRMs
   message("Collecting taxonomy from the WoRMS database of taxa reported in TripleD data. This can take a while...")
   worms <- get_worms_taxonomy(as.character(species$Species_reported))
   save(worms, file = paste0(out_folder,"/worms.rda"))
   message(paste0("WoRMS taxonomic information is stored as ",out_folder,"/worms.rda."))
+  if(as_CSV){
+    write.csv(worms, file = "worms_taxonomy.csv")
+  }
+}
+
+#' Check species names from bioconversion file to WoRMS
+#'
+#' This function checks species names from the bioconversion input file against
+#' WoRMS and calculates average conversion factors and regression formula's for
+#' higher taxonomic levels.
+#' @details
+#' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
+#' You need internet connection to do this.
+#' The reported taxonomic names of the specimens in the bioconversion.csv file
+#' are matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
+#' @return This function does not return an object, but stores the information in the specified
+#' \code{out_folder} under the names 'worms_conversion.rda' and 'conversion_data.rda'.
+#' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
+#' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
+#' loaded from the input_folder.
+#' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
+#' @param out_folder The external data is stored in this folder. Default is 'data'.
+#' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
+#' @export
+check_bioconversion_WORMS <- function(conversion_data = NULL,
+                                      input_folder = "inputfiles", out_folder = "data",
+                                      as_CSV = FALSE){
+
+  calculate_mean_conversion <- function(conversion_data){
+    means_list <- list()
+    tlevels <- c("phylum", "class", "order", "family", "genus")
+    for(i in 1:length(tlevels)){
+      # get taxonomic level
+      tlevel <- tlevels[i]
+
+      # get mean regressions
+      subdf_r <- conversion_data %>%
+        dplyr::group_by(!!sym(tlevel), Size_dimension, Size_unit,
+                 Output_unit) %>%
+        dplyr::summarise(A_factor = mean(A_factor, na.rm = T),
+                  B_exponent = mean(B_exponent, na.rm = T)) %>%
+        dplyr::filter(!is.na(!!sym(tlevel)),
+                      !is.na(Size_dimension))
+      isdouble <- subdf_r %>%
+        dplyr::group_by(!!sym(tlevel), Size_dimension) %>%
+        dplyr::summarize(count = n())
+
+      subdf_r <- subdf_r %>%
+        dplyr::left_join(., isdouble) %>%
+        dplyr::filter(!(count > 1 & Output_unit == "WW_g")) %>%
+        dplyr::select(-count)
+
+      # get mean conversion factors
+      subdf_c <- conversion_data %>%
+        dplyr::group_by(!!sym(tlevel), is_Shell_removed) %>%
+        dplyr::summarise(WW_to_AFDW = mean(WW_to_AFDW, na.rm = T)) %>%
+        dplyr::filter(!is.na(!!sym(tlevel)),
+                      !is.na(WW_to_AFDW))
+
+      # Merge data
+      subdf <- dplyr::full_join(subdf_c, subdf_r) %>%
+        dplyr::rename(valid_name = !!sym(tlevel)) %>%
+        dplyr::mutate(Comment_WW_to_AFDW = "Calculated mean.",
+                      Comment_regression = "Calculated mean.",
+                      Taxon = "Ignore") %>%
+        dplyr::filter(!is.na(is_Shell_removed))
+
+      means_list[[1]] <- subdf
+    }
+    # Bind rows to original conversion_data
+    means_df <- bind_rows(means_list)
+    result <- dplyr::bind_rows(conversion_data, means_df)
+
+    # Check for double entries
+    # # Only one conversion factor is allowed for each combination of
+    # # valid name and is_Shell_removed
+    # check_conv_f <- conversion_factors %>%
+    #   dplyr::group_by(valid_name, is_Shell_removed) %>%
+    #   dplyr::summarise(Count = dplyr::n()) %>%
+    #   dplyr::filter(Count > 1)
+    # are_double <- which(check_conv_f$Count > 1)
+    # if(length(are_double) > 0){
+    #   print(check_conv_f, n=Inf)
+    #   stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
+    # }
+    #
+    # # Only one combination for each taxa, size_dimension, output_unit, and is_Shell_removed is allowed.
+    # check_regressions <- regressions %>%
+    #   dplyr::group_by(valid_name, Size_dimension, is_Shell_removed) %>%
+    #   dplyr::summarise(Count = dplyr::n()) %>%
+    #   dplyr::filter(Count > 1)
+    # are_double <- which(check_regressions$Count > 1)
+    # if(length(are_double) > 0){
+    #   print(check_regressions, n=Inf)
+    #   stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
+    # }
+
+    return(result)
+  }
+
+  message("Loading size to weight conversion data...")
+  if(is.null(conversion_data)){
+    conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
+  }
+  conversion_taxa <- conversion_data$Taxon
 
   # Collect taxonomy of taxa in the bioconversion file
   message("Collecting taxonomy from the WoRMS database of taxa reported in the bioconversion.csv file. This can take a while...")
@@ -71,20 +185,21 @@ collect_external_data <- function(stations = NULL, species = NULL, conversion_da
   no_match_i <- which(is.na(worms_conversion$valid_name))
   if(length(no_match_i) > 0){
     message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
-                paste0(unique(worms_conversion$Query[no_match_i]), collapse = ", ")))
+                   paste0(unique(worms_conversion$Query[no_match_i]), collapse = ", ")))
   }
+  save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
+
   message("Adding WoRMS valid names to conversion data...")
   conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-    worms_conversion, Query, valid_name, isFuzzy),
+    worms_conversion, Query, valid_name, isFuzzy,
+    phylum, class, order, family, genus),
     by = c("Taxon" = "Query")) %>%
     dplyr::distinct()
-  save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
+  message("Calculating conversion and regression means for all taxonomic levels...")
+  conversion_data <- calculate_mean_conversion(conversion_data)
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
   save(conversion_data, file = paste0(out_folder,"/conversion_data.rda"))
-
   if(as_CSV){
-    write.csv(bathymetry, file = "bathymetry.csv")
-    write.csv(worms, file = "worms_taxonomy.csv")
     write.csv(worms_conversion, file = "worms_conversion.csv")
     write.csv(conversion_data, file = "conversion_data.csv")
   }
