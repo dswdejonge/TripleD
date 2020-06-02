@@ -33,7 +33,9 @@ construct_database(in_folder = "inputfiles")
 collect_external_data()
 
 # Add extra data to the intial database (taxonomy, water depths, etc.)
-complete_database()
+collect_from_NOAA() # currently not working - cannot reach NOAA server
+check_species_WORMS()
+check_bioconversion_WORMS()
 
 # Finalize database, by aggregating data, selecting relevant columns, and
 # calculating final densities and biomass per sampling station.
