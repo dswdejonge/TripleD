@@ -135,8 +135,8 @@ check_bioconversion_WORMS <- function(conversion_data = NULL,
       # Merge data
       subdf <- dplyr::full_join(subdf_c, subdf_r) %>%
         dplyr::rename(valid_name = !!sym(tlevel)) %>%
-        dplyr::mutate(Comment_WW_to_AFDW = "Calculated mean.",
-                      Comment_regression = "Calculated mean.",
+        dplyr::mutate(Comment_WW_to_AFDW = "Automatic calculated mean.",
+                      Comment_regression = "Automatic calculated mean.",
                       Taxon = "Ignore") %>%
         dplyr::filter(!is.na(is_Shell_removed))
 
@@ -145,31 +145,6 @@ check_bioconversion_WORMS <- function(conversion_data = NULL,
     # Bind rows to original conversion_data
     means_df <- bind_rows(means_list)
     result <- dplyr::bind_rows(conversion_data, means_df)
-
-    # Check for double entries
-    # # Only one conversion factor is allowed for each combination of
-    # # valid name and is_Shell_removed
-    # check_conv_f <- conversion_factors %>%
-    #   dplyr::group_by(valid_name, is_Shell_removed) %>%
-    #   dplyr::summarise(Count = dplyr::n()) %>%
-    #   dplyr::filter(Count > 1)
-    # are_double <- which(check_conv_f$Count > 1)
-    # if(length(are_double) > 0){
-    #   print(check_conv_f, n=Inf)
-    #   stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
-    # }
-    #
-    # # Only one combination for each taxa, size_dimension, output_unit, and is_Shell_removed is allowed.
-    # check_regressions <- regressions %>%
-    #   dplyr::group_by(valid_name, Size_dimension, is_Shell_removed) %>%
-    #   dplyr::summarise(Count = dplyr::n()) %>%
-    #   dplyr::filter(Count > 1)
-    # are_double <- which(check_regressions$Count > 1)
-    # if(length(are_double) > 0){
-    #   print(check_regressions, n=Inf)
-    #   stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
-    # }
-
     return(result)
   }
 
@@ -343,10 +318,20 @@ check_bioconversion_input <- function(conversion_data){
 
   # Only one conversion factor is allowed for each combination of
   # valid name and is_Shell_removed
-  check_conv_f <- conversion_factors %>%
-     dplyr::group_by(valid_name, is_Shell_removed) %>%
-     dplyr::summarise(Count = dplyr::n()) %>%
-     dplyr::filter(Count > 1)
+  doubles_c <- function(conversion_factors){
+    check_conv_f <- conversion_factors %>%
+      dplyr::group_by(valid_name, is_Shell_removed) %>%
+      dplyr::summarise(Count = dplyr::n()) %>%
+      dplyr::filter(Count > 1)
+    return(check_conv_f)
+  }
+  # Identify doubles
+  check_conv_f <- doubles_c(conversion_factors)
+  # Remove automic calculated doubles
+  conversion_factors2 <- dplyr::left_join(conversion_factors, check_conv_f) %>%
+    dplyr::filter(!(!is.na(Count) & Comment_WW_to_AFDW == "Automatic calculated mean."))
+  # Re-identify doubles
+  check_conv_f <- doubles_c(conversion_factors2)
   are_double <- which(check_conv_f$Count > 1)
   if(length(are_double) > 0){
     print(check_conv_f, n=Inf)
@@ -354,10 +339,20 @@ check_bioconversion_input <- function(conversion_data){
   }
 
   # Only one combination for each taxa, size_dimension, output_unit, and is_Shell_removed is allowed.
-  check_regressions <- regressions %>%
-    dplyr::group_by(valid_name, Size_dimension, is_Shell_removed) %>%
-    dplyr::summarise(Count = dplyr::n()) %>%
-    dplyr::filter(Count > 1)
+  doubles_r <- function(regressions){
+    check_regressions <- regressions %>%
+      dplyr::group_by(valid_name, Size_dimension, is_Shell_removed) %>%
+      dplyr::summarise(Count = dplyr::n()) %>%
+      dplyr::filter(Count > 1)
+    return(check_regressions)
+  }
+  # Identify doubles
+  check_regressions <- doubles_r(regressions)
+  # Remove automic calculated doubles
+  regressions2 <- dplyr::left_join(regressions, check_regressions) %>%
+    dplyr::filter(!(!is.na(Count) & Comment_regression == "Automatic calculated mean."))
+  # Re-identify doubles
+  check_regressions <- doubles_r(regressions2)
   are_double <- which(check_regressions$Count > 1)
   if(length(are_double) > 0){
     print(check_regressions, n=Inf)
