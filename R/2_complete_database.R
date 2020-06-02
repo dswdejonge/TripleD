@@ -360,8 +360,8 @@ check_bioconversion_input <- function(conversion_data){
   }
 
   return(list(
-    conversion_factors = conversion_factors,
-    regressions = regressions))
+    conversion_factors = conversion_factors2,
+    regressions = regressions2))
 }
 
 #' Complete database with external data and calculations
