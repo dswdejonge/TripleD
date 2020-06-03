@@ -39,7 +39,7 @@ collect_from_NOAA <- function(stations = NULL,
   save(bathymetry, file = paste0(out_folder,"/bathymetry.rda"))
   message(paste0("Bathymetry stored as ",out_folder,"/bathymetry.rda."))
   if(as_CSV){
-    write.csv(bathymetry, file = "bathymetry.csv")
+    write.csv(bathymetry, file = paste0(out_folder,"/bathymetry.csv"))
   }
 }
 
@@ -74,7 +74,7 @@ check_species_WORMS <- function(species = NULL,
   save(worms, file = paste0(out_folder,"/worms.rda"))
   message(paste0("WoRMS taxonomic information is stored as ",out_folder,"/worms.rda."))
   if(as_CSV){
-    write.csv(worms, file = "worms_taxonomy.csv")
+    write.csv(worms, file = paste0(out_folder,"/worms_taxonomy.csv"))
   }
 }
 
@@ -110,14 +110,14 @@ check_bioconversion_WORMS <- function(conversion_data = NULL,
 
       # get mean regressions
       subdf_r <- conversion_data %>%
-        dplyr::group_by(!!sym(tlevel), Size_dimension, Size_unit,
+        dplyr::group_by(!!dplyr::sym(tlevel), Size_dimension, Size_unit,
                  Output_unit) %>%
         dplyr::summarise(A_factor = mean(A_factor, na.rm = T),
                   B_exponent = mean(B_exponent, na.rm = T)) %>%
-        dplyr::filter(!is.na(!!sym(tlevel)),
+        dplyr::filter(!is.na(!!dplyr::sym(tlevel)),
                       !is.na(Size_dimension))
       isdouble <- subdf_r %>%
-        dplyr::group_by(!!sym(tlevel), Size_dimension) %>%
+        dplyr::group_by(!!dplyr::sym(tlevel), Size_dimension) %>%
         dplyr::summarize(count = n())
 
       subdf_r <- subdf_r %>%
@@ -127,14 +127,14 @@ check_bioconversion_WORMS <- function(conversion_data = NULL,
 
       # get mean conversion factors
       subdf_c <- conversion_data %>%
-        dplyr::group_by(!!sym(tlevel), is_Shell_removed) %>%
+        dplyr::group_by(!!dplyr::sym(tlevel), is_Shell_removed) %>%
         dplyr::summarise(WW_to_AFDW = mean(WW_to_AFDW, na.rm = T)) %>%
-        dplyr::filter(!is.na(!!sym(tlevel)),
+        dplyr::filter(!is.na(!!dplyr::sym(tlevel)),
                       !is.na(WW_to_AFDW))
 
       # Merge data
       subdf <- dplyr::full_join(subdf_c, subdf_r) %>%
-        dplyr::rename(valid_name = !!sym(tlevel)) %>%
+        dplyr::rename(valid_name = !!dplyr::sym(tlevel)) %>%
         dplyr::mutate(Comment_WW_to_AFDW = "Automatic calculated mean.",
                       Comment_regression = "Automatic calculated mean.",
                       Taxon = "Ignore") %>%
@@ -175,8 +175,8 @@ check_bioconversion_WORMS <- function(conversion_data = NULL,
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
   save(conversion_data, file = paste0(out_folder,"/conversion_data.rda"))
   if(as_CSV){
-    write.csv(worms_conversion, file = "worms_conversion.csv")
-    write.csv(conversion_data, file = "conversion_data.csv")
+    write.csv(worms_conversion, file = paste0(out_folder,"/worms_conversion.csv"))
+    write.csv(conversion_data, file = paste0(out_folder,"/conversion_data.csv"))
   }
 }
 
