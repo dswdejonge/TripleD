@@ -143,7 +143,7 @@ check_bioconversion_WORMS <- function(conversion_data = NULL,
       means_list[[1]] <- subdf
     }
     # Bind rows to original conversion_data
-    means_df <- bind_rows(means_list)
+    means_df <- dplyr::bind_rows(means_list)
     result <- dplyr::bind_rows(conversion_data, means_df)
     return(result)
   }
