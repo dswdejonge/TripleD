@@ -8,6 +8,7 @@ prepare_bioconversion(
   conversion_data = NULL,
   worms = NULL,
   input_folder = "inputfiles",
+  data_folder = "data",
   out_folder = "data",
   as_CSV = FALSE
 )
