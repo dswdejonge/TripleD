@@ -44,9 +44,9 @@ collect_from_NOAA <- function(stations = NULL,
 }
 
 
-#' Check reported species names against WoRMS
+#' Collect reported species names from WoRMS
 #'
-#' This function checks reported species names against WoRMS.
+#' This function collects accepted species names from WoRMS for all reported species.
 #' @details
 #' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
 #' You need internet connection to do this.
@@ -61,7 +61,7 @@ collect_from_NOAA <- function(stations = NULL,
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
-check_species_WORMS <- function(species = NULL,
+collect_species_WORMS <- function(species = NULL,
                                 data_folder = "data", out_folder = "data",
                                 as_CSV = FALSE){
   if(is.null(species)){
@@ -78,9 +78,9 @@ check_species_WORMS <- function(species = NULL,
   }
 }
 
-#' Check species names from bioconversion file to WoRMS
+#' Collect species names in bioconversion file from WoRMS
 #'
-#' This function checks species names from the bioconversion input file against
+#' This function queries reported species names from the bioconversion input file against
 #' WoRMS and calculates average conversion factors and regression formula's for
 #' higher taxonomic levels.
 #' @details
@@ -97,7 +97,7 @@ check_species_WORMS <- function(species = NULL,
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
-check_bioconversion_WORMS <- function(conversion_data = NULL,
+collect_bioconversion_WORMS <- function(conversion_data = NULL,
                                       input_folder = "inputfiles", out_folder = "data",
                                       as_CSV = FALSE){
 
@@ -329,7 +329,8 @@ check_bioconversion_input <- function(conversion_data){
   check_conv_f <- doubles_c(conversion_factors)
   # Remove automic calculated doubles
   conversion_factors2 <- dplyr::left_join(conversion_factors, check_conv_f) %>%
-    dplyr::filter(!(!is.na(Count) & Comment_WW_to_AFDW == "Automatic calculated mean."))
+    dplyr::filter(!(!is.na(Count) & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
+    dplyr::select(-Count)
   # Re-identify doubles
   check_conv_f <- doubles_c(conversion_factors2)
   are_double <- which(check_conv_f$Count > 1)
@@ -350,7 +351,8 @@ check_bioconversion_input <- function(conversion_data){
   check_regressions <- doubles_r(regressions)
   # Remove automic calculated doubles
   regressions2 <- dplyr::left_join(regressions, check_regressions) %>%
-    dplyr::filter(!(!is.na(Count) & Comment_regression == "Automatic calculated mean."))
+    dplyr::filter(!(!is.na(Count) & Comment_regression == "Automatic calculated mean.")) %>%
+    dplyr::select(-Count)
   # Re-identify doubles
   check_regressions <- doubles_r(regressions2)
   are_double <- which(check_regressions$Count > 1)
