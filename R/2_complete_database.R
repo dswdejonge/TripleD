@@ -1,39 +1,5 @@
 
 
-#' Collect reported species names from WoRMS
-#'
-#' This function collects accepted species names from WoRMS for all reported species.
-#' @details
-#' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
-#' You need internet connection to do this.
-#' The reported taxonomic names of the specimens in the initial database
-#' is matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
-#' @return This function does not return an object, but stores the information in the specified
-#' \code{out_folder} under the name 'worms.rda'.
-#' @param species The initial database for species with reported specimen names.
-#' If NULL (default) the function will automatically search the data_folder for 'species_initial.rda'.
-#' @param data_folder If the species database is not provided, the function will search
-#' for it (species_initial.rda') in this folder. Default is 'data'.
-#' @param out_folder The external data is stored in this folder. Default is 'data'.
-#' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
-#' @export
-collect_species_WORMS <- function(species = NULL,
-                                data_folder = "data", out_folder = "data",
-                                as_CSV = FALSE){
-  if(is.null(species)){
-    message("Loading intitial database with species")
-    load(paste0(data_folder,"/species_initial.rda"))
-  }
-  # Collect taxonomy of species from WoRMs
-  message("Collecting taxonomy from the WoRMS database of taxa reported in TripleD data. This can take a while...")
-  worms <- get_worms_taxonomy(as.character(species$Species_reported))
-  save(worms, file = paste0(out_folder,"/worms.rda"))
-  message(paste0("WoRMS taxonomic information is stored as ",out_folder,"/worms.rda."))
-  if(as_CSV){
-    write.csv(worms, file = paste0(out_folder,"/worms_taxonomy.csv"))
-  }
-}
-
 #' Collect species names in bioconversion file from WoRMS
 #'
 #' This function queries reported species names from the bioconversion input file against
@@ -56,69 +22,11 @@ collect_species_WORMS <- function(species = NULL,
 collect_bioconversion_WORMS <- function(conversion_data = NULL,
                                       input_folder = "inputfiles", out_folder = "data",
                                       as_CSV = FALSE){
-
-  calculate_mean_conversion <- function(conversion_data){
-    means_list <- list()
-    tlevels <- c("phylum", "class", "order", "family", "genus")
-    for(i in 1:length(tlevels)){
-      # get taxonomic level
-      tlevel <- tlevels[i]
-
-      # get mean regressions
-      subdf_r <- conversion_data %>%
-        dplyr::group_by(!!dplyr::sym(tlevel), Size_dimension, Size_unit,
-                 Output_unit) %>%
-        dplyr::summarise(A_factor = mean(A_factor, na.rm = T),
-                  B_exponent = mean(B_exponent, na.rm = T)) %>%
-        dplyr::filter(!is.na(!!dplyr::sym(tlevel)),
-                      !is.na(Size_dimension))
-      isdouble <- subdf_r %>%
-        dplyr::group_by(!!dplyr::sym(tlevel), Size_dimension) %>%
-        dplyr::summarize(count = n())
-
-      subdf_r <- subdf_r %>%
-        dplyr::left_join(., isdouble) %>%
-        dplyr::filter(!(count > 1 & Output_unit == "WW_g")) %>%
-        dplyr::select(-count)
-
-      # get mean conversion factors
-      subdf_c <- conversion_data %>%
-        dplyr::group_by(!!dplyr::sym(tlevel), is_Shell_removed) %>%
-        dplyr::summarise(WW_to_AFDW = mean(WW_to_AFDW, na.rm = T)) %>%
-        dplyr::filter(!is.na(!!dplyr::sym(tlevel)),
-                      !is.na(WW_to_AFDW))
-
-      # Merge data
-      subdf <- dplyr::full_join(subdf_c, subdf_r) %>%
-        dplyr::rename(valid_name = !!dplyr::sym(tlevel)) %>%
-        dplyr::mutate(Comment_WW_to_AFDW = "Automatic calculated mean.",
-                      Comment_regression = "Automatic calculated mean.",
-                      Taxon = "Ignore") %>%
-        dplyr::filter(!is.na(is_Shell_removed))
-
-      means_list[[1]] <- subdf
-    }
-    # Bind rows to original conversion_data
-    means_df <- dplyr::bind_rows(means_list)
-    result <- dplyr::bind_rows(conversion_data, means_df)
-    return(result)
-  }
-
-  message("Loading size to weight conversion data...")
-  if(is.null(conversion_data)){
-    conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
-  }
-  conversion_taxa <- conversion_data$Taxon
-
-  # Collect taxonomy of taxa in the bioconversion file
-  message("Collecting taxonomy from the WoRMS database of taxa reported in the bioconversion.csv file. This can take a while...")
-  worms_conversion <- get_worms_taxonomy(conversion_taxa)
   no_match_i <- which(is.na(worms_conversion$valid_name))
   if(length(no_match_i) > 0){
     message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
                    paste0(unique(worms_conversion$Query[no_match_i]), collapse = ", ")))
   }
-  save(worms_conversion, file = paste0(out_folder,"/worms_conversion.rda"))
 
   message("Adding WoRMS valid names to conversion data...")
   conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
@@ -126,204 +34,14 @@ collect_bioconversion_WORMS <- function(conversion_data = NULL,
     phylum, class, order, family, genus),
     by = c("Taxon" = "Query")) %>%
     dplyr::distinct()
+
   message("Calculating conversion and regression means for all taxonomic levels...")
   conversion_data <- calculate_mean_conversion(conversion_data)
   message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
   save(conversion_data, file = paste0(out_folder,"/conversion_data.rda"))
   if(as_CSV){
-    write.csv(worms_conversion, file = paste0(out_folder,"/worms_conversion.csv"))
     write.csv(conversion_data, file = paste0(out_folder,"/conversion_data.csv"))
   }
-}
-
-check_bioconversion_input <- function(conversion_data){
-  # Read attributes
-  message("Checking data format of bioconversion.csv...")
-  my_attributes <- read.csv(system.file("extdata", "attributes_bioconversion.csv", package = "TripleD"))
-
-  # Check presence required attributes
-  required_attributes <- dplyr::filter(my_attributes, Required_or_Optional == "Required")
-  att_is_missing <- !required_attributes$Attribute %in% colnames(conversion_data)
-  if(TRUE %in% (att_is_missing)){
-    stop(paste0("The required attribute(s) ", paste(required_attributes$Attribute[att_is_missing], collapse = ", "),
-                " is/are missing in bioconversion.csv."))
-  }
-
-  # No NA values are allowed in the required columns.
-  columns <- colnames(conversion_data) %in% required_attributes$Attribute
-  subset <- conversion_data[,columns, drop = F]
-  if(TRUE %in% is.na(subset)){
-    rowi <- unique(which(is.na(subset), arr.ind = T)[,"row"]+1)
-    stop(paste0("NA values are not allowed for the required attributes ",
-                paste(required_attributes$Attribute, collapse = ", "),
-                ". Please check row(s): ",paste(sort(unique(rowi)), collapse = ", ")))
-  }
-
-  # Are groups complete
-  my_groups <- my_attributes %>%
-    dplyr::filter(!is.na(Group)) %>%
-    dplyr::group_by(Group) %>%
-    dplyr::group_split()
-  for(my_group in my_groups){
-    is_group_included <- colnames(conversion_data) %in% my_group$Attribute
-    if(TRUE %in% is_group_included &&
-       length(which(is_group_included)) != length(my_group$Attribute)){
-      stop(paste0("The attributes ",
-                  paste(my_group$Attribute, collapse = ", "),
-                  " are needed but only ",
-                  paste(colnames(conversion_data)[is_group_included], collapse = ", ")," are given."))
-    }
-  }
-
-  #TODO: no NA values in grouped vars if a value is given.
-
-  # Check doubles
-  doubles_attributes <- dplyr::filter(my_attributes, Datatype == "Double")
-  columns <- which(colnames(conversion_data) %in% doubles_attributes$Attribute)
-  if(length(columns) > 0){
-    for(j in 1:length(columns)){
-      if(!is.double(conversion_data[,columns[j]])){
-        stop(paste0("The column ", colnames(conversion_data)[columns[j]],
-                    " must contain only values of datatype ",doubles_attributes$Datatype[1]))
-      }
-    }
-  }
-
-  # Check integers
-  integer_attributes <- dplyr::filter(my_attributes, Datatype == "Integer")
-  columns <- which(colnames(conversion_data) %in% integer_attributes$Attribute)
-  if(length(columns) > 0){
-    for(j in 1:length(columns)){
-      if(!is.double(conversion_data[,columns[j]])){
-        stop(paste0("The column ", colnames(conversion_data)[columns[j]],
-                    " must contain only values of datatype ",integer_attributes$Datatype[1]))
-      }
-    }
-  }
-
-  # Check fractions
-  fraction_attributes <- dplyr::filter(my_attributes, Unit == "Fraction")
-  if(length(fraction_attributes$Attribute) > 0){
-    columns <- which(colnames(conversion_data) %in% fraction_attributes$Attribute)
-    subset <- conversion_data[,columns, drop = F]
-    is_not_fraction <- which(subset < 0 | subset > 1, arr.ind = T)[,"row"]+1
-    if(length(is_not_fraction) > 0){
-      stop(paste0("The attributes ", paste(colnames(conversion_data)[columns], collapse = ", "),
-                  " should lie between 0 and 1. Please check row(s) ",
-                  paste(sort(is_not_fraction), collapse = ", ")))
-    }
-  }
-
-  # Check booleans
-  boolean_attributes <- dplyr::filter(my_attributes, Datatype == "Boolean")
-  if(length(boolean_attributes$Attribute) > 0){
-    columns <- which(colnames(conversion_data) %in% boolean_attributes$Attribute)
-    subset <- conversion_data[,columns, drop = F]
-    if(dim(subset)[2] != 0){
-      #is_not_boolean <- which(!is.na(subset) & subset != 0 & subset != 1, arr.ind = T)[,"row"]+1
-      is_not_boolean <- which(is.na(subset), arr.ind = T)[,"row"]+1
-      if(length(is_not_boolean) > 0){
-        stop(paste0("The boolean attributes in the bioconversion file", paste(colnames(conversion_data)[columns], collapse = ", "),
-                    " may only be 0 or 1. Please check row(s) ",
-                    paste(sort(is_not_boolean), collapse = ", ")))
-      }
-    }
-  }
-
-  # Check predefined units
-  remove_str <- "Predefined: "
-  split_at <- ", "
-  units <- my_attributes$Unit %>%
-    .[grep(remove_str, .)] %>%
-    gsub(remove_str, "", .) %>%
-    strsplit(., split_at)
-  names(units) <- my_attributes$Attribute[grep(remove_str, my_attributes$Unit)]
-  for(i in 1:length(units)){
-    att <- names(units)[i]
-    if(!att %in% colnames(conversion_data)){
-      next
-    }else{
-      subset <- conversion_data[,att]
-      is_not_predefined <- which(!subset %in% units[[i]] & !is.na(subset))+1
-      if(length(is_not_predefined) > 0){
-        stop(paste0("In column ",att,
-          " values exist that are not the predefined values ",
-          paste(units[[i]], collapse = ", "),
-          " or NA in row(s): ",paste(sort(is_not_predefined), collapse = ", ")
-        ))
-      }
-    }
-  }
-
-  # TODO: check if all are positive?
-
-  # Split in conversion data and regression
-  conversion_factors <- conversion_data %>%
-    dplyr::filter(!is.na(valid_name)) %>%
-    dplyr::select(valid_name, WW_to_AFDW, Reference_WW_to_AFDW,
-                  is_Shell_removed, Comment_WW_to_AFDW) %>%
-    dplyr::filter(WW_to_AFDW > 0) %>%
-    dplyr::distinct()
-
-  regressions <- conversion_data %>%
-    dplyr::filter(!is.na(valid_name)) %>%
-    dplyr::select(valid_name, Size_dimension, A_factor, B_exponent, Output_unit,
-                  Reference_regression, Comment_regression, is_Shell_removed) %>%
-    dplyr::filter(!is.na(Output_unit)) %>%
-    dplyr::distinct()
-
-  # Only one conversion factor is allowed for each combination of
-  # valid name and is_Shell_removed
-  doubles_c <- function(conversion_factors){
-    check_conv_f <- conversion_factors %>%
-      dplyr::group_by(valid_name, is_Shell_removed) %>%
-      dplyr::summarise(Count = dplyr::n()) %>%
-      dplyr::filter(Count > 1)
-    return(check_conv_f)
-  }
-  # Identify doubles
-  check_conv_f <- doubles_c(conversion_factors)
-  # Remove automic calculated doubles
-  conversion_factors2 <- dplyr::left_join(conversion_factors, check_conv_f) %>%
-    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
-                  Comment_WW_to_AFDW = ifelse(is.na(Comment_WW_to_AFDW), "NA", Comment_WW_to_AFDW)) %>%
-    dplyr::filter(!(Count == 2 & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
-    dplyr::select(-Count)
-  # Re-identify doubles
-  check_conv_f <- doubles_c(conversion_factors2)
-  are_double <- which(check_conv_f$Count > 1)
-  if(length(are_double) > 0){
-    print(check_conv_f, n=Inf)
-    stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
-  }
-
-  # Only one combination for each taxa, size_dimension, output_unit, and is_Shell_removed is allowed.
-  doubles_r <- function(regressions){
-    check_regressions <- regressions %>%
-      dplyr::group_by(valid_name, Size_dimension, is_Shell_removed) %>%
-      dplyr::summarise(Count = dplyr::n()) %>%
-      dplyr::filter(Count > 1)
-    return(check_regressions)
-  }
-  # Identify doubles
-  check_regressions <- doubles_r(regressions)
-  # Remove automic calculated doubles
-  regressions2 <- dplyr::left_join(regressions, check_regressions) %>%
-    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
-                  Comment_regression = ifelse(is.na(Comment_regression), "NA", Comment_regression)) %>%
-    dplyr::filter(!(Count == 2 & Comment_regression == "Automatic calculated mean.")) %>%
-    dplyr::select(-Count)
-  # Re-identify doubles
-  check_regressions <- doubles_r(regressions2)
-  are_double <- which(check_regressions$Count > 1)
-  if(length(are_double) > 0){
-    print(check_regressions, n=Inf)
-    stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
-  }
-
-  return(list(
-    conversion_factors = conversion_factors2,
-    regressions = regressions2))
 }
 
 #' Complete database with external data and calculations
