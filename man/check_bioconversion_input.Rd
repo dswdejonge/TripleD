@@ -4,11 +4,7 @@
 \alias{check_bioconversion_input}
 \title{Check bioconversion input}
 \usage{
-check_bioconversion_input(
-  conversion_data = NULL,
-  input_folder = "inputfiles",
-  out_folder = "data"
-)
+check_bioconversion_input(conversion_data = NULL, input_folder = "inputfiles")
 }
 \arguments{
 \item{conversion_data}{Dataframe with bioconversion data matching the given requirements from the
@@ -16,11 +12,9 @@ attributes_bioconversion file. If NULL (default) the bioconversion.csv will be s
 loaded from the input_folder.}
 
 \item{input_folder}{The folder where to find the bioconversion.csv file. Default is 'inputfiles'.}
-
-\item{out_folder}{The external data is stored in this folder. Default is 'data'.}
 }
 \value{
-This function does not return an object, but stores the dataframe as 'conversion_data.rda' in the out_folder.
+This function does not return an object.
 }
 \description{
 This function checks the format of the bioconversion input file.

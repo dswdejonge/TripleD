@@ -39,58 +39,18 @@ get_double_regressions <- function(regressions, name_column = "valid_name"){
   return(df)
 }
 
-remove_automatically_generated_double_entries <- function(){
-  # Identify doubles
-  check_conv_f <- doubles_c(conversion_factors)
-  # Remove automic calculated doubles
-  conversion_factors2 <- dplyr::left_join(conversion_factors, check_conv_f) %>%
-    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
-                  Comment_WW_to_AFDW = ifelse(is.na(Comment_WW_to_AFDW), "NA", Comment_WW_to_AFDW)) %>%
-    dplyr::filter(!(Count == 2 & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
-    dplyr::select(-Count)
-  # Re-identify doubles
-  check_conv_f <- doubles_c(conversion_factors2)
-  are_double <- which(check_conv_f$Count > 1)
-  if(length(are_double) > 0){
-    print(check_conv_f, n=Inf)
-    stop(paste0("Multiple conversion factors WW_to_AFDW are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
-  }
-
-  # Identify doubles
-  check_regressions <- doubles_r(regressions)
-  # Remove automic calculated doubles
-  regressions2 <- dplyr::left_join(regressions, check_regressions) %>%
-    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
-                  Comment_regression = ifelse(is.na(Comment_regression), "NA", Comment_regression)) %>%
-    dplyr::filter(!(Count == 2 & Comment_regression == "Automatic calculated mean.")) %>%
-    dplyr::select(-Count)
-  # Re-identify doubles
-  check_regressions <- doubles_r(regressions2)
-  are_double <- which(check_regressions$Count > 1)
-  if(length(are_double) > 0){
-    print(check_regressions, n=Inf)
-    stop(paste0("Multiple regressions are present for the above species.\nBeware that these valid names might differ from the taxon name reported in bioconversion.csv.\nUse worms_conversion.rda to check."))
-  }
-
-  return(list(
-    conversion_factors = conversion_factors2,
-    regressions = regressions2))
-}
-
 #' Check bioconversion input
 #'
 #' This function checks the format of the bioconversion input file.
-#' @return This function does not return an object, but stores the dataframe as 'conversion_data.rda' in the out_folder.
+#' @return This function does not return an object.
 #' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
 #' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
 #' loaded from the input_folder.
 #' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
-#' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @export
-check_bioconversion_input <- function(conversion_data = NULL,
-                                      input_folder = "inputfiles", out_folder = "data"){
+check_bioconversion_input <- function(conversion_data = NULL, input_folder = "inputfiles"){
 
-  message("Loading and checking size to weight bioconversion data...")
+  message("Loading and checking bioconversion data...")
   if(is.null(conversion_data)){
     conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
   }
@@ -230,6 +190,7 @@ check_bioconversion_input <- function(conversion_data = NULL,
   message("All good!")
 }
 
+# Input list with conversion_factors df and regressions df
 calculate_mean_conversion <- function(conversion_data){
   means_list <- list()
   tlevels <- c("phylum", "class", "order", "family", "genus")
@@ -247,8 +208,7 @@ calculate_mean_conversion <- function(conversion_data){
                     !is.na(Size_dimension))
     isdouble <- subdf_r %>%
       dplyr::group_by(!!dplyr::sym(tlevel), Size_dimension) %>%
-      dplyr::summarize(count = n())
-
+      dplyr::summarize(count = dplyr::n())
     subdf_r <- subdf_r %>%
       dplyr::left_join(., isdouble) %>%
       dplyr::filter(!(count > 1 & Output_unit == "WW_g")) %>%
@@ -260,7 +220,6 @@ calculate_mean_conversion <- function(conversion_data){
       dplyr::summarise(WW_to_AFDW = mean(WW_to_AFDW, na.rm = T)) %>%
       dplyr::filter(!is.na(!!dplyr::sym(tlevel)),
                     !is.na(WW_to_AFDW))
-
     # Merge data
     subdf <- dplyr::full_join(subdf_c, subdf_r) %>%
       dplyr::rename(valid_name = !!dplyr::sym(tlevel)) %>%
@@ -271,8 +230,99 @@ calculate_mean_conversion <- function(conversion_data){
 
     means_list[[1]] <- subdf
   }
+
   # Bind rows to original conversion_data
   means_df <- dplyr::bind_rows(means_list)
   result <- dplyr::bind_rows(conversion_data, means_df)
   return(result)
 }
+
+#' Prepare the bioconversion file
+#'
+#' This wrapper function adds valid taxon names to the bioconversion file and also calculates
+#' mean conversion values for all higher taxonomic levels.
+#' @return This function does not return an object, but stores a dataframe in the specified
+#' \code{out_folder} under the name 'conversion_data.rda'.
+#' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
+#' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
+#' loaded from the input_folder.
+#' @param worms Dataframe with query and valid names from worms. If NULL (default), the file
+#' "worms.rda" is searched for in the data_folder.
+#' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
+#' @param out_folder The external data is stored in this folder. Default is 'data'.
+#' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
+#' @export
+prepare_bioconversion <- function(conversion_data = NULL, worms = NULL,
+                                  input_folder = "inputfiles", data_folder = "data", out_folder = "data",
+                                  as_CSV = FALSE){
+  message("Loading bioconversion data...")
+  if(is.null(conversion_data)){
+    conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
+  }
+  message("Loading WoRMS taxonomic data...")
+  if(is.null(worms)){
+    load(paste0(data_folder,"/worms.rda"))
+  }
+
+  message("Adding WoRMS valid names to conversion data...")
+  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
+    worms, Query, valid_name, isFuzzy,
+    phylum, class, order, family, genus),
+    by = c("Taxon" = "Query")) %>%
+    dplyr::distinct()
+  no_match_i <- which(is.na(conversion_data$valid_name))
+  if(length(no_match_i) > 0){
+    message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
+                   paste0(unique(conversion_data$Query[no_match_i]), collapse = ", ")))
+  }
+
+  message("Calculating conversion and regression means for all taxonomic levels...")
+  conversion_data <- calculate_mean_conversion(conversion_data) %>%
+    dplyr::mutate(
+      is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE, FALSE)
+    )
+  conversion_list <- split_into_factors_and_regression(conversion_data)
+  conversion_factors <- conversion_list$conversion_factors
+  regressions <- conversion_list$regressions
+
+  # Remove automic calculated double factors
+  check_factors <- get_double_factors(conversion_factors)
+  conversion_factors <- dplyr::left_join(conversion_factors, check_factors) %>%
+    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
+                  Comment_WW_to_AFDW = ifelse(is.na(Comment_WW_to_AFDW), "NA", Comment_WW_to_AFDW)) %>%
+    dplyr::filter(!(Count == 2 & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
+    dplyr::select(-Count)
+  check_factors <- get_double_factors(conversion_factors)
+  are_double <- which(check_factors$Count > 1)
+  if(length(are_double) > 0){
+    print(check_conv_f, n=Inf)
+    stop(paste0("Automatic calculated means introduced doubles."))
+  }
+
+  # Remove automic calculated double regressions
+  check_regressions <- get_double_regressions(regressions)
+  regressions <- dplyr::left_join(regressions, check_regressions) %>%
+    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
+                  Comment_regression = ifelse(is.na(Comment_regression), "NA", Comment_regression)) %>%
+    dplyr::filter(!(Count == 2 & Comment_regression == "Automatic calculated mean.")) %>%
+    dplyr::select(-Count)
+  check_regressions <- get_double_regressions(regressions)
+  are_double <- which(check_regressions$Count > 1)
+  if(length(are_double) > 0){
+    print(check_regressions, n=Inf)
+    stop(paste0("Automatic calculated means introduced doubles."))
+  }
+
+  save(conversion_factors, regressions, file = paste0(out_folder,"/conversion_data.rda"))
+  message(paste0("Prepared bioconversion file saved as objects conversion_factors and regressions in the file "
+                 ,out_folder,"/conversion_data.rda"))
+  if(as_CSV){
+    write.csv(conversion_factors, file = paste0(out_folder,"/conversion_factors.csv"))
+    write.csv(regressions, file = paste0(out_folder,"/regressions.csv"))
+  }
+}
+
+
+
+
+

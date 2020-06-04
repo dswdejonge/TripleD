@@ -36,6 +36,10 @@ check_bioconversion_input()
 collect_from_NOAA() # currently not working - cannot reach NOAA server
 collect_species_WORMS()
 
+# Prepare the bioconversion file to use (add valid taxon
+# names and calculate mean conversions for each higher taxon)
+prepare_bioconversion()
+
 # Add extra data to the intial database (taxonomy, water depths
 # from bathymetry, track lengths from coordinates and ticks,
 # AFDW using conversion data)

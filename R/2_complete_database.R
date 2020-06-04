@@ -1,49 +1,3 @@
-
-
-#' Collect species names in bioconversion file from WoRMS
-#'
-#' This function queries reported species names from the bioconversion input file against
-#' WoRMS and calculates average conversion factors and regression formula's for
-#' higher taxonomic levels.
-#' @details
-#' Taxonomic data is collected from the WoRMS database using the \code{worrms} R-package.
-#' You need internet connection to do this.
-#' The reported taxonomic names of the specimens in the bioconversion.csv file
-#' are matched against the WoRMS database (also fuzzy matches, i.e. where typos and phonetic spelling is allowed).
-#' @return This function does not return an object, but stores the information in the specified
-#' \code{out_folder} under the names 'worms_conversion.rda' and 'conversion_data.rda'.
-#' @param conversion_data Dataframe with bioconversion data matching the given requirements from the
-#' attributes_bioconversion file. If NULL (default) the bioconversion.csv will be searched for and
-#' loaded from the input_folder.
-#' @param input_folder The folder where to find the bioconversion.csv file. Default is 'inputfiles'.
-#' @param out_folder The external data is stored in this folder. Default is 'data'.
-#' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
-#' @export
-collect_bioconversion_WORMS <- function(conversion_data = NULL,
-                                      input_folder = "inputfiles", out_folder = "data",
-                                      as_CSV = FALSE){
-  no_match_i <- which(is.na(worms_conversion$valid_name))
-  if(length(no_match_i) > 0){
-    message(paste0("These taxa names from the bioconversion.csv file cannot be matched to the WoRMS database:",
-                   paste0(unique(worms_conversion$Query[no_match_i]), collapse = ", ")))
-  }
-
-  message("Adding WoRMS valid names to conversion data...")
-  conversion_data <- dplyr::left_join(conversion_data, dplyr::select(
-    worms_conversion, Query, valid_name, isFuzzy,
-    phylum, class, order, family, genus),
-    by = c("Taxon" = "Query")) %>%
-    dplyr::distinct()
-
-  message("Calculating conversion and regression means for all taxonomic levels...")
-  conversion_data <- calculate_mean_conversion(conversion_data)
-  message(paste0("WoRMS taxonomic information for the bioconversion.csv file is stored as ",out_folder,"/worms_conversion.rda."))
-  save(conversion_data, file = paste0(out_folder,"/conversion_data.rda"))
-  if(as_CSV){
-    write.csv(conversion_data, file = paste0(out_folder,"/conversion_data.csv"))
-  }
-}
-
 #' Complete database with external data and calculations
 #'
 #' This function contains a workflow to add information to the original data
@@ -86,11 +40,6 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   load(paste0(data_folder,"/worms.rda"))
   message("Loading size to weight conversion data...")
   load(paste0(data_folder,"/conversion_data.rda"))
-  conversion_data <- conversion_data %>%
-    dplyr::mutate(
-      is_Shell_removed = ifelse(is_Shell_removed == 1, TRUE, FALSE)
-      )
-  conversion_list <- check_bioconversion_input(conversion_data)
 
   message("Adding additional data to stations...")
   stations_additions <- stations %>%
