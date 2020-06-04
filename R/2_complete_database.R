@@ -329,7 +329,10 @@ check_bioconversion_input <- function(conversion_data){
   check_conv_f <- doubles_c(conversion_factors)
   # Remove automic calculated doubles
   conversion_factors2 <- dplyr::left_join(conversion_factors, check_conv_f) %>%
-    dplyr::filter(!(!is.na(Count) & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
+    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
+                  Comment_WW_to_AFDW = ifelse(is.na(Comment_WW_to_AFDW), "NA", Comment_WW_to_AFDW)) %>%
+    dplyr::filter(!(Count == 2 & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
+    #dplyr::filter(!(!is.na(Count) & Comment_WW_to_AFDW == "Automatic calculated mean.")) %>%
     dplyr::select(-Count)
   # Re-identify doubles
   check_conv_f <- doubles_c(conversion_factors2)
@@ -351,7 +354,10 @@ check_bioconversion_input <- function(conversion_data){
   check_regressions <- doubles_r(regressions)
   # Remove automic calculated doubles
   regressions2 <- dplyr::left_join(regressions, check_regressions) %>%
-    dplyr::filter(!(!is.na(Count) & Comment_regression == "Automatic calculated mean.")) %>%
+    dplyr::mutate(Count = ifelse(is.na(Count), 1, Count),
+                  Comment_regression = ifelse(is.na(Comment_regression), "NA", Comment_regression)) %>%
+    dplyr::filter(!(Count == 2 & Comment_regression == "Automatic calculated mean.")) %>%
+    #dplyr::filter(!(!is.na(Count) & Comment_regression == "Automatic calculated mean.")) %>%
     dplyr::select(-Count)
   # Re-identify doubles
   check_regressions <- doubles_r(regressions2)
