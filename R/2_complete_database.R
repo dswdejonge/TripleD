@@ -38,7 +38,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
 
   message("Loading WoRMS taxonomic data...")
   load(paste0(data_folder,"/worms.rda"))
-  message("Loading size to weight conversion data...")
+  message("Loading bioconversion data...")
   load(paste0(data_folder,"/conversion_data.rda"))
 
   message("Adding additional data to stations...")
@@ -57,20 +57,22 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
                         family, genus, hasNoMatch, isFuzzy),
               by = c("Species_reported" = "Query")) %>%
     # Attach conversion factors
-    dplyr::left_join(., conversion_list$conversion_factors,
+    dplyr::left_join(., conversion_factors,
                      by = c("valid_name", "is_Shell_removed"),
                      suffix = c("_species", "_conversion")) %>%
     # Attach regression formulas
-    dplyr::left_join(., conversion_list$regressions,
+    dplyr::left_join(., regressions,
                      by = c("valid_name", "Size_dimension","is_Shell_removed"),
                      suffix = c("_species", "_conversion")) %>%
     # Convert length to mm from other units
     #   - 1/2cm are classes, so 0x1/2cm  = 5 mm, and 1x1/2cm is 10 mm.
     #   - cm are simply multiplied x10.
-    # TODO: how to deal with mm2 and cm2? mm3, cm3
+    #   - cm2 is * 100 and cm3 is *1000 to get mm2 and mm3 respectively
     dplyr::mutate(Size_mm =
            ifelse(Size_unit == "1/2cm", Size_value*5+5,
-           ifelse(Size_unit == "cm", Size_value*10, Size_value))) %>%
+           ifelse(Size_unit == "cm", Size_value*10,
+           ifelse(Size_unit == "cm2", Size_value*100,
+           ifelse(Size_unit == "cm3", Size_value*1000, Size_value))))) %>%
     # Calculate WW from size (ww = A*size^B -> multiply by count)
     # If count is NA, WW_g_calc is NA.
     dplyr::mutate(WW_g_calc =
@@ -93,17 +95,17 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   if(length(no_match_i) > 0){
     message(paste0("These printed taxa names from the corresponding files cannot be matched to the WoRMS database:"))
     to_print <- species_additions[no_match_i,] %>%
-      dplyr::select(File, Species_reported) %>%
-      dplyr::distinct()
+      dplyr::group_by(File, Species_reported) %>%
+      dplyr::summarize(Number_of_entries = dplyr::n())
     print(to_print)
   }
 
   # Give list of taxa in species_additions that did not have conversion factors
   no_conversion_factors <- species_additions %>%
     dplyr::filter(WW_g > 0 | WW_g_calc > 0) %>%
-    dplyr::select(valid_name, is_Shell_removed, WW_to_AFDW) %>%
+    dplyr::group_by(valid_name, is_Shell_removed, WW_to_AFDW) %>%
     dplyr::filter(is.na(WW_to_AFDW)) %>%
-    dplyr::distinct() %>%
+    dplyr::summarise(Number_of_entries = dplyr::n()) %>%
     dplyr::arrange(valid_name)
   if(nrow(no_conversion_factors) > 0){
     message("These taxa names have no conversion factor WW_to_AFDW in the bioconversion.csv file:")
@@ -112,9 +114,9 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
   # Give list of taxa that do not have a regression formula
   no_regressions <- species_additions %>%
     dplyr::filter(Size_value > 0) %>%
-    dplyr::select(valid_name, Size_dimension, is_Shell_removed, A_factor) %>%
+    dplyr::group_by(valid_name, Size_dimension, is_Shell_removed, A_factor) %>%
     dplyr::filter(!is.na(Size_dimension), is.na(A_factor)) %>%
-    dplyr::distinct() %>%
+    dplyr::summarise(Number_of_species = dplyr::n()) %>%
     dplyr::arrange(valid_name)
   if(nrow(no_regressions) > 0){
     message("These taxa names have no regression formula in the bioconversion.csv file:")
