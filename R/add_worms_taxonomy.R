@@ -67,7 +67,9 @@ get_worms_taxonomy <- function(species_names){
   # If there are multiple accepted names, it is assumed a no match and gets an empty record.
   if(length(multiple_matches) > 0){
     for(i in 1:length(multiple_matches)){
-      record <- worms[[multiple_matches[i]]]
+      # Extract record and discard extinct species
+      record <- worms[[multiple_matches[i]]] %>%
+        dplyr::filter(is.na(isExtinct) | isExtinct != 1)
       # Only use accepted name if there is only 1
       accepted <- dplyr::filter(record, status == "accepted")
       if(nrow(accepted) == 1){
