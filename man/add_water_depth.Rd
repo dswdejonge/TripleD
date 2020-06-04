@@ -4,22 +4,27 @@
 \alias{add_water_depth}
 \title{Add water depth}
 \usage{
-add_water_depth(stations, bathymetry = NULL, col_lon, col_lat, col_name)
+add_water_depth(stations, bathymetry, col_lon, col_lat, col_name)
 }
 \arguments{
 \item{stations}{Dataframe (tibble) with the attributes "Lat_DD_midpt" and "Lon_DD_midpt".}
 
 \item{bathymetry}{An xyz dataframe (tibble) or object of class bathy created by
-the marmap package. Default = NULL, uses \code{collect_bathymetry()} function to first download data.}
+the marmap package.}
+
+\item{col_lon}{Column name with longitudes in stations dataframe}
+
+\item{col_lat}{Column name with latitudes in stations dataframe}
+
+\item{col_name}{New column name in which the extracted depth will be added.}
 }
 \value{
-Returns a xyz dataframe (x = lon, y = lat, z = altitude i.e. negative values are depth)
-with bathymetry of a resolution of 1 minute.
+Returns a dataframe with depth added in a new column based on bathymetry.
 }
 \description{
-This function adds an attribute with water depth based on track midpoints and the
-collected NOAA bathymetry with the marmap R-pacakge using the function \code{get.depth()}.
+This function adds an attribute with water depth to the stations dataframe
+extracted for a certain position (lat, lon) based on batymetry.
 }
 \references{
-maramp R-package
+marmap R-package
 }
