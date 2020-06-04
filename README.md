@@ -29,13 +29,14 @@ library(TripleD)
 # Should not throw errors if the CSVs taken directly from DAS are used.
 construct_database(in_folder = "inputfiles")
 
-# Collects external data at NOAA and WoRMS.
-collect_external_data()
-
 # Add extra data to the intial database (taxonomy, water depths, etc.)
 collect_from_NOAA() # currently not working - cannot reach NOAA server
 check_species_WORMS()
 check_bioconversion_WORMS()
+
+# Add taxonomy, add depth from bathymetry, calculate track lengths,
+calculate AFDW.
+complete_database()
 
 # Finalize database, by aggregating data, selecting relevant columns, and
 # calculating final densities and biomass per sampling station.
