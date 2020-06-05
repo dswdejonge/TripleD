@@ -52,6 +52,12 @@ finalize_database()
 # Load the final database and view within Rstudio
 load("database.rda")
 View(database)
+# or
+head(database)
+
+# Extract a community matrix for ecological analysis
+# e.g. Ash-Free Dry Weight per m2 for all species
+CM <- get_community_matrix(database, "species", "Biomass_g_per_m2")
 ```
 
 ## Cheat sheet
