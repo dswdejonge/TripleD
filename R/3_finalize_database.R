@@ -51,62 +51,67 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
 
   ## Clean species table ## -----------
   # Set sample weights from NA to 0
-  species_final <- species_additions
-  species_final[
-    which(species_final$Weight_type_AFDW == "Sample" &
-          is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
-  species_final[
-    which(species_final$Weight_type == "Sample" &
-          is.na(species_final$AFDW_g_from_WW)), "AFDW_g_from_WW"] <- 0
+  if(TRUE){
+    species_final <- species_additions
+    species_final[
+      which(species_final$Weight_type_AFDW == "Sample" &
+              is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
+    species_final[
+      which(species_final$Weight_type == "Sample" &
+              is.na(species_final$AFDW_g_from_WW)), "AFDW_g_from_WW"] <- 0
 
-  species_final <- species_final %>%
-    # Remove species with no match to WoRMS database (avoid removing NA)
-    dplyr::filter(hasNoMatch != 1 | is.na(hasNoMatch)) %>%
-    # Remove species that are not counted as organism (Count = -1) (avoid removing NA)
-    dplyr::filter(Count != -1 | is.na(Count)) %>%
-    # Upscale all values with the Fraction
-    dplyr::mutate_at(
-      dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
-      function(x){x/.$Fraction}) %>%
-    # Round Count to integer (e.g. 3 * 0.333 = 0.999 = 1)
-    dplyr::mutate(Count = round(Count)) %>%
-    # Find conflicting weight type fields between
-    # Weight_type (WW and AFDW_from_WW) and Weight_type_AFDW (AFDW_g)
-    dplyr::mutate(is_conflict = ifelse(
-      Weight_type == "Sample" & !is.na(Weight_type_AFDW), TRUE, FALSE
-    ))
-  # Set all conflicting fields to NA, so they are skipped in combine_sources
-  tempdf <- species_final %>%
-    dplyr::filter(Weight_type == "Sample", is_conflict == TRUE) %>%
-    dplyr::select(valid_name, Weight_type, is_conflict) %>%
-    dplyr::distinct() %>%
-    dplyr::rename(skip_WW_sample = is_conflict)
-  species_final <- species_final %>%
-    dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
-  species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
-  species_final$Weight_type[species_final$skip_WW_sample] <- NA
-  # If AFDW or WW is_Partial, use AFDW_calc unless it does not exist.
-  species_final <- species_final %>%
-    dplyr::mutate(
-      skip_partial_WW = ifelse(is_Partial_WW & !is.na(AFDW_g_calc), TRUE, FALSE),
-      skip_partial_AFDW = ifelse(is_Partial_AFDW & !is.na(AFDW_g_calc), TRUE, FALSE)
-    )
-  species_final$AFDW_g_from_WW[species_final$skip_partial_WW] <- NA
-  species_final$AFDW_g[species_final$skip_partial_AFDW] <- NA
-  # Combine AFDW columns
-  species_final <- combine_data_sources(species_final,
-                                        new_column_name = "AFDW_g_combined",
-                                        order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
-  species_final <- species_final %>%
-    # Identify rows with unknown Count or Biomass
-    dplyr::mutate(
-      incomplete_count = ifelse(is.na(Count), 1, 0),
-      incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
+    species_final <- species_final %>%
+      # Remove species with no match to WoRMS database (avoid removing NA)
+      dplyr::filter(hasNoMatch != 1 | is.na(hasNoMatch)) %>%
+      # Remove species that are not counted as organism (Count = -1) (avoid removing NA)
+      dplyr::filter(Count != -1 | is.na(Count)) %>%
+      # Upscale all values with the Fraction
+      dplyr::mutate_at(
+        dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
+        function(x){x/.$Fraction}) %>%
+      dplyr::select(-Fraction) %>%
+      # Round Count to integer (e.g. 3 * 0.333 = 0.999 = 1)
+      dplyr::mutate(Count = round(Count)) %>%
+      # Find conflicting weight type fields between
+      # Weight_type (WW and AFDW_from_WW) and Weight_type_AFDW (AFDW_g)
+      dplyr::mutate(is_conflict = ifelse(
+        Weight_type == "Sample" & !is.na(Weight_type_AFDW), TRUE, FALSE
+      ))
+    # Set all conflicting fields to NA, so they are skipped in combine_sources
+    tempdf <- species_final %>%
+      dplyr::filter(Weight_type == "Sample", is_conflict == TRUE) %>%
+      dplyr::select(valid_name, Weight_type, is_conflict) %>%
+      dplyr::distinct() %>%
+      dplyr::rename(skip_WW_sample = is_conflict)
+    species_final <- species_final %>%
+      dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
+    species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
+    species_final$Weight_type[species_final$skip_WW_sample] <- NA
+    # If AFDW or WW is_Partial, use AFDW_calc unless it does not exist.
+    species_final <- species_final %>%
+      dplyr::mutate(
+        skip_partial_WW = ifelse(is_Partial_WW & !is.na(AFDW_g_calc), TRUE, FALSE),
+        skip_partial_AFDW = ifelse(is_Partial_AFDW & !is.na(AFDW_g_calc), TRUE, FALSE)
+      )
+    species_final$AFDW_g_from_WW[species_final$skip_partial_WW] <- NA
+    species_final$AFDW_g[species_final$skip_partial_AFDW] <- NA
+    # Combine AFDW columns
+    species_final <- combine_data_sources(species_final,
+                                          new_column_name = "AFDW_g_combined",
+                                          order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc")
     ) %>%
-    # Set Count = NA to Count = 1 (there was see at least 1)
-    dplyr::mutate(
-      Count = ifelse(is.na(Count), 1, Count)
-    ) %>%
+      # Identify rows with unknown Count or Biomass
+      dplyr::mutate(
+        incomplete_count = ifelse(is.na(Count), 1, 0),
+        incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
+      ) %>%
+      # Set Count = NA to Count = 1 (there was see at least 1)
+      dplyr::mutate(
+        Count = ifelse(is.na(Count), 1, Count)
+      )
+  }
+
+  sp <- species_final %>%
     # Collapse to one count and biomass per station/species combi
     # Keep column with info if the count/biomass was complete or not
     dplyr::group_by(StationID, valid_name,
@@ -119,6 +124,8 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       incomplete_biomass = ifelse(sum(incomplete_biomass) > 0, TRUE, FALSE)
     ) %>%
     dplyr::ungroup()
+
+  sp_sizes <- species_final %>%
 
   # Clean station database
   stations_final <- stations_additions %>%
@@ -150,11 +157,11 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Water_depth_m_Bathy, -Water_depth_m_Bathy2,
       -Bearing, -Bearing_calc)
 
-  # Create one large table for the Shiny app
+  # Create one large table with densities and biomasses for the Shiny app
   # Deselect File in stations because it's double.
   st <- dplyr::select(stations_final, -File)
   # Join data into big table
-  database <- dplyr::inner_join(species_final, st, by = "StationID") %>%
+  database <- dplyr::inner_join(sp, st, by = "StationID") %>%
   # Calculate density and biomass per station
     dplyr::mutate(
       Density_nr_per_m2 = Count_total / Sample_area_m2,
