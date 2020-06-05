@@ -171,7 +171,15 @@ check_bioconversion_input <- function(conversion_data = NULL, input_folder = "in
     }
   }
 
-  # TODO: check if all are positive?
+  wa <- conversion_data$WW_to_AFDW
+  if(!is.null(wa)){
+    wa <- wa  < 0
+    if(TRUE %in% wa){
+      stop(paste0("In bioconversion file column WW_to_AFDW the values in row(s) ",
+                  paste(sort(which(wa)+1), collapse = ", "),
+                  " are negative and should be positive."))
+    }
+  }
 
   # Check for no double entries
   conversion_list <- split_into_factors_and_regression(conversion_data, name_column = "Taxon")
