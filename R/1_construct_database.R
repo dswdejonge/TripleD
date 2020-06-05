@@ -414,6 +414,7 @@ are_measurements_positive <- function(file, file_name){
   ts <- file$Tow_speed_knots
   wd <- file$Water_depth_m_cruise
   oc <- file$Odometer_count
+  br <- file$Bearing
   if(!is.null(tl)){
     tl <- tl  < 0
     if(TRUE %in% tl){
@@ -456,6 +457,15 @@ are_measurements_positive <- function(file, file_name){
                   paste(sort(which(oc)+1), collapse = ", "), " are negative but should be positive."))
     }
   }
+  if(!is.null(br)){
+    br <- abs(br) > 180
+    if(TRUE %in% br){
+      stop(paste0("In file ",file_name," column Bearing the absolute values in row(s) ",
+                  paste(sort(which(br)+1), collapse = ", "),
+                  " are larger than 180."))
+    }
+  }
+
   # Species
   ct <- file$Count
   sv <- file$Size_value
