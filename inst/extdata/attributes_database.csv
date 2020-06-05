@@ -1,4 +1,4 @@
-﻿Attribute,Unit,Datatype,Description
+Attribute,Unit,Datatype,Description
 StationID,<cruiseID/cruise name>#<station/event number>,String,"A unique ID for the sampling event, preferably as ""<cruiseID>#<station/event number>"". For example: 64PE438#21. Very important because it is used to match stations metadata to species observations. No empty (i.e. NA) cells should occur."
 valid_name,Taxon,String,"The taxonomic name assigned to the reported species/taxon name in the original species CSV files by checking against the accepted names in the WoRMS database. No empty (i.e. NA) cells should occur, because all taxa that could not be matched against WoRMS are discarded from the database."
 File,File name,String,The file name of the original input CSV file from which the species data is imported. No empty (i.e. NA) cells should occur.

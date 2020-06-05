@@ -42,22 +42,30 @@ prepare_bioconversion()
 
 # Add extra data to the intial database (taxonomy, water depths
 # from bathymetry, track lengths from coordinates and ticks,
-# AFDW using conversion data)
+# bearings, and ash-free dry weight using conversion data)
 complete_database()
 
 # Finalize database, by aggregating data, selecting relevant columns, and
 # calculating final densities and biomass per sampling station.
 finalize_database()
 
-# Load the final database and view within Rstudio
+# There is a database with density and biomass data 
+# per taxon per station.
 load("database.rda")
-View(database)
-# or
-head(database)
 
-# Extract a community matrix for ecological analysis
-# e.g. Ash-Free Dry Weight per m2 for all species
+# View definition of each database column.
+att_database
+
+# Extract a community matrix for ecological analysis,
+# e.g. Ash-Free Dry Weight per m2 for all species.
 CM <- get_community_matrix(database, "species", "Biomass_g_per_m2")
+
+# There is also a database with individual size measurements 
+# and weights per taxon.
+load("database_individuals.rda")
+
+# View definition of each database_individuals column.
+att_database_individuals
 ```
 
 ## Cheat sheet

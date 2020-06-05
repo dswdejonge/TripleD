@@ -20,25 +20,28 @@
 #' or species data. The format of these CSVs, thus, the names of all variables
 #' and the exact meaning of the values in those columns, is explained here.
 #' \cr
-#' A dataframe exists for the station CSVs called 'stations_att' and for the species
-#' CSVs called 'species_att'.
+#' A dataframe exists for the station CSVs called 'att_stations' and for the species
+#' CSVs called 'att_species'.
 #' \cr
 #' It is also possible to include data to convert sizes and wet weights to ash-free dry weights.
 #' This data should be included in a file called 'bioconversion.csv'.
-#' The requirements for this file can be found in 'bioconversion_att'.
+#' The requirements for this file can be found in 'att_bioconversion'.
 #' \cr
-#' The meaning of all columns in the final database produced by the package can be found
-#' in 'database_att'.
+#' The meaning of all columns in the final two databases produced by the package can be found
+#' in 'att_database' and 'att_database_individuals'.
 NULL
 
 #' @rdname attributes
-"stations_att"
+"att_stations"
 
 #' @rdname attributes
-"species_att"
+"att_species"
 
 #' @rdname attributes
-"bioconversion_att"
+"att_bioconversion"
 
 #' @rdname attributes
-"database_att"
+"att_database"
+
+#' @rdname attributes
+"att_database_individuals"
