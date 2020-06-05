@@ -34,7 +34,7 @@ check_bioconversion_input()
 
 # Collect bathymetry from NOAA and taxonomy from WoRMS
 collect_from_NOAA() # currently not working - cannot reach NOAA server
-collect_species_WORMS()
+collect_from_WORMS()
 
 # Prepare the bioconversion file to use (add valid taxon
 # names and calculate mean conversions for each higher taxon)
