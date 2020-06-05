@@ -18,7 +18,9 @@
 #' bathymetery column.
 #' @export
 combine_data_sources <- function(mytable, new_column_name = "new", order_of_preference){
-  #TODO: check if the names in order_of_preference exist
+  if(FALSE %in% (order_of_preference %in% colnames(mytable))){
+    stop("Given column name in order of preference does not exist.")
+  }
   mytable$new <- dplyr::pull(mytable, order_of_preference[1])
   mytable$source <- order_of_preference[1]
   for(i in 2:length(order_of_preference)){
