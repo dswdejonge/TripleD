@@ -108,6 +108,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       )
   }
 
+  message("Summarizing density and biomass per taxon per station...")
   sp <- species_final %>%
     # Set Count = NA to Count = 1 (there was see at least 1)
     dplyr::mutate(
@@ -126,6 +127,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     ) %>%
     dplyr::ungroup()
 
+  message("Creating separate dataframe with individual sizes and weights...")
   # Keep individual lengths and weights (only entry weight type)
   sp_individuals <- species_final %>%
     # Select relevant columns
@@ -157,6 +159,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     dplyr::filter(!(is.na(Size_mm) & is.na(Individual_WW_g) & is.na(Individual_AFDW_g)))
 
   # Clean station database
+  message("Cleaning and combining station data from multiple sources into one column...")
   stations_final <- stations_additions %>%
     combine_data_sources(
       ., new_column_name = "Lat_DD", order_of_preference = c("Lat_DD_midpt", "Lat_DD_calc")
@@ -186,7 +189,7 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Water_depth_m_Bathy, -Water_depth_m_Bathy2,
       -Bearing, -Bearing_calc)
 
-  # Merge stations and species for the Shiny app
+  message("Join density/biomass table to stations table...")
   # Deselect File in stations because it's double.
   st <- dplyr::select(stations_final, -File)
   # Join data with biomass and density into big table
@@ -199,30 +202,43 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       Biomass_g_per_m3 = Biomass_g / Sample_volume_m3) %>%
     dplyr::select(-Count_total, -Biomass_g)
 
+  message("Join specimens size/weight table to stations table...")
   database_individuals <- dplyr::inner_join(sp_individuals, st, by = "StationID",
                                             suffix = c(".sp", ".st"))
 
+  message(paste0("Saving intermediate data to ",out_folder))
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
   if(as_CSV){
+    message(paste0("Writing intermediate data to CSVs in ",out_folder))
     write.csv(species_final, paste0(out_folder,"/species_final.csv"))
     write.csv(stations_final, paste0(out_folder,"/stations_final.csv"))
   }
+  message("Saving databases...")
   if(is.null(database_folder)){
     save(database, file = "database.rda")
     save(database_individuals, file = "database_individuals.rda")
+    message("Biomass and density data can be found as 'database.rda' in the working directory.")
+    message("Individual size and weight data can be found as 'database_individuals.rda' in the working directory.")
     if(as_CSV){
+      message("Writing databases as CSVs...")
       write.csv(database, file = "database.csv")
       write.csv(database_individuals, file = "database_individuals.csv")
+      message("Done.")
       }
   }else{
     save(database, file = paste0(database_folder,"/database.rda"))
     save(database_individuals, file = paste0(database_folder,"/database_individuals.rda"))
+    message(paste0("Biomass and density data can be found as 'database.rda' in ",database_folder))
+    message(paste0("Individual size and weight data can be found as 'database_individuals.rda' in ",database_folder))
     if(as_CSV){
+      message("Writing databases as CSVs...")
       write.csv(database, file = paste0(database_folder,"/database.csv"))
       write.csv(database_individuals, file = paste0(database_folder,"/database_individuals.csv"))
+      message("Done.")
       }
   }
+  message("Yay! Your database is done and ready to go!")
 }
 
 
