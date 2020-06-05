@@ -698,4 +698,5 @@ construct_database <- function(in_folder = "inputfiles", out_folder = "data", as
     write.csv(stations, file = paste0(out_folder, "/stations_initial.csv"))
     write.csv(species, file = paste0(out_folder, "/species_initial.csv"))
   }
+  message("All good! (Warnings can probably be ignored. Review if you want to be sure.")
 }
