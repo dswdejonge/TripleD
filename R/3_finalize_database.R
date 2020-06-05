@@ -46,12 +46,13 @@
 #' @export
 finalize_database <- function(data_folder = "data", out_folder = "data",
                               database_folder = NULL, as_CSV = TRUE){
+  message("Loading intermediate species and stations files...")
   load(paste0(data_folder,"/species_additions.rda"))
   load(paste0(data_folder,"/stations_additions.rda"))
 
-  ## Clean species table ## -----------
-  # Set sample weights from NA to 0
+  message("Cleaning species data and combinding biomass data into one column...")
   if(TRUE){
+    # Set sample weights from NA to 0
     species_final <- species_additions
     species_final[
       which(species_final$Weight_type_AFDW == "Sample" &
@@ -104,14 +105,14 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       dplyr::mutate(
         incomplete_count = ifelse(is.na(Count), 1, 0),
         incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
-      ) %>%
-      # Set Count = NA to Count = 1 (there was see at least 1)
-      dplyr::mutate(
-        Count = ifelse(is.na(Count), 1, Count)
       )
   }
 
   sp <- species_final %>%
+    # Set Count = NA to Count = 1 (there was see at least 1)
+    dplyr::mutate(
+      Count = ifelse(is.na(Count), 1, Count)
+    ) %>%
     # Collapse to one count and biomass per station/species combi
     # Keep column with info if the count/biomass was complete or not
     dplyr::group_by(StationID, valid_name,
@@ -135,6 +136,8 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
                   WW_g_threshold, Weight_type, is_Shell_removed, is_Partial_WW,
                   is_Fraction_assumed, is_Preserved,
                   Comment) %>%
+    # Only keep entries with a valid Count
+    dplyr::filter(!is.na(Count)) %>%
     # Only retain individual weights (not bulk sample weights)
     dplyr::mutate(AFDW_g = ifelse(Weight_type_AFDW == "Sample", NA, AFDW_g),
                   WW_g_threshold = ifelse(Weight_type == "Sample", NA, WW_g_threshold)) %>%
