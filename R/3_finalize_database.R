@@ -125,7 +125,33 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     ) %>%
     dplyr::ungroup()
 
-  sp_sizes <- species_final %>%
+  # Keep individual lengths and weights (only entry weight type)
+  sp_individuals <- species_final %>%
+    # Select relevant columns
+    dplyr::select(File, EntryID, StationID, valid_name, is_ID_confident,
+                  rank, genus, family, order, class, phylum, isFuzzy,
+                  Count, Size_dimension, Size_mm,
+                  AFDW_g, Weight_type_AFDW, is_Partial_AFDW,
+                  WW_g_threshold, Weight_type, is_Shell_removed, is_Partial_WW,
+                  is_Fraction_assumed, is_Preserved,
+                  Comment) %>%
+    # Only retain individual weights (not bulk sample weights)
+    dplyr::mutate(AFDW_g = ifelse(Weight_type_AFDW == "Sample", NA, AFDW_g),
+                  WW_g_threshold = ifelse(Weight_type == "Sample", NA, WW_g_threshold)) %>%
+    # Calculate individual weight
+    dplyr::mutate(Individual_WW_g = WW_g_threshold / Count,
+                  Individual_AFDW_g = AFDW_g / Count) %>%
+    dplyr::select(-Weight_type_AFDW, -Weight_type,
+                  -WW_g_threshold, -AFDW_g) %>%
+   # Booleans from 0/1 to FALSE/TRUE
+    dplyr::mutate(isFuzzy = ifelse(isFuzzy == 0 | is.na(isFuzzy), FALSE, TRUE),
+                  is_ID_confident = ifelse(is_ID_confident == 1 | is.na(is_ID_confident), TRUE, FALSE),
+                  is_Partial_WW = ifelse(is_Partial_WW == 0 | is.na(is_Partial_WW), FALSE, TRUE),
+                  is_Partial_AFDW = ifelse(is_Partial_AFDW == 0 | is.na(is_Partial_AFDW), FALSE, TRUE),
+                  is_Preserved = ifelse(is_Preserved == 0 | is.na(is_Preserved), FALSE, TRUE)
+                  ) %>%
+    # Only keep entries where Size, AFDW or WW is known (i.e. remove rows with no data at all)
+    dplyr::filter(!(is.na(Size_mm) & is.na(Individual_WW_g) & is.na(Individual_AFDW_g)))
 
   # Clean station database
   stations_final <- stations_additions %>%
@@ -157,10 +183,10 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Water_depth_m_Bathy, -Water_depth_m_Bathy2,
       -Bearing, -Bearing_calc)
 
-  # Create one large table with densities and biomasses for the Shiny app
+  # Merge stations and species for the Shiny app
   # Deselect File in stations because it's double.
   st <- dplyr::select(stations_final, -File)
-  # Join data into big table
+  # Join data with biomass and density into big table
   database <- dplyr::inner_join(sp, st, by = "StationID") %>%
   # Calculate density and biomass per station
     dplyr::mutate(
@@ -170,6 +196,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       Biomass_g_per_m3 = Biomass_g / Sample_volume_m3) %>%
     dplyr::select(-Count_total, -Biomass_g)
 
+  database_individuals <- dplyr::inner_join(sp_individuals, st, by = "StationID",
+                                            suffix = c(".sp", ".st"))
+
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
   if(as_CSV){
@@ -178,10 +207,18 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
   }
   if(is.null(database_folder)){
     save(database, file = "database.rda")
-    if(as_CSV){write.csv(database, file = "database.csv")}
+    save(database_individuals, file = "database_individuals.rda")
+    if(as_CSV){
+      write.csv(database, file = "database.csv")
+      write.csv(database_individuals, file = "database_individuals.csv")
+      }
   }else{
     save(database, file = paste0(database_folder,"/database.rda"))
-    if(as_CSV){write.csv(database, file = paste0(database_folder,"/database.csv"))}
+    save(database_individuals, file = paste0(database_folder,"/database_individuals.rda"))
+    if(as_CSV){
+      write.csv(database, file = paste0(database_folder,"/database.csv"))
+      write.csv(database_individuals, file = paste0(database_folder,"/database_individuals.csv"))
+      }
   }
 }
 
