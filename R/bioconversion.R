@@ -91,8 +91,6 @@ check_bioconversion_input <- function(conversion_data = NULL, input_folder = "in
     }
   }
 
-  #TODO: no NA values in grouped vars if a value is given.
-
   # Check doubles
   doubles_attributes <- dplyr::filter(my_attributes, Datatype == "Double")
   columns <- which(colnames(conversion_data) %in% doubles_attributes$Attribute)
