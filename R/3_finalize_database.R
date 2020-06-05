@@ -134,6 +134,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     combine_data_sources(
       ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_preset", "Track_dist_m_Odometer", "Track_dist_m_GPS")
     ) %>%
+    combine_data_sources(
+      ., new_column_name = "Bearings", order_of_preference = c("Bearing", "Bearing_calc")
+    ) %>%
     dplyr::mutate(
       Sample_area_m2 = Track_length_m * (Blade_width_cm/100),
       Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
@@ -143,7 +146,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Lat_stop_DD,	-Lon_stop_DD,
       -Lon_DD_calc,	-Lat_DD_calc,
       -Track_length_m_preset, -Water_depth_m_cruise, -Odometer_count,
-      -Track_dist_m_GPS, -Track_dist_m_Odometer, -Water_depth_m_Bathy, -Water_depth_m_Bathy2)
+      -Track_dist_m_GPS, -Track_dist_m_Odometer,
+      -Water_depth_m_Bathy, -Water_depth_m_Bathy2,
+      -Bearing, -Bearing_calc)
 
   # Create one large table for the Shiny app
   # Deselect File in stations because it's double.
