@@ -13,7 +13,6 @@ add_bearings <- function(stations){
   bearings <- geosphere::bearing(
     stations[,c("Lon_start_DD", "Lat_start_DD")],
     stations[,c("Lon_stop_DD", "Lat_stop_DD")])
-  colnames(bearings) <- "Bearing_calc"
-  stations <- dplyr::bind_cols(stations, bearings)
+  stations <- dplyr::bind_cols(stations, data.frame(Bearing_calc = bearings))
   return(stations)
 }
