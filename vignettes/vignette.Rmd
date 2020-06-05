@@ -54,7 +54,7 @@ Video:
 [![TripleD operations video](http://img.youtube.com/vi/O3XIFzbljWk/0.jpg)](https://www.youtube.com/watch?v=O3XIFzbljWk "NIOZ Triple D Operations clip")
 
 ## 2.B. Sampling procedure
-The dredge is lowered to the seabed and towed over the sediment until it's stable (the pre-track distance). The blade is pushed into the sediment to start the actual sampling track. All sediment exised by the blade pass through a net that retains the organisms. After the intended track distance the blad is taken out of the sediment, and the catch is brought up to the ship.  
+The dredge is lowered to the seabed and towed over the sediment until it's stable (the pre-track distance). The blade is pushed into the sediment to start the actual sampling track in a certain direction (bearing). The length of this sampling track is preset, and often 100 m (especially in recent years). All sediment exised by the blade pass through a net that retains the organisms. After the intended track distance the blad is taken out of the sediment, and the catch is brought up to the ship. Based on several sources of information it is decided whether or not the sampling track was successful and can be used quantitatively.   
 
 On board, any remaining sediment is washed from the organisms. The organisms are identified and grouped. Preferably all specimens are counted, measured, and weighed. However, due to the sometimes large number of specimens only a representative fraction of the species is measured and weighed. For example, 100 specimens of *Asterias rubens* (common sea star) are caught. Due to time constraints, 20 representative specimens are selected, measured and weighed (the other 80 are discarded). These measurements (size and weight) are noted together with a fraction of 0.2 (i.e. 20 of 100 specimens processed). This fraction is later used to upscale the measured values to an estimation for the complete catch.  
 
@@ -78,6 +78,7 @@ Following these guidelines should make it easy to digitize your data as required
 ## 2.C. Limitations
 - The blade width and blade depth dimension are the intended sampling width and depth. However due to sediment types, objects in the sediment, and unevenness of the sediment, the actual track width and depth may differ somewhat. No study is yet done to quantify these effects.  
 - Polychaetes are caught by the Triple-D, but the Triple-D is not suitable for a quantitative analysis of polychaete abundance.  
+- Amphiura are often broken when processed, therefore the estimated biomass are probably almost always underestimations.
 
 # 3. The TripleD R-package
 
