@@ -9,7 +9,7 @@
 #' "Bearing_calc" and "Bearing_calc". Stations without start and stop coordinates have
 #' NA in these added columns.
 #' @export
-add_track_midpoints <- function(stations){
+add_bearings <- function(stations){
   bearings <- geosphere::bearing(
     stations[,c("Lon_start_DD", "Lat_start_DD")],
     stations[,c("Lon_stop_DD", "Lat_stop_DD")])
