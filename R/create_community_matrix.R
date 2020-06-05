@@ -84,6 +84,5 @@ get_community_matrix <- function(database, taxonomic_level, abundance_measure,
     values_from = Value,
     values_fill = list(Value = 0)
   )
-  #environmental_matrix
   return(community_matrix)
 }
