@@ -6,6 +6,7 @@
 \alias{stations_att}
 \alias{species_att}
 \alias{bioconversion_att}
+\alias{database_att}
 \title{Attributes for CSV input files TripleD database}
 \format{A dataframe with the following columns:
 \describe{
@@ -24,6 +25,8 @@ stations_att
 species_att
 
 bioconversion_att
+
+database_att
 }
 \description{
 Data frame with information on all attributes that should or could be
@@ -41,5 +44,8 @@ CSVs called 'species_att'.
 It is also possible to include data to convert sizes and wet weights to ash-free dry weights.
 This data should be included in a file called 'bioconversion.csv'.
 The requirements for this file can be found in 'bioconversion_att'.
+\cr
+The meaning of all columns in the final database produced by the package can be found
+in 'database_att'.
 }
 \keyword{datasets}

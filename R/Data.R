@@ -26,6 +26,9 @@
 #' It is also possible to include data to convert sizes and wet weights to ash-free dry weights.
 #' This data should be included in a file called 'bioconversion.csv'.
 #' The requirements for this file can be found in 'bioconversion_att'.
+#' \cr
+#' The meaning of all columns in the final database produced by the package can be found
+#' in 'database_att'.
 NULL
 
 #' @rdname attributes
@@ -36,3 +39,6 @@ NULL
 
 #' @rdname attributes
 "bioconversion_att"
+
+#' @rdname attributes
+"database_att"
