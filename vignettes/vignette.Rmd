@@ -87,7 +87,7 @@ The Triple-D R-package and all related files can be found in its GitHub reposito
 
 ![TripleD package cheatsheet](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png)
   
-## 3.B.Input files
+## 3.B. Input files
 The TripleD package can only read in CSV data files - one with sampling station data and one with species data per research cruise - that meet the specified requirements. The attribute files included in the package describe these requirements. This may require cleaning of your raw data files. A description of this cleaning process must be logged in a corresponding readme file.   
 
 General requirements:    
@@ -107,6 +107,12 @@ library(TripleD)
 print(stations_att)
 print(species_att)
 ```
+
+To help guide you with constructing the CSV files according to the requirements, I have added some examples below.
+
+Entry for a cruise 64PE330 in 2017 for a project called FakeSamples. The third sampling track was within a windmill park at a fixed monitoring station called WM10.
+|CruiseID
+
 
 ## Available data from DAS
 TripleD biological data and corresponding metadata was collected and kept intact to refer back if inconsistencies would occur. The raw data is not included in the package to save space, but instead it should be available through the NIOZ data archiving system (DAS). The current database in based on the following sources of data:   
