@@ -24,6 +24,9 @@ library(TripleD)
 - This workflow also allows the user to **rewrite (part of) the workflow** to process the original data if they have specific wishes/assumptions they would like to use.  
 - The output of the TripleD package can directly be used in a developed **Shiny app to visually interact with the data**.  
 
+# Citation
+Please use the citation specified for each individual dataset.
+
 # 1. Introduction
 The Triple-D (Deep Digging Dredge) is a dredge designed by NIOZ Royal Netherlands Institute for Sea Research that can easily sample relatively large areas of seabed to quantitatively study the distribution of megafauna that generally occurs in low abundances. So far, the Triple-D is only used in the North Sea, mostly on the Dutch Continental Shelf.  
 
@@ -67,13 +70,17 @@ If you want to use the TripleD to collect organisms, follow these guidelines to 
 5) When the TripleD is back on board, assess the confidence of the sampled track. If something appears to have gone wrong, document this. If the catch cannot be used quantitatively, but the information is usefull for presence-absence or relative abundances withint the sample, document this as explained in the attributes files.  
 6) Identify and sort the catch. The process will be smoother if the full catch is properly sorted before starting the measurements. You can document who identified the species and if that identification is confident (i.e. no doubt).  
 7) Preferably, each individual is measured and weighed. However, sometimes it is easier to pool some organisms together. For example, if multiple organisms have the same size, you can decide to pool and weigh them together. Report how many specimens are included in each entry (count). Egg masses, and algae batches, and other loose material that you want to document, should be reported with a count of -1. Each entry must have a unique ID. You can start assigning these onboard already. This is especially usefull when you want to store the organisms for later analysis in the lab (e.g. AFDW measurements). Make sure to consistently use this ID! Document if you will preserve certain organisms and where a user of the database may find these specimens in the future.  
-7) For each taxon, measure the size of all organisms. Carefully documen the size dimension measured, the unit, and the value. You can also only process a fraction of the catch, document this accordingly. Below is a diagram that explains for each general morphological group what size dimensions may be measured and what unit is the most appropriate. Hanging this diagram onboard as a large A1 poster, and providing it as laminated hand-out may help your colleagues/studnets/volunteers in the process. Sticking to the defined size dimensions and documenting their names strictly as written on the diagram will ease digitizing your measurements!  
+7) For each taxon, measure the size of all organisms. Carefully document the size dimension measured (diagram below), the unit (mm, cm, 1/2cm [note on using 1/2cm units below]), and the value. You can also only process a fraction of the catch, document this accordingly. Below is a diagram that explains for each general morphological group what size dimensions may be measured and what unit is the most appropriate. Hanging this diagram onboard as a large A1 poster, and providing it as laminated hand-out may help your colleagues/studnets/volunteers in the process. Sticking to the defined size dimensions and documenting their names strictly as written on the diagram will ease digitizing your measurements!  
 ![TripleD size diagram](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/_morphologies.png)
 
-8) For each taxon: weigh the wet weight. You can also only process a fraction of the catch, document this accordingly. Document the threshold of the scale you are using. If an organism is broken/missing body parts, write down that the wet weight is an underestimation because it only concerns a partial wet weight. If an organism naturally occurs with a hard external structure, like a shell (also hermit crabs!) or a tube (tube worms), write down if this shell was removed before weighing! If your weight does NOT concern a single entry but is a bulk weight (e.g. all specimens of a certain taxon are weighed together but measured for size seperately), document this accordingly! Eggs should generally not be included in the weight and be weighed seperately, unless it can't be avoided.  
-9) If you decide to take specimens back to the lab (read point 6!) for ash-free dry weight measurements, also document the scale threshold, if the organisms were broken, and if the weight is a bulk weight or not. Ash-free dry weight only concerns biologically active tissue, so external hard structures like shells are always removed. Make sure you match the AFDW measurement to the right entry (use the unique IDs).  
+8) For each taxon: weigh the wet weight. You can also only process a fraction of the catch, document this accordingly. Document the threshold of the scale you are using. If the weight of a specimen is below the threshold, record 0. If the weight is not measured at all, record NA. If an organism is broken/missing body parts, write down that the wet weight is an underestimation because it only concerns a partial wet weight. If an organism naturally occurs with a hard external structure, like a shell (also hermit crabs!) or a tube (tube worms), write down if this shell was removed before weighing! If your weight does NOT concern a single entry but is a bulk weight (e.g. all specimens of a certain taxon are weighed together but measured for size seperately), document this accordingly! Eggs should generally not be included in the weight and be weighed seperately, unless it can't be avoided.  
+9) If you decide to take specimens back to the lab (read point 6!) for ash-free dry weight (AFDW) measurements, also document the scale threshold, if the organisms were broken, and if the weight is a bulk weight or not. AFDW is the dry weight (drying of wet tissue in the oven) minus the weight of the ash left after combustion of the tissue, i.e. AFDW and dry weight are not equivalent. Ash-free dry weight only concerns biologically active tissue, so external hard structures like shells are always removed. Make sure you match the AFDW measurement to the right entry (use the unique entry IDs). AFDW is the measurement type used to report final biomasses in the database.  
 
 Following these guidelines should make it easy to digitize your data as required by the TripleD package (see 3.B.).  
+![half cm units](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/half_cm_units.png)
+
+**Note on using the 1/2cm unit**:  
+The unit 1/2cm is used a bit differently than the units mm and cm, because it works with ‘classes’. Imagine you have a ruler with tick-marks every 5 mm. So, the first tick mark at 0 mm, the second tick mark at 5 mm, the third tick mark at 10 mm, etc. If the organism is at least 5 mm (so between 5 and 10 mm) it falls in the class 1 ½cm. This means that an organism that is 4 mm falls in the class 0 ½ cm,and an organism of 14 mm will fall in the class 2 ½cm. Understanding this system is especially important if you want to convert ½units to mm or cm.
 
 ## 2.C. Limitations
 - The blade width and blade depth dimension are the intended sampling width and depth. However due to sediment types, objects in the sediment, and unevenness of the sediment, the actual track width and depth may differ somewhat. No study is yet done to quantify these effects.  
@@ -88,18 +95,23 @@ The Triple-D R-package and all related files can be found in its GitHub reposito
 ![TripleD package cheatsheet](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png)
   
 ## 3.B. Input files
-The TripleD package can only read in CSV data files - one with sampling station data and one with species data per research cruise - that meet the specified requirements. The attribute files included in the package describe these requirements. This may require cleaning of your raw data files. A description of this cleaning process must be logged in a corresponding readme file.   
+The TripleD package can only read in CSV data files - one with sampling station data and one with species data per research cruise - that meet the specified requirements. The attribute files included in the package describe these requirements. This may require cleaning of your raw data files. A description of this cleaning process must be logged in the corresponding readme file.  
+
+Preparation of the CSV files is best done manually: it can be the step where you carefully review the data you noted during the cruise (e.g. on paper) while you convert it to a carefully documented digital format.
 
 General requirements:    
 
 - Per research cruise you need three files: 1) Station data ('Year_CruiseID_stations.csv'), 2) Species data ('Year_CruiseID_species.csv'), and 3) a readme file explaining how the former two files were constructued ('Year_CruiseID_README.txt').  
+- As much as possible, only include original data, i.e. measured and derived during the research cruise, and not calculated or sourced from an external dataset.  
 - Fields may **never** be empty.   
 - Always be aware of the difference between 'NA' (not measured) and '0' (measured and value is 0).   
 - A sampling station corresponds to a single unique sampling event (i.e. dredge track), and NOT to a geographical location.   
+- CruiseID, StationID, and EntryID are always required and must contain unique values. StationID is especially important because it is used to match station data to species data.  
 - Do not include columns where all values are NA (otherwise R will treat them as characters in stead of missing values).    
 - Following from the former statement, it is not necessary to include all columns in the attributes files. The attributes files note which columns are 'Required' (i.e. they must always be included) and which are 'Optional' (i.e. if you haven't measured this data, simply leave this column out).   
 - Coordinates must be in WGS84.   
 - Time must be in UTC+0.   
+- Please report in English as much as possible, so that international researchers can also use the data.  
 
 Stations CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_stations.csv), and species CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_species.csv). Alternatively, you can view the requirements in R:  
 ```{r view_att, eval=FALSE}
@@ -108,18 +120,131 @@ print(stations_att)
 print(species_att)
 ```
 
-To help guide you with constructing the CSV files according to the requirements, I have added some examples below.
+To help guide you with constructing the CSV files according to the requirements, I have added some examples below. Don't forget to write a readme file with a log of how you constructed your CSV files!
 
-Entry for a cruise 64PE330 in 2017 for a project called FakeSamples. The third sampling track was within a windmill park at a fixed monitoring station called WM10.
-|CruiseID
+### Example: Stations name
+Entry for a cruise 64PE330 in 2017 for a project called FakeSamples. The third sampling track was within a windmill park at a fixed monitoring station called WM10.   
 
+|CruiseID | StationID | Date       | Cruise_name     | Station_name | Region | Comment |
+| ------- | --------- | ---------- | -----------     | ------------ | ------ | ------- |
+|64PE330 | 64PE330#3  | 01/01/2017 | FakeSamples2017 | WM10          | WM    | Monitoring station |
+  
+Note that the CruiseID (required) and Cruise_name (optional) should not be confused, just like StationID (required and used to match to the species file) and Station_name (optional). The date should be in the correct format (01-01-2017 would be wrong), and the region should be a predefined abbreviation in the attributes file.
 
-## Available data from DAS
-TripleD biological data and corresponding metadata was collected and kept intact to refer back if inconsistencies would occur. The raw data is not included in the package to save space, but instead it should be available through the NIOZ data archiving system (DAS). The current database in based on the following sources of data:   
-```{r}
-#raw_data_sources <- read.csv(system.file("extdata", "data_sources.csv", package = "TripleD"))
-#knitr::kable(raw_data_sources)
+### Example: Coordinates and time
+During cruise 64PE330 you sampled a station and recorded the start and stop coordinates of the track in coordinate system ED50 i.e. EPSG4230 (e.g. 5.2185, 54.329 to 5.2180, 54.322), and the local start and stop time (16.30 - 17.00 UTC+2).  
+```{r echo=FALSE, eval=FALSE}
+devtools::install_github("dswdejonge/rgis")
+library(rgis)
+rgis::transform_latlon_to_different_CRS(data.frame(x= c(5.2185, 5.2180), 
+                                                   y = c(54.329, 54.322)), 
+                                        epsg_code_from = 4230, epsg_code_to = 4326)
 ```
+  
+| StationID | Lat_start_DD | Lon_start_DD | Lat_stop_DD | Lon_stop_DD | Time_start | Time_stop |
+| --------- | ------------ | ------------ | ----------- | ----------- | ---------- | --------- |
+| 64PE330#4 | 54.32828     | 5.217122     | 54.32128    | 5.216622    | 14:30:00   | 15:00:00  |
+  
+Note that the coordinates are always expected in coordinate reference system WGS84 (aka EPSG:4326), meaning that in this case the coordinates reported in ED50 (aka EPSG:4230) must first be transformed. In this case I used a function written in R hosted on GitHub, but there is also a web functionality that can be used (https://epsg.io/transform). Also note that the reported time must always have the format HH:MM:SS (so 14.30 would not be accepted) and must be reported in UTC+0, meaning in this case the time had to be converted from local time UTC+2 to UTC+0. In your readme file you should state how you converted your original data to fit the requirements of the TripleD CSV files! Finally, you should either provide start and stop coordinates of the track OR the track midpoint coordinates, i.e. at least of of them is required. You are free to add both pieces of information but it is not necessary (the TripleD package can automatically calculate track length and midpoint based on the provided start and stop coordinates).  
 
+### Example: Sample metadata  
+After retrieving the net it was found to be overfull, mostly due to Calianassa mud shrimp and Abra alba bivalves. It is decided to do another track right beside the original track, but at only half of the original track length and disregarding Calianassa and Abra alba entirely. This time the retrieved net is not overfull.  
+
+| StationID | Track_length_m_preset | is_Quantitative | Station_objective | Excluded |
+| --------- | --------------------- | --------------- | ----------------- | -------- |
+| 64PE330#4 | 100                   | 0               | Complete          | NA       |
+| 64PE330#5 | 50                    | 1               | Incomplete        | Calianassa;Abra alba|
+  
+As the first net was overfull, the catch *cannot* be used quantitatively (i.e. to calculate density or biomass per m2 or m3), however, the information is kept for e.g. studying relative abundance within this one catch. The second track was much shorter, and therefore the catch *can* be used quantitatively. However, during later ecological analysis it must be taken into account Calianassa and Abra alba were excluded in processing the catch (i.e. the lack of those species in this specific sample does not mean they weren't present). Note that the species in the column 'Excluded' are seperated with a ';'.  
+
+### Example: Water depth
+You lost the notes with water depth for some stations measured during the research cruise. However, you do have a  bathymetric map with water depths on which you can find depths based on the coordinates.  
+
+| StationID | Water_depth_m_cruise | Comment |
+| --------- | ---------------------| ------- |
+| 64PE330#4 | 32                   | NA      |
+| 64PE330#5 | NA                   | Water depth notes lost |
+| 64PE330#6 | NA                   | Water depth notes lost |
+
+Only include original data in your dataset as much as possible. Therefore, you should set the missing water depth values to NA and *not* include calculated water depths based on the bathymetric map. Instead, you can use your bathymetry data in the package to automatically derive water depth at the track midpoints during the package workflow. Beware that if no water depth is recorded at all, i.e. the full column will be set to NA, do not include a water depth column as R will read this column to be full of characters 'NA' instead of numeric.   
+
+### Example: Reporting species presence
+You sampled with the TripleD, and now want to record which species you found with the minimum of required fields.  
+
+| StationID | EntryID     | Species_reported    | Fraction | is_Fraction_assumed | 
+| --------- | ----------- | -----------------   | -------- | ------------------- |
+| 64PE330#4 | 64PE330#4_1 | *Asterias rubens*   | 1        | 0                   |
+| 64PE330#4 | 64PE330#4_2 | *Abra alba*         | 1        | 0                   |
+| 64PE330#4 | 64PE330#4_3 | *Crangon crangon*   | 1        | 0                   |
+| 64PE330#4 | 64PE330#4_4 | *lanice conchilega* | 1        | 0                   |
+
+These are the minimum number of required fields to report species sampled with the TripleD. The StationID is used to match the biological data to the station data (not reported in the other examples for brevity). The EntryID denotes every unique entry. The Species_reported is the name of the species found at that sampling station. The Fraction and is_Fraction_assumed are always required, even if you don't report counts, sizes, or weights. In this case you wrote down presence based on the whole catch so the Fraction is 1 and it is not an assumed fraction (=0). Using the data becomes a lot more fun if counts, sizes, and weights are also reported (see other examples).  
+
+### Example: Reporting counts
+In your full catch you find 10 sea stars *Asterias rubens*, 5 specimens of shrimp *Crangon crangon*, an egg mass of *Abra alba*, and a large clump of tube worms *Lanice conchilega*.  
+
+| EntryID     | Species_reported    | Fraction | is_Fraction_assumed | Count | Comment |
+| ----------- | -----------------   | -------- | ------------------- | ----- | ------- |
+| 64PE330#4_1 | *Asterias rubens*   | 1        | 0                   | 10    |  NA     |
+| 64PE330#4_2 | *Abra alba*         | 1        | 0                   | -1    | Egg mass |
+| 64PE330#4_3 | *Crangon crangon*   | 1        | 0                   | 5     | NA |
+| 64PE330#4_4 | *Lanice conchilega* | 1        | 0                   | NA    | Large clump |
+
+
+
+
+### Example: Reporting fractions
+In a sample, 20 sea stars *Asterias rubens* were found, but only 4 representative specimens were measured and weighed.   
+
+| EntryID     | Species_reported  | Fraction | is_Fraction_assumed | Count |
+| ----------- | ----------------  | -------- | ------------------- | ----- |
+| 64PE330#4_1 | *Asterias rubens* | 0.2      | 0                   | 1     |
+| 64PE330#4_2 | *Asterias rubens* | 0.2      | 0                   | 1     |
+| 64PE330#4_3 | *Asterias rubens* | 0.2      | 0                   | 1     |
+| 64PE330#4_4 | *Asterias rubens* | 0.2      | 0                   | 1     |
+
+Note that the reported 'Fraction' is the overall fraction of the catch of the reported species that was processed i.e. 4/20. It is NOT the fraction that each specimen makes up (1/20). You specifically noted the fraction, so the fraction is not assumed (=0). If you are not sure about the fraction, and you have to estimate this afterwards, it would have been 1.  
+
+### Example: Reporting groups
+
+
+## 3.C. Available input files
+Input files with data for the TripleD package can be requested from NIOZ scientists Rob Witbaard (rob.witbaard@nioz.nl) and Dick van Oevelen (undefined [dick.van.oevelen@nioz.nl]). Please make sure to cite the data correctly.  
+
+Datasets are stored per research cruise. For each dataset you should be able to find:  
+
+1) A README text file,  
+2) A stations CSV with station and environmental data,  
+3) A species CSV with biological data (counts, sizes, weights),  
+4) Additional raw data files (scans of labbook, cruise report, ship log, etc.) used to construct the stations and species CSV files.  
+  
+The following files are available:   
+
+| Files                        | Entries (n) |
+| -----                        | ----------- |
+| 2006_ARCA_README.txt         | - |
+| 2006_ARCA_species.csv        | 3218 |
+| 2006_ARCA_stations.csv       | 3 |
+| 2006_Arca_FF.xlsx            | - |
+| 2018_RWS_31135633_README.txt | - |
+| 2018_RWS_31135633_species.csv  | 3447 |
+| 2018_RWS_31135633_stations.csv | 15 |
+| 2018_RWS_31135633_Bodemschaaf FrieseFront | - |
+| 2018_RWS_Database_V7.xlsx                 | - |
+| 2018_2019_RWS_Bijlage 9; RWSV 913.00.B080 | - |
+| Bemonsteringbodemschaaf_V2.pdf            | - |
+| 2019_64PE438_NICO10_README.txt        | - |
+| 2019_64PE438_NICO10_species.csv       | 2375 |
+| 2019_64PE438_NICO10_stations.csv      | 37 |
+| 2019_64PE438_NICO10_Schaafdata.xlsx   | - |
+| 2019_64PE463_README.txt             | - |
+| 2019_64PE463_species.csv            | 4571 |
+| 2019_64PE463_stations.csv           | 44 |
+| 2019_RWS_31144108_README.txt        | - |
+| 2019_RWS_31144108_species.csv       | 47624 |
+| 2019_RWS_31144108_stations.csv      | 187 |
+| 2018_2019_RWS_Bijlage 9; RWSV 913.00.B080 | - |
+| Bemonsteringbodemschaaf_V2.pdf      | - |
+| 2019_RWS_31144108_Definitief-bestand_MZBzout_Bodemschaven_2019_versie03_definitie.._.xlsx | - |
 
 # Bibliography
