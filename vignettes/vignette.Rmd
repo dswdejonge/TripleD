@@ -116,8 +116,8 @@ General requirements:
 Stations CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_stations.csv), and species CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_species.csv). Alternatively, you can view the requirements in R:  
 ```{r view_att, eval=FALSE}
 library(TripleD)
-print(stations_att)
-print(species_att)
+print(att_stations)
+print(att_species)
 ```
 
 To help guide you with constructing the CSV files according to the requirements, I have added some examples below. Don't forget to write a readme file with a log of how you constructed your CSV files!
@@ -183,17 +183,21 @@ These are the minimum number of required fields to report species sampled with t
 ### Example: Taxon identification
 You found a couple of bivalve *Ensis* specimens that you cannot fully identify, they are either *Ensis ensis* or *Ensis siliqua*.  
 
-**Option 1**
+**Option 1**  
+
 | EntryID     | Species_reported | is_ID_confident | ID_by | is_Preserved | Comment |
 | ----------- | ---------------- | --------------- | ----- | ------------ | ------- |
-| 64PE330#4_1 | Ensis sp.        | 1               | D. de Jonge | 1      | Stored in -20 NIOZ freezer under sample number '64PE330#4_1a'. |
+| 64PE330#4_1 | Ensis sp.        | 1               | D. de Jonge | 1      | A comment |
 
-**Option 2**
+**Option 2**  
+
 | EntryID     | Species_reported | is_ID_confident | ID_by | is_Preserved | Comment |
 | ----------- | ---------------- | --------------- | ----- | ------------ | ------- |
-| 64PE330#4_1 | Ensis siliqua    | 0               | D. de Jonge | 1      | Stored in -20 NIOZ freezer under sample number '64PE330#4_1a'. |
+| 64PE330#4_1 | Ensis siliqua    | 0               | D. de Jonge | 1      | A comment |
 
-If you are not sure about the taxonomic identification, the best option is to report the taxonomic level you are sure about. In other words, species names are preferred in the column 'Species_reported' but other taxonomic levels are also allowed as long as the scientific name is used. In the example under consideration you are sure the bivalve belongs to the genus *Ensis* so you report *Ensis sp.* (could also simply be *Ensis*, but avoid *Ensis spec.* or *Ensis species* as the taxa matching algorithm does not like this notation). If you are almost sure about an identification, but not quite, you may choose to report the taxon you think it correct but identify your doubt about the identification in the column 'is_ID_confident'. It is best practice to store specimens with unsure ID, so that later identification in the lab can take place e.g. through barcoding. You can identify specimens that are stored in the column 'is_Preserved' and use the comment section to write where to find the stored sample.  
+If you are not sure about the taxonomic identification, the best option is to report the taxonomic level you are sure about. In other words, species names are preferred in the column 'Species_reported' but other taxonomic levels are also allowed as long as the scientific name is used. In the example under consideration you are sure the bivalve belongs to the genus *Ensis* so you report *Ensis sp.* (could also simply be *Ensis*, but avoid *Ensis spec.* or *Ensis species* as the taxa matching algorithm does not like this notation).  
+
+If you are almost sure about an identification, but not quite, you may choose to report the taxon you think it correct but identify your doubt about the identification in the column 'is_ID_confident'. It is best practice to store specimens with unsure ID, so that later identification in the lab can take place e.g. through barcoding. You can identify specimens that are stored in the column 'is_Preserved' and use the comment section to write where to find the stored sample (e.g.Stored in -20 NIOZ freezer under sample number '64PE330#4_1a').  
 
 ### Example: Specimen counts
 In your full catch you find 10 sea stars *Asterias rubens*, 5 specimens of shrimp *Crangon crangon*, an egg mass of *Abra alba*, and a large clump of tube worms *Lanice conchilega*.  
@@ -333,5 +337,106 @@ The following files are available:
 | 2018_2019_RWS_Bijlage 9; RWSV 913.00.B080 | - |
 | Bemonsteringbodemschaaf_V2.pdf      | - |
 | 2019_RWS_31144108_Definitief-bestand_MZBzout_Bodemschaven_2019_versie03_definitie.._.xlsx | - |
+
+## 3.D. Bioconversion file
+A special CSV input file is the ‘bioconversion.csv’ file. This file contains data that can be used to estimate Ash-Free Dry Weights (AFDW) from sizes and wet weights (WW). Basically, it contains two types of information:  
+
+1) conversion factors to go from WW to AFDW, and   
+2) regression power formulas with A_factors and B_exponents that can use a measured size dimension in mm to return either WW or AFDW in grams.  
+
+A default bioconversion CSV file can be requested from NIOZ, but the user is also allowed to use their own file with conversion data, as long as this CSV file adhere to the defined formatting requirements. The required format of the bioconversion file is defined in an attributes file and a README text file is available explaining how the default bioconversion CSV file was constructed, much like the species and stations CSVs.  
+
+General requirements:    
+
+- Fields may **never** be empty. Fill empty cells with NA.  
+- Do not include columns where all values are NA (otherwise R will treat them as characters instead of missing values).    
+- The file should only contain conversion factors to go from WW to AFDW. So NOT from WW to dry weight (DW), or DW to AFDW. You can obtain WW_to_AFDW as WW_to_DW x DW_to_AFDW.   
+- The regression formula must ALWAYS follow the form: Output_unit_g = A_factor * Size_dimension_in_mm ^ B_exponent. Where:  
+  * The output_unit can either be WW in grams or AFDW in grams.  
+  * The size dimension to be used in the formula (e.g. total length, or siphon diameter) must match the allowed predefined size dimensions specified in the species attributes.  
+  * The input value of the size must ALWAYS have the unit mm.  
+- You can specify whether or not the WW you are working with in an entry concerns the WW with or without the shell in the column ‘is_Shell_removed’.   
+- You should include **only one** WW_to_AFDW conversion factor for each taxon (distincion can only be made for conversion factors that apply with or without shell). Similarly, you should include **only one** regression formula for a possible size dimension of a taxon (distinction can only be made for resulting wet weights that include or exclude shells). This is necessary because the workflow cannot choose for you, i.e. there should only be one option available for the script. If you have various sources for one type of conversion data, choose the value that has the highest confidence according to you.  
+- Its good practice to always provided references for your conversion data and note any assumptions and alteration from the original reference if any in the comments and a README file.  
+
+Bioconversion CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_bioconversion.csv). Alternatively, you can view the requirements in R:  
+```{r view_att, eval=FALSE}
+library(TripleD)
+print(att_bioconversion)
+```
+
+To help guide you with constructing your own bioconversion CSV file according to the requirements, I have added some examples below.  
+
+The default bioconversion file available from NIOZ is constructed using the following sources:  
+
+- Conversion data generated by NIOZ itself.  
+- @Brey2010  
+- @Robinson2010  
+- @Rumohr1987  
+- @Cartaxana2003  
+- @Ambrogi1995   
+- @Fahy1996  
+- @Chigbu1996  
+- @Eklof2017  
+- @Pinedo2000
+- @Rosati2012  
+- @Toda1984  
+
+### Example: Conversion factors
+For the hermit crab *Pagurus bernhardus* I found the following conversion factors in literature:  
+
+- WW_to_DW = 0.7 (WW excluding shell)  
+- DW_to_AFDW = 0.2  
+- WW_to_AFDW = 0.10 (WW excluding shell)
+- WW_to_AFDW = 0.04 (WW including shell)
+
+I can construct my bioconversion file in two ways.  
+**Option1:**  
+
+| Taxon | WW_to_AFDW | Reference_WW_to_AFDW | Comment_WW_to_AFDW | is_Shell_removed |
+| ----- | ---------- | -------------------- | ------------------ | ---------------- |
+|*Pagurus bernhardus* | 0.14 | Reference A | WW_to_AFDW = WW_to_DW x DW_to_AFDW | 1 |
+|*Pagurus bernhardus* | 0.04 | Reference B | NA | 0 |  
+
+**Option2:**  
+
+| Taxon | WW_to_AFDW | Reference_WW_to_AFDW | Comment_WW_to_AFDW | is_Shell_removed |
+| ----- | ---------- | -------------------- | ------------------ | ---------------- |
+|*Pagurus bernhardus* | 0.10 | Reference C | NA | 1 |
+|*Pagurus bernhardus* | 0.04 | Reference B | NA | 0 |  
+
+I can calculate WW_to_AFDW (excluding shell) using the conversion factors WW_to_DW and DW_to_AFDW I found in literature. However, I have another source for WW_to_AFDW (excluding shell) where the value is reported directly. I have to decide which conversion factor I trust most based on the information from the original dataset (e.g. based on sample size, regression fit, error margins, study area, etc.).  
+
+I should NOT include both possibilities for WW_to_AFDW (excluding shell), because then my script would not know which option to choose when trying to find a conversion factor. However, I am allowed to include a second WW_to_AFDW for *Pagurus bernhardus* which is valid for a wet weight **including** shell. The script can now choose a WW_to_AFDW for reported WW with or without shell.  
+
+## Example: Regression formulas
+For *Pagurus bernhardus* I found the following regression formulas in literature:  
+
+- log10(WW_mg) = 3.2xlog10(Claw_length_mm)-2.1  (WW excluding shell)
+- AFDW_g = 5x(10^-3) x Body_length_cm^2.5
+
+The bioconversion file should be constructed as follows:
+| Taxon | Size_dimension | A_factor | B_exponent | Output_unit | is_Shell_removed |
+| ----- | -------------- | -------- | ---------- | ----------- | ---------------- |
+|*Pagurus bernhardus* | Claw_length | 7.9e-06 | 3.2 | WW_g | 1
+|*Pagurus bernhardus* | Body_length | 1.6e-05 | 2.5 | AFDW_g | NA  
+
+The first regression first has to first be rewritten into the format Output_unit_g = A_factor x Size_dimension_in_mm ^ B_exponent, and then altered so that the output is not in milligram but in gram. A_factor becomes (10^-2.1)/1000 = 7.9e-06 and B_exponent is 3.2.  
+
+1) log10(Output_unit_mg) = B*log10(Size_mm)+A >>  
+2) Output_unit_mg = 10^(B*log10(Size_mm)+A) >>  
+3) Output_unit_mg = (10^A)*(10^B*log10(Size_mm)) >>  
+4) Output_unit_mg = (10^A)*(10^(log10(Size_mm)^B)) >>  
+5) Output_unit_mg = (10^A)*(Size_mm^B) >>  
+6) Output_unit_g = (10^A)/1000*(Size_mm^B)  
+
+The second regression has to be rewritten so that the Body_length can be given as input in millimeters in stead of centimeters. A_factor becomes 5x(10^-3) / 10^2.5 = 1.6e-05, B_exponent is 2.5.   
+
+1) Output_unit_g = A x Size_cm^B >>  
+2) Output_unit_g = A x (Size_mm/10)^B >>  
+3) Output_unit_g = A x Size_mm^B / 10^B >>
+4) Output_unit_g = (A/10^B) x Size_mm^B   
+
+Other examples of how regressions can be rewritten to match the required format can be found in the README file of the default bioconversion file that can be requested from NIOZ.  
 
 # Bibliography
