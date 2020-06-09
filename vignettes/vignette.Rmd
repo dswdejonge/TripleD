@@ -168,7 +168,7 @@ You lost the notes with water depth for some stations measured during the resear
 
 Only include original data in your dataset as much as possible. Therefore, you should set the missing water depth values to NA and *not* include calculated water depths based on the bathymetric map. Instead, you can use your bathymetry data in the package to automatically derive water depth at the track midpoints during the package workflow. Beware that if no water depth is recorded at all, i.e. the full column will be set to NA, do not include a water depth column as R will read this column to be full of characters 'NA' instead of numeric.   
 
-### Example: Reporting species presence
+### Example: Species presence
 You sampled with the TripleD, and now want to record which species you found with the minimum of required fields.  
 
 | StationID | EntryID     | Species_reported    | Fraction | is_Fraction_assumed | 
@@ -176,21 +176,36 @@ You sampled with the TripleD, and now want to record which species you found wit
 | 64PE330#4 | 64PE330#4_1 | *Asterias rubens*   | 1        | 0                   |
 | 64PE330#4 | 64PE330#4_2 | *Abra alba*         | 1        | 0                   |
 | 64PE330#4 | 64PE330#4_3 | *Crangon crangon*   | 1        | 0                   |
-| 64PE330#4 | 64PE330#4_4 | *lanice conchilega* | 1        | 0                   |
+| 64PE330#4 | 64PE330#4_4 | *Lanice conchilega* | 1        | 0                   |
 
 These are the minimum number of required fields to report species sampled with the TripleD. The StationID is used to match the biological data to the station data (not reported in the other examples for brevity). The EntryID denotes every unique entry. The Species_reported is the name of the species found at that sampling station. The Fraction and is_Fraction_assumed are always required, even if you don't report counts, sizes, or weights. In this case you wrote down presence based on the whole catch so the Fraction is 1 and it is not an assumed fraction (=0). Using the data becomes a lot more fun if counts, sizes, and weights are also reported (see other examples).  
 
-### Example: Reporting counts
+### Example: Taxon identification
+You found a couple of bivalve *Ensis* specimens that you cannot fully identify, they are either *Ensis ensis* or *Ensis siliqua*.  
+
+**Option 1**
+| EntryID     | Species_reported | is_ID_confident | ID_by | is_Preserved | Comment |
+| ----------- | ---------------- | --------------- | ----- | ------------ | ------- |
+| 64PE330#4_1 | Ensis sp.        | 1               | D. de Jonge | 1      | Stored in -20 NIOZ freezer under sample number '64PE330#4_1a'. |
+
+**Option 2**
+| EntryID     | Species_reported | is_ID_confident | ID_by | is_Preserved | Comment |
+| ----------- | ---------------- | --------------- | ----- | ------------ | ------- |
+| 64PE330#4_1 | Ensis siliqua    | 0               | D. de Jonge | 1      | Stored in -20 NIOZ freezer under sample number '64PE330#4_1a'. |
+
+If you are not sure about the taxonomic identification, the best option is to report the taxonomic level you are sure about. In other words, species names are preferred in the column 'Species_reported' but other taxonomic levels are also allowed as long as the scientific name is used. In the example under consideration you are sure the bivalve belongs to the genus *Ensis* so you report *Ensis sp.* (could also simply be *Ensis*, but avoid *Ensis spec.* or *Ensis species* as the taxa matching algorithm does not like this notation). If you are almost sure about an identification, but not quite, you may choose to report the taxon you think it correct but identify your doubt about the identification in the column 'is_ID_confident'. It is best practice to store specimens with unsure ID, so that later identification in the lab can take place e.g. through barcoding. You can identify specimens that are stored in the column 'is_Preserved' and use the comment section to write where to find the stored sample.  
+
+### Example: Specimen counts
 In your full catch you find 10 sea stars *Asterias rubens*, 5 specimens of shrimp *Crangon crangon*, an egg mass of *Abra alba*, and a large clump of tube worms *Lanice conchilega*.  
 
 | EntryID     | Species_reported    | Fraction | is_Fraction_assumed | Count | Comment |
 | ----------- | -----------------   | -------- | ------------------- | ----- | ------- |
 | 64PE330#4_1 | *Asterias rubens*   | 1        | 0                   | 10    |  NA     |
 | 64PE330#4_2 | *Abra alba*         | 1        | 0                   | -1    | Egg mass |
-| 64PE330#4_3 | *Crangon crangon*   | 1        | 0                   | 5     | NA |
+| 64PE330#4_3 | *Crangon crangon*   | 1        | 0                   | 5     | Snouts |
 | 64PE330#4_4 | *Lanice conchilega* | 1        | 0                   | NA    | Large clump |
 
-
+Some species are easily counted and reported. For some species, like *Lanice conchilega*, counting is sometimes omitted. In the latter case, you do want to report the presence but without counts, so the column 'Count' is set to NA, i.e. *not* to zero (it is recommended to include biomass in these cases, examples below). If you observe any items of interest which are not specimens (like egg masses or algae batches), set the count to -1 (again *not* to zero). Use the 'Comment' column to provide additional insight into your specimens and notations.  
 
 
 ### Example: Reporting fractions
@@ -203,10 +218,82 @@ In a sample, 20 sea stars *Asterias rubens* were found, but only 4 representativ
 | 64PE330#4_3 | *Asterias rubens* | 0.2      | 0                   | 1     |
 | 64PE330#4_4 | *Asterias rubens* | 0.2      | 0                   | 1     |
 
-Note that the reported 'Fraction' is the overall fraction of the catch of the reported species that was processed i.e. 4/20. It is NOT the fraction that each specimen makes up (1/20). You specifically noted the fraction, so the fraction is not assumed (=0). If you are not sure about the fraction, and you have to estimate this afterwards, it would have been 1.  
+Note that the reported 'Fraction' is the overall fraction of the catch of the reported species that was processed i.e. 4/20. It is NOT the fraction that each specimen makes up (1/20). You specifically noted the fraction, so the fraction is not assumed (=0). If you are not sure about the fraction, and you have to estimate this afterwards, it would have been 1. Also note that the counts are *not yet corrected* for the fraction.    
 
-### Example: Reporting groups
+The columns with potential size and weights are omitted in this example.
 
+### Example: Size measurements
+You process 4 specimens of the seastar *Asterias rubens* (like the previous example) of different sizes, of which one is missing some arms. You also process 13 specimens of *Abra alba*, of which 5 specimens fall within the same size class, another 6 fall within the same size class, and you find two siphons without complete shells. You found a large clump of tube worms *Lanice conchilega* which you did not count, but you did estimate the volume of the colony. You also found a large specimen of the squid *Alloteuthis sp.* of which you  measured both the mantle length and the length including tentacles.  
+
+| EntryID     | Species_reported  | Count | Size_dimension | Size_unit | Size_value | Comment |
+| ----------- | ----------------  | ----- | -------------- | --------- | ---------- | ------- |
+| 64PE330#4_1 | *Asterias rubens*   | 1   | Max_length     | cm        | 9          | NA      |
+| 64PE330#4_2 | *Asterias rubens*   | 1   | Max_length     | cm        | 9          | NA      |
+| 64PE330#4_3 | *Asterias rubens*   | 1   | Max_length     | cm        | 8          | NA      |
+| 64PE330#4_4 | *Asterias rubens*   | 1   | Disc_diameter  | cm        | 4     | Missing arms |     
+| 64PE330#4_5 | *Abra alba*         | 5   | Shell_length   | 1/2cm     | 0          | NA      |
+| 64PE330#4_6 | *Abra alba*         | 6   | Shell_length   | 1/2cm     | 1          | NA      |
+| 64PE330#4_7 | *Abra alba*         | 2   | Siphon_width   | mm        | 3          | Broken  |
+| 64PE330#4_8 | *Lanice conchilega* | NA  | Volume         | cm3       | 13     | Large clump |
+| 64PE330#4_9 | *Alloteuthis sp.*   | 1   | Mantle_length  | cm        | 12 | Body length incl. tentacles = 19 cm |
+
+Recording size measurements is a bit more complex than recording counts. You always need three grouped attributes: Size_dimension (describing what morphology was measured), Size_unit (describing what unit the value is in), and Size_value (the actual measured size value). The Size_dimension is important, because it determines which regression formula can be used to estimate biomass from the reported size.  
+
+You can report one size value per specimen (in the case of *Asterias rubens* in this example), or you can report a size value for a group of specimens (in the case of *Abra alba* in this example).  
+
+You can report different size dimensions and size units for one species if necessary. In this case example some *Asterias rubens* specimens are measured arm tip to arm tip (Max_length) whereas for one specimen the disc diameter is measured (Disc_diameter) because arms were missing in this specific broken organism. Also, for some specimens of *Abra alba* the Shell_length is measured in 1/2cm, and the Siphon_width is measured in mm for two broken specimens.  
+
+Beware of the use of 1/2cm as unit: it describes size classes (read the note under 2.B.), and it allows a size class of 0 1/2cm which does not mean 'no size' but 'between 0 and 5 mm'. If you did not measure a specimen, simply put 'NA' in all three size related columns.  
+
+This format does not allow the specification of multiple sizes for one specimen; each entry must really only represent the number of counted organism reported. In this example, two sizes are known for the squid *Alloteuthis sp.*. However, only one size can be reported (in this case it was chosen to report Mantle_length as official size, and note the other measurement in the comments). Reporting both sizes would require an additional entry, with the interpretation that two specimens were caught, which is not correct of course.  
+
+For some species, like sponges, tunicates, and colony-forming organisms, it is difficult to identify and measure a specific size dimension. In this cases it is possible to report (an estimated) area (in mm2 or cm2) or volume (in mm3 or cm3).  
+
+### Example: Wet weight measurements
+The specimens under 'Example: Size measurements' were also weighed. Additionally you weigh a hermit crab *Pagurus bernhardus* that was retrieved without a shell, six specimens of *Arctica islandica* for a study of size-weight relationships (shell lengths are already recorded to be 1, 1, 2, 2, 3 and 3 cm), and 10 large *Ensis ensis* specimens. A while later you find three additional *Ensis ensis* specimens you initially missed because they are smaller. You manage to measure their sizes, but do not have time to weigh them. You use a scale that can only record weights of 0.5 g or larger.  
+
+You find that all four specimens of *Asterias rubens* (of which one was missing some arms) together have a wet weight of 15 g. You find that the 11 complete specimens of *Abra alba* together weigh 7 grams, and that the 2 siphons with some shell remains together weigh less than the scale threshold (i.e. an exact weight cannot be determined). The *Lanice conchilega* colony is 102 grams. The *Alloteuthis sp.* individual is accidentally discarded before it could be weighed. The individual of *Pagurus bernhardus* that was retrieved without a shell weighs 3 grams. The three *Arctica islandica* are measured individually as 3, 6 and 12 g. The 10 large specimens of *Ensis ensis* are 8 grams together.
+
+| Species_reported| Count | WW_g | Weight_type | Threshold_scale | is_Shell_removed | is_Partial_WW |
+| ----------------| ----- | ---- | ----------- | --------------- | ---------------- | ------------- |
+| *Asterias rubens*   | 1 | 15   | Sample      | 0.5             | 0                | 0 |
+| *Asterias rubens*   | 1 | NA   | Sample      | 0.5             | 0                | 0 |
+| *Asterias rubens*   | 1 | NA   | Sample      | 0.5             | 0                | 0 |
+| *Asterias rubens*   | 1 | NA   | Sample      | 0.5             | 0                | 1 |     
+| *Abra alba*         | 5 | 7    | Sample      | 0.5             | 0                | 0 |
+| *Abra alba*         | 6 | NA   | Sample      | 0.5             | 0                | 0 |
+| *Abra alba*         | 2 | 0    | Entry       | 0.5             | 0                | 1 |
+| *Lanice conchilega* | NA | 102 | Entry       | 0.5             | 0                | 0 |
+| *Alloteuthis sp.*   | 1 | NA   | NA          | NA              | 0                | 0 |
+| *Pagurus bernhardus* | 1 | 3   | Entry       | 0.5             | 1                | 0 |
+| *Arctica islandica* | 2 | 3    | Entry       | 0.5             | 0                | 0 |
+| *Arctica islandica* | 2 | 6    | Entry       | 0.5             | 0                | 0 |
+| *Arctica islandica* | 2 | 12   | Entry       | 0.5             | 0                | 0 |
+| *Ensis ensis*       | 10 | 8   | Entry       | 0.5             | 0                | 0 |
+| *Ensis ensis*       | 3 | NA   | NA          | NA              | 0                | 0 |
+(Any measured sizes are not shown in the table for simplicity).
+
+Just like size measurements, wet weight measurements are perhaps somewhat complex to note correctly. If you weighed organisms, you always need to include 5 grouped attributes: WW_g (the actual wet weight in grams), Weight_type (defining if the weight concerns one entry or multiple), Threshold_scale (the threshold of the weighing scale used in grams), is_Shell_removed (to identify specimens that naturally occur with an external structure which is removed before weighing), and is_Partial_WW (to identify underestimated wet weights because broken organisms were measured).  
+
+If the reported weight only concerns the counted organisms in one row, the Weight_type is 'Entry', e.g. for *Pagurus bernhardus* and *Arctica islandica* in the example. If the reported weight concerns specimens over multiple entries, the Weight_type is 'Sample', e.g. for *Asterias rubens* in the example. You are allowed to mix 'Entry' and 'Sample' weight types for a reported species in a certain sample (e.g. for *Abra alba* in the example).  
+
+If a (group of) specimen(s) was measured, but the weight was below the scale threshold, note WW_g = 0 and *not* NA (e.g. *Abra alba*). The TripleD package workflow will then estimate the wet weight to be half the Threshold_scale (0.25 g in this example). If the weight was not measured at all, note WW_g = NA (e.g. *Alloteuthis sp.*). The TripleD package workflow will then estimate wet weight based on the size measurement.  
+
+Wet weight measurements with weight type 'Entry' are useful to determine size-weight relationships. In the example of *Arctica islandica* we can calculate that an individual of 1 cm weighs approximately 1.5 g, an individual of 2 cm approximately 3 g, and an individual of 3 cm approximately 6 g (entry weight divided by the count). Entry weights are retained in the 'database_individuals' together with size measurements, whereas sample weights are discarded.  
+
+For density and biomass calculations the TripleD workflow will sum all biomasses, i.e. both entry and sample weights, after conversion using WW to AFDW conversion factors. Assuming a WW_to_AFDW for all organisms of 0.2 when the shell is not removed, and 0.1 when the shell is removed, the final AFDW for each species will be:
+
+| Species_reported    | Count | Sum          | AFDW_g | is_Shell_removed | Underestimation? |
+| ------------------- | ----- | ------------ | ------ | ---------------- | ------------- |
+| *Asterias rubens*   | 4     | 15 x 0.2                  | 2    | 0 | TRUE |
+| *Abra alba*         | 13    | (7 + 2 x 0.5 / 2) x 0.2   | 1.5  | 0 | TRUE |
+| *Lanice conchilega* | NA    | 102 x 0.2                 | 20.4 | 0 | FALSE |
+| *Alloteuthis sp.*   | 1     | NA                        | NA   | 0 | NA |
+| *Pagurus bernhardus* | 1    | 3 x 0.1                   | 0.3  | 1 | FALSE |
+| *Arctica islandica* | 6     | (3 + 6 + 12) x 0.2        | 4.2  | 0 | FALSE |
+| *Ensis ensis*       | 13    | (8 + NA) x 0.2            | 1.6  | 0 | TRUE |
+
+The column is_Shell_removed guides the workflow of the TripleD package in chosing what type of conversion factor WW_to_AFDW to use. The AFDW values for *Asterias rubens* and *Abra alba* are an underestimation because some of the reported wet weights concerned a partial organism. The AFDW value for *Ensis ensis* is also an underestimation, because of the 13 individuals only 10 were weighed. However, regression formulas might be available to estimate a wet weight from size measurements, which an be applied in the case of the missing weight measurements of *Ensis ensis*.
 
 ## 3.C. Available input files
 Input files with data for the TripleD package can be requested from NIOZ scientists Rob Witbaard (rob.witbaard@nioz.nl) and Dick van Oevelen (undefined [dick.van.oevelen@nioz.nl]). Please make sure to cite the data correctly.  
