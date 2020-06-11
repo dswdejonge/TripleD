@@ -6,10 +6,13 @@ This package contains all the code necessary to set up the TripleD database with
 The database output of the package can be visually interacted with using a developed [Shiny app](https://www.github.com/dswdejonge/TripleD-app).
 
 ## Installation
-You can install the `TripleD` R-package by running the following command (beware you need to have the R-package `devtools` installed):
+You can install the `TripleD` R-package including the HTML vignette by running the following command (beware you need to have the R-package `devtools` installed):
 ```R
 #install.packages("devtools")
-devtools::install_github("dswdejonge/TripleD")
+devtools::install_github("dswdejonge/TripleD", build_vignettes = TRUE)
+
+# Read vignette:
+browseVignettes("TripleD") # click HTML
 ```
 
 ## Contructing the database
