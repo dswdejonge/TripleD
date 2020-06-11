@@ -1,13 +1,13 @@
 Package: TripleD
-Title: What the Package Does (One Line, Title Case)
+Title: Construct a TripleD database.
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Danielle",
+           family = "de Jonge",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = structure("YOUR-ORCID-ID", .Names = "ORCID"))
-Description: What the package does (one paragraph).
+           email = "mail@dswdejonge.com",
+           comment = structure("https://orcid.org/0000-0002-4093-2721", .Names = "ORCID"))
+Description: Takes input files in predefined format, and uses workflows in wrapper function to output a database with benthic megafauna density, biomass, individual size, and individual weight data.
 License: What license it uses
 Encoding: UTF-8
 LazyData: true
