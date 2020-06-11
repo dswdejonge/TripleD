@@ -46,6 +46,7 @@ complete_database <- function(data_folder = "data", out_folder = "data", input_f
     add_track_midpoints() %>%
     add_track_length_GPS() %>%
     add_track_length_Odometer() %>%
+    add_bearings() %>%
     add_water_depth(bathymetry = bathymetry, col_lon = "Lon_DD_midpt", col_lat = "Lat_DD_midpt", col_name = "Water_depth_m_Bathy") %>%
     add_water_depth(bathymetry = bathymetry, col_lon = "Lon_DD_calc", col_lat = "Lat_DD_calc", col_name = "Water_depth_m_Bathy2")
 

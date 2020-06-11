@@ -133,7 +133,7 @@ get_valid_names <- function(species_names){
 #' @param out_folder The external data is stored in this folder. Default is 'data'.
 #' @param as_CSV If you also want to store the collected external data as CSV, set to TRUE. Default is FALSE.
 #' @export
-collect_species_WORMS <- function(species = NULL, conversion_data = NULL,
+collect_from_WORMS <- function(species = NULL, conversion_data = NULL,
                                   input_folder = "inputfiles", data_folder = "data", out_folder = "data",
                                   as_CSV = FALSE){
   if(is.null(species)){

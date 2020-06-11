@@ -3,9 +3,11 @@
 \docType{data}
 \name{attributes}
 \alias{attributes}
-\alias{stations_att}
-\alias{species_att}
-\alias{bioconversion_att}
+\alias{att_stations}
+\alias{att_species}
+\alias{att_bioconversion}
+\alias{att_database}
+\alias{att_database_individuals}
 \title{Attributes for CSV input files TripleD database}
 \format{A dataframe with the following columns:
 \describe{
@@ -19,11 +21,15 @@ If this is filled with 'Required_alternative' it means the information is requir
 description of what the information of this attribute includes; how data should be documented.}
 }}
 \usage{
-stations_att
+att_stations
 
-species_att
+att_species
 
-bioconversion_att
+att_bioconversion
+
+att_database
+
+att_database_individuals
 }
 \description{
 Data frame with information on all attributes that should or could be
@@ -35,11 +41,14 @@ the package in order to create a database. These CSVs either contain station
 or species data. The format of these CSVs, thus, the names of all variables
 and the exact meaning of the values in those columns, is explained here.
 \cr
-A dataframe exists for the station CSVs called 'stations_att' and for the species
-CSVs called 'species_att'.
+A dataframe exists for the station CSVs called 'att_stations' and for the species
+CSVs called 'att_species'.
 \cr
 It is also possible to include data to convert sizes and wet weights to ash-free dry weights.
 This data should be included in a file called 'bioconversion.csv'.
-The requirements for this file can be found in 'bioconversion_att'.
+The requirements for this file can be found in 'att_bioconversion'.
+\cr
+The meaning of all columns in the final two databases produced by the package can be found
+in 'att_database' and 'att_database_individuals'.
 }
 \keyword{datasets}

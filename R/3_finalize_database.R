@@ -46,63 +46,70 @@
 #' @export
 finalize_database <- function(data_folder = "data", out_folder = "data",
                               database_folder = NULL, as_CSV = TRUE){
+  message("Loading intermediate species and stations files...")
   load(paste0(data_folder,"/species_additions.rda"))
   load(paste0(data_folder,"/stations_additions.rda"))
 
-  ## Clean species table ## -----------
-  # Set sample weights from NA to 0
-  species_final <- species_additions
-  species_final[
-    which(species_final$Weight_type_AFDW == "Sample" &
-          is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
-  species_final[
-    which(species_final$Weight_type == "Sample" &
-          is.na(species_final$AFDW_g_from_WW)), "AFDW_g_from_WW"] <- 0
+  message("Cleaning species data and combinding biomass data into one column...")
+  if(TRUE){
+    # Set sample weights from NA to 0
+    species_final <- species_additions
+    species_final[
+      which(species_final$Weight_type_AFDW == "Sample" &
+              is.na(species_final$AFDW_g)), "AFDW_g"] <- 0
+    species_final[
+      which(species_final$Weight_type == "Sample" &
+              is.na(species_final$AFDW_g_from_WW)), "AFDW_g_from_WW"] <- 0
 
-  species_final <- species_final %>%
-    # Remove species with no match to WoRMS database (avoid removing NA)
-    dplyr::filter(hasNoMatch != 1 | is.na(hasNoMatch)) %>%
-    # Remove species that are not counted as organism (Count = -1) (avoid removing NA)
-    dplyr::filter(Count != -1 | is.na(Count)) %>%
-    # Upscale all values with the Fraction
-    dplyr::mutate_at(
-      dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
-      function(x){x/.$Fraction}) %>%
-    # Round Count to integer (e.g. 3 * 0.333 = 0.999 = 1)
-    dplyr::mutate(Count = round(Count)) %>%
-    # Find conflicting weight type fields between
-    # Weight_type (WW and AFDW_from_WW) and Weight_type_AFDW (AFDW_g)
-    dplyr::mutate(is_conflict = ifelse(
-      Weight_type == "Sample" & !is.na(Weight_type_AFDW), TRUE, FALSE
-    ))
-  # Set all conflicting fields to NA, so they are skipped in combine_sources
-  tempdf <- species_final %>%
-    dplyr::filter(Weight_type == "Sample", is_conflict == TRUE) %>%
-    dplyr::select(valid_name, Weight_type, is_conflict) %>%
-    dplyr::distinct() %>%
-    dplyr::rename(skip_WW_sample = is_conflict)
-  species_final <- species_final %>%
-    dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
-  species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
-  species_final$Weight_type[species_final$skip_WW_sample] <- NA
-  # If AFDW or WW is_Partial, use AFDW_calc unless it does not exist.
-  species_final <- species_final %>%
-    dplyr::mutate(
-      skip_partial_WW = ifelse(is_Partial_WW & !is.na(AFDW_g_calc), TRUE, FALSE),
-      skip_partial_AFDW = ifelse(is_Partial_AFDW & !is.na(AFDW_g_calc), TRUE, FALSE)
-    )
-  species_final$AFDW_g_from_WW[species_final$skip_partial_WW] <- NA
-  species_final$AFDW_g[species_final$skip_partial_AFDW] <- NA
-  # Combine AFDW columns
-  species_final <- combine_data_sources(species_final,
-                                        new_column_name = "AFDW_g_combined",
-                                        order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc"))
-  species_final <- species_final %>%
-    # Identify rows with unknown Count or Biomass
-    dplyr::mutate(
-      incomplete_count = ifelse(is.na(Count), 1, 0),
-      incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
+    species_final <- species_final %>%
+      # Remove species with no match to WoRMS database (avoid removing NA)
+      dplyr::filter(hasNoMatch != 1 | is.na(hasNoMatch)) %>%
+      # Remove species that are not counted as organism (Count = -1) (avoid removing NA)
+      dplyr::filter(Count != -1 | is.na(Count)) %>%
+      # Upscale all values with the Fraction
+      dplyr::mutate_at(
+        dplyr::vars(Count, AFDW_g, AFDW_g_from_WW, AFDW_g_calc),
+        function(x){x/.$Fraction}) %>%
+      dplyr::select(-Fraction) %>%
+      # Round Count to integer (e.g. 3 * 0.333 = 0.999 = 1)
+      dplyr::mutate(Count = round(Count)) %>%
+      # Find conflicting weight type fields between
+      # Weight_type (WW and AFDW_from_WW) and Weight_type_AFDW (AFDW_g)
+      dplyr::mutate(is_conflict = ifelse(
+        Weight_type == "Sample" & !is.na(Weight_type_AFDW), TRUE, FALSE
+      ))
+    # Set all conflicting fields to NA, so they are skipped in combine_sources
+    tempdf <- species_final %>%
+      dplyr::filter(Weight_type == "Sample", is_conflict == TRUE) %>%
+      dplyr::select(valid_name, Weight_type, is_conflict) %>%
+      dplyr::distinct() %>%
+      dplyr::rename(skip_WW_sample = is_conflict)
+    species_final <- species_final %>%
+      dplyr::left_join(., tempdf, by = c("valid_name", "Weight_type"))
+    species_final$AFDW_g_from_WW[species_final$skip_WW_sample] <- NA
+    species_final$Weight_type[species_final$skip_WW_sample] <- NA
+    # If AFDW or WW is_Partial, use AFDW_calc unless it does not exist.
+    species_final <- species_final %>%
+      dplyr::mutate(
+        skip_partial_WW = ifelse(is_Partial_WW & !is.na(AFDW_g_calc), TRUE, FALSE),
+        skip_partial_AFDW = ifelse(is_Partial_AFDW & !is.na(AFDW_g_calc), TRUE, FALSE)
+      )
+    species_final$AFDW_g_from_WW[species_final$skip_partial_WW] <- NA
+    species_final$AFDW_g[species_final$skip_partial_AFDW] <- NA
+    # Combine AFDW columns
+    species_final <- combine_data_sources(species_final,
+                                          new_column_name = "AFDW_g_combined",
+                                          order_of_preference = c("AFDW_g", "AFDW_g_from_WW", "AFDW_g_calc")
     ) %>%
+      # Identify rows with unknown Count or Biomass
+      dplyr::mutate(
+        incomplete_count = ifelse(is.na(Count), 1, 0),
+        incomplete_biomass = ifelse(is.na(AFDW_g_combined), 1, 0)
+      )
+  }
+
+  message("Summarizing density and biomass per taxon per station...")
+  sp <- species_final %>%
     # Set Count = NA to Count = 1 (there was see at least 1)
     dplyr::mutate(
       Count = ifelse(is.na(Count), 1, Count)
@@ -120,7 +127,39 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     ) %>%
     dplyr::ungroup()
 
+  message("Creating separate dataframe with individual sizes and weights...")
+  # Keep individual lengths and weights (only entry weight type)
+  sp_individuals <- species_final %>%
+    # Select relevant columns
+    dplyr::select(File, EntryID, StationID, valid_name, is_ID_confident,
+                  rank, genus, family, order, class, phylum, isFuzzy,
+                  Count, Size_dimension, Size_mm,
+                  AFDW_g, Weight_type_AFDW, is_Partial_AFDW,
+                  WW_g_threshold, Weight_type, is_Shell_removed, is_Partial_WW,
+                  is_Fraction_assumed, is_Preserved,
+                  Comment) %>%
+    # Only keep entries with a valid Count
+    dplyr::filter(!is.na(Count)) %>%
+    # Only retain individual weights (not bulk sample weights)
+    dplyr::mutate(AFDW_g = ifelse(Weight_type_AFDW == "Sample", NA, AFDW_g),
+                  WW_g_threshold = ifelse(Weight_type == "Sample", NA, WW_g_threshold)) %>%
+    # Calculate individual weight
+    dplyr::mutate(Individual_WW_g = WW_g_threshold / Count,
+                  Individual_AFDW_g = AFDW_g / Count) %>%
+    dplyr::select(-Weight_type_AFDW, -Weight_type,
+                  -WW_g_threshold, -AFDW_g) %>%
+   # Booleans from 0/1 to FALSE/TRUE
+    dplyr::mutate(isFuzzy = ifelse(isFuzzy == 0 | is.na(isFuzzy), FALSE, TRUE),
+                  is_ID_confident = ifelse(is_ID_confident == 1 | is.na(is_ID_confident), TRUE, FALSE),
+                  is_Partial_WW = ifelse(is_Partial_WW == 0 | is.na(is_Partial_WW), FALSE, TRUE),
+                  is_Partial_AFDW = ifelse(is_Partial_AFDW == 0 | is.na(is_Partial_AFDW), FALSE, TRUE),
+                  is_Preserved = ifelse(is_Preserved == 0 | is.na(is_Preserved), FALSE, TRUE)
+                  ) %>%
+    # Only keep entries where Size, AFDW or WW is known (i.e. remove rows with no data at all)
+    dplyr::filter(!(is.na(Size_mm) & is.na(Individual_WW_g) & is.na(Individual_AFDW_g)))
+
   # Clean station database
+  message("Cleaning and combining station data from multiple sources into one column...")
   stations_final <- stations_additions %>%
     combine_data_sources(
       ., new_column_name = "Lat_DD", order_of_preference = c("Lat_DD_midpt", "Lat_DD_calc")
@@ -134,6 +173,9 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
     combine_data_sources(
       ., new_column_name = "Track_length_m", order_of_preference = c("Track_length_m_preset", "Track_dist_m_Odometer", "Track_dist_m_GPS")
     ) %>%
+    combine_data_sources(
+      ., new_column_name = "Bearings", order_of_preference = c("Bearing", "Bearing_calc")
+    ) %>%
     dplyr::mutate(
       Sample_area_m2 = Track_length_m * (Blade_width_cm/100),
       Sample_volume_m3 = Sample_area_m2 * (Blade_depth_cm/100)) %>%
@@ -143,13 +185,15 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       -Lat_stop_DD,	-Lon_stop_DD,
       -Lon_DD_calc,	-Lat_DD_calc,
       -Track_length_m_preset, -Water_depth_m_cruise, -Odometer_count,
-      -Track_dist_m_GPS, -Track_dist_m_Odometer, -Water_depth_m_Bathy, -Water_depth_m_Bathy2)
+      -Track_dist_m_GPS, -Track_dist_m_Odometer,
+      -Water_depth_m_Bathy, -Water_depth_m_Bathy2,
+      -Bearing, -Bearing_calc)
 
-  # Create one large table for the Shiny app
+  message("Join density/biomass table to stations table...")
   # Deselect File in stations because it's double.
   st <- dplyr::select(stations_final, -File)
-  # Join data into big table
-  database <- dplyr::inner_join(species_final, st, by = "StationID") %>%
+  # Join data with biomass and density into big table
+  database <- dplyr::inner_join(sp, st, by = "StationID") %>%
   # Calculate density and biomass per station
     dplyr::mutate(
       Density_nr_per_m2 = Count_total / Sample_area_m2,
@@ -158,19 +202,43 @@ finalize_database <- function(data_folder = "data", out_folder = "data",
       Biomass_g_per_m3 = Biomass_g / Sample_volume_m3) %>%
     dplyr::select(-Count_total, -Biomass_g)
 
+  message("Join specimens size/weight table to stations table...")
+  database_individuals <- dplyr::inner_join(sp_individuals, st, by = "StationID",
+                                            suffix = c(".sp", ".st"))
+
+  message(paste0("Saving intermediate data to ",out_folder))
   save(species_final, file = paste0(out_folder, "/species_final.rda"))
   save(stations_final, file = paste0(out_folder, "/stations_final.rda"))
   if(as_CSV){
+    message(paste0("Writing intermediate data to CSVs in ",out_folder))
     write.csv(species_final, paste0(out_folder,"/species_final.csv"))
     write.csv(stations_final, paste0(out_folder,"/stations_final.csv"))
   }
+  message("Saving databases...")
   if(is.null(database_folder)){
     save(database, file = "database.rda")
-    if(as_CSV){write.csv(database, file = "database.csv")}
+    save(database_individuals, file = "database_individuals.rda")
+    message("Biomass and density data can be found as 'database.rda' in the working directory.")
+    message("Individual size and weight data can be found as 'database_individuals.rda' in the working directory.")
+    if(as_CSV){
+      message("Writing databases as CSVs...")
+      write.csv(database, file = "database.csv")
+      write.csv(database_individuals, file = "database_individuals.csv")
+      message("Done.")
+      }
   }else{
     save(database, file = paste0(database_folder,"/database.rda"))
-    if(as_CSV){write.csv(database, file = paste0(database_folder,"/database.csv"))}
+    save(database_individuals, file = paste0(database_folder,"/database_individuals.rda"))
+    message(paste0("Biomass and density data can be found as 'database.rda' in ",database_folder))
+    message(paste0("Individual size and weight data can be found as 'database_individuals.rda' in ",database_folder))
+    if(as_CSV){
+      message("Writing databases as CSVs...")
+      write.csv(database, file = paste0(database_folder,"/database.csv"))
+      write.csv(database_individuals, file = paste0(database_folder,"/database_individuals.csv"))
+      message("Done.")
+      }
   }
+  message("Yay! Your database is done and ready to go!")
 }
 
 
