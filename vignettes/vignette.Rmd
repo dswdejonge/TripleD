@@ -360,7 +360,7 @@ General requirements:
 - Its good practice to always provided references for your conversion data and note any assumptions and alteration from the original reference if any in the comments and a README file.  
 
 Bioconversion CSV attributes can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_bioconversion.csv). Alternatively, you can view the requirements in R:  
-```{r view_att, eval=FALSE}
+```{r view_att_bioc, eval=FALSE}
 library(TripleD)
 print(att_bioconversion)
 ```
@@ -409,7 +409,7 @@ I can calculate WW_to_AFDW (excluding shell) using the conversion factors WW_to_
 
 I should NOT include both possibilities for WW_to_AFDW (excluding shell), because then my script would not know which option to choose when trying to find a conversion factor. However, I am allowed to include a second WW_to_AFDW for *Pagurus bernhardus* which is valid for a wet weight **including** shell. The script can now choose a WW_to_AFDW for reported WW with or without shell.  
 
-## Example: Regression formulas
+### Example: Regression formulas
 For *Pagurus bernhardus* I found the following regression formulas in literature:  
 
 - log10(WW_mg) = 3.2xlog10(Claw_length_mm)-2.1  (WW excluding shell)
@@ -438,5 +438,191 @@ The second regression has to be rewritten so that the Body_length can be given a
 4) Output_unit_g = (A/10^B) x Size_mm^B   
 
 Other examples of how regressions can be rewritten to match the required format can be found in the README file of the default bioconversion file that can be requested from NIOZ.  
+
+## 3.E. Workflows
+The readme file of the TripleD package explains which wrapper functions should be used, and in what order, to fully construct two databases from the input files: database.rda and database_individuals.rda. You can review the workflow in each wrapper function in the GitHub repository (https://github.com/dswdejonge/TripleD/tree/master/R) or in an R session as follows:  
+```{r}
+library(TripleD)
+construct_database
+check_bioconversion_input
+collect_from_NOAA
+collect_species_WORMS
+prepare_bioconversion
+complete_database
+finalize_database
+```
+
+If you are not comfortable reading R-code, your can read about the workflow per wrapper function below.
+
+### construct_database
+This function reads in the format requirements and the input files, and subsequently checks the formatting of the input files and merges all stations CSVs and all species CSVs together into two tables. The function requires the argument ‘in_folder’ which is the name of the folder that contains the input files (default is “inputfiles”), the argument ‘out_folder’ which is the name of the folder where new data should be stored (default is “data”), and the boolean argument ‘as_CSV’ that says whether or not to also write the new dataframes into CSV files (default is TRUE).  
+
+First, a folder is created in the working directory (default name ‘data’), where all generated data will be saved.  
+
+For each stations and each species CSV file, the format is checked. If anything in the file does not fit these requirements, an error message will be thrown containing information on what the problem is and where in the CSV it occurs. You can adjust the CSV input file accordingly and try again. All format checks:  
+- Empty cells in the CSVs are not allowed. An error message occurs if “NaN” or “” is found in the file, reported the row numbers where the empty cells occur.  
+- If a required attribute is missing from the read-in column names, an error message is given specifying which required attribute is missing in the stations CSV file.   
+- Sometimes, an attribute is required but can be provided in alternative forms (e.g. either the start and end coordinates of a track, or the midpoint of a track). It is checked if at least one of these alternatives is present.  
+- If there are column names in the data that are not specified in the attributes file, they are invalid, and an error message will be thrown specifying which column names are not allowed (often indicates a typo in the column name).  
+- Each column for the required attributes must be completely filled, i.e. no NA values may occur. If an NA occurs in a required column, an error message is thrown specifying in which rows NAs are observed.  
+- For required attributes that may be given in alternative forms, the columns do not have to be completely filled, but if NA occurs in one alternative, the other alterative MUST be filled so that all-in-all the information is complete for each station. Therefore, if NAs occur for all allowed alternatives, an error message is thrown that specifies the rows with NAs.  
+- Some attributes are optional, but if they occur other attributes must also be present i.e. grouped attributes. If not all attributes in a group are given, a error message is thrown specifying which attributes are missing.  
+- It is checked if all values that are in a column of a variable with datatype ‘double’ are indeed doubles. The same is done for the datatype ‘integer’. NAs are allowed. If this column in the dataframe has a wrong datatype, an error message is thrown with the corresponding column name.  
+- It is checked if all values in a column of a variable with datatype ‘boolean’ are 1s and 0s. If other values occur, an error message is thrown with the column names and row numbers of the cells in the CSV that contains something else than a 1 or a 0 (NAs are allowed).
+- It is checked if all values in a column of a variable with datatype ‘fraction’ are between 0 and 1. If other values occur, an error message is thrown with the column names and row numbers of the cells in the CSV that contains something else than a 1 or a 0 (NAs are allowed).  
+- It is checked if all values in a column of a variable with predefined values matches these predefined values. If values occur that are not predefined in the attributes CSV (see the colours example above) an error message is thrown with the column names and row numbers of the cells in the CSV that contains something else than the predefined values (NAs are allowed).  
+
+For stations CSV files, some specific format checks are done:  
+- All given StationIDs must be unique. If a StationID is duplicated, an error message is thrown specifying these duplicated StationIDs.  
+- The dates are converted to an R date format. If dates cannot be converted, it means the format in the CSV inputfile is wrong. An error message will be thrown specifying which rows contain a data that cannot be converted.  
+- If the time does not follow a specific format (checked using a regex statement), an error message is thrown specifying which rows contain times in the wrong format.  
+- The station objective can be set to ‘Complete’ i.e. all caught species were processed or to ‘Incomplete’ i.e. some taxa were consistently ignored or focused on. If the cruise objective is set to ‘Incomplete’ the column ‘Excluded’ or 'Focus' should be filled. If this is not the case, an error message will be thrown.
+- All values in the columns Track_length_m_cruise, Blade_depth_cm, Blade_width_cm, Tow_speed_knots, Water_depth_m_cruise, and Odometer_count should be positive. If negative values occur, an error message is thrown specifying the rows where negative values occur.  
+
+For species CSV files, some specific format checks are done:  
+
+- All given EntryIDs must be unique. If an EntryID is duplicated, an error message is thrown specifying these duplicated EntryIDs.  
+- Each combination of StationID and taxon should have the same reported value for ‘Fraction’ and ‘is_Fraction_assumed’. If this is not the case, the StationID and taxa names with inconsistent values are printed and an error message is thrown specifying that this issue must be resolved.  
+- If a value for WW_g or AFDW_g is given, it is checked if all other required information (WeightType, Threshold_Scale, is_Shell_removed and is_Partial_WW for WW_g; Weight_type_AFDW, Threshold_Scale_AFDW, and is_Partial_AFDW for AFDW_g) is also provided i.e. may not be NA in that row. If this is not the case, an error message is thrown specifying it should be checked if all rows with a given weight have all other columns filled.  
+- If WW_g is NA the Weight_type may not be 'Entry'. Also, the sum of all WW_g for a taxon in a sample with Weight_type 'Sample' may not be 0. An error is thrown including information of where the error occurs.  
+- If a value for Size is given (Size_value), the columns ‘Size_unit’ and ‘Size_dimension’ should also be filled. If this is not the case, an error message is thrown specifying in which rows this information is missing.  
+- All values in the columns Count, Size_value, WW_g, AFDW_g, Threshold_Scale, and Threshold_Scale_AFDW should be positive. If negative values occur, an error message is thrown specifying the rows where negative values occur.  
+
+After the above-mentioned checks, all data from several stations files are merged into one dataframe called ‘stations’, where an extra column in added specifying from which original CSV inputfile the data is imported (column name ‘File’). The same happens for the species data, which merges into a new dataframe called ‘species’. If CSV files do not have all possible columns specified in the attributes file, then these columns are added with values ‘NA’ to prevent errors in the rest of the code.  
+
+Binary booleans (1, 0, NA) are changed to true booleans (TRUE, FALSE).   
+
+As a final check, it is checked if all StationIDs that occur in the species files are also mentioned in the station files, and if StationIDs are unique over multiple input files. If a StationID occurs in the species dataframe which is not defined in the stations dataframe, or if StationIDs over multiple input files are not unique, an error is thrown specifying which StationIDs have issues.  
+
+The stations and species data frame are stored as Rdata file (‘stations_initial.rda’ and ‘species_initial.rda’) in the ‘out_folder’, and also as CSV files (‘stations_initial.csv’ and species_initial.csv’) if the argument ‘as_CSV’ was set to TRUE (default).  
+
+### check_bioconversion_input
+Just like the species and stations file, the format of the bioconversion CSV file is checked against its corresponding attributes file, i.e. checking:  
+
+- presence of required attributes,  
+- no empty cells,  
+- if grouped variables are complete,  
+- if numeric columns are indeed numeric (either doubles or integers),
+- if boolean columns are indeed booleans,  
+- if fraction columns are indeed between 0 and 1,  
+- if there are no unknown words in predefined columns,  
+- if conversion factors are all positive.  
+
+Additionally, it is checked if there are no double entries of conversion factors and regression formulas, i.e. if there is only one unique combination of taxon and is_Shell_removed (for conversion factors) or taxon, Size_dimension, and is_Shell_removed (for regression formulas).  
+
+### collect_from_NOAA
+This function collects bathymetry from NOAA based on the coordinates in the database.  
+
+First, it finds the min and max latitude and longitude in all relevant columns. It adds a buffer zone in decimal degrees to these coordinates (default buffer zones is 2 decimal degrees). It then connects to the API of NOAA via de marmapp package to obtain bathymetry of a certain resolution (default resolution is 1 minute). 
+
+The bathymetry from NOAA is shaped into an xyz dataframe (x = lon, y = lat, z = altitude i.e. negative values are depth) using the marmap package and stored as bathymetry.rda.
+
+### collect_from_WORMS
+This function collects taxonomy from WoRMS based on all reported taxa in the input files and the bioconversion file.  
+
+All reported taxa names are collected from initial_species.rda and the bioconversin file. These taxa names are queried against the WoRMS database using the ‘worrms’ R-package. A list with unique reported taxon names is queried against the WoRMS database in batches of 50 names (to avoid a time-out of the connection with WoRMS) using the function worrms:: wm_records_names(). This function only returns exact matches.    
+
+The WoRMS API returns the requested data as a list where every element is named according to the queried taxon name and contains a data frame with the data extracted from the WoRMS database for the respective taxon). If there is was no exact match, the list element for that taxon is empty.
+
+We re-query the taxa that did not result in an exact match using a different function this time: worrms::wm_records_taxamatch(). The taxamatch function allows for fuzzy matching, meaning typos and phonetic spelling is also allowed. The empty elements in our worms list are replaced by the newly extracted WoRMS records found with the taxamatch (fuzzy) algorithm.  
+
+For each queries taxa, we only want to store one row of data including the currently accepted valid name and its taxonomy (only extant species are used):  
+
+- If there was no match at all (no exact match, no fuzzy match), an empty record is used for the respective taxon i.e. same format as matching records, but with all values NA.  
+- If there was only a single match, this single record is used.  
+- If there were multiple matches (e.g. when multiple synonyms exist), the currently 'accepted' name is used.  
+- If there are multiple or no accepted matches, but all these matches contain the same valid name, we use this valid name by simply taking the first match.  
+- In all other cases we cannot make a good choice and therefore choose to use an empty record.  
+
+The worms list is transformed into a dataframe, which contains two extra columns: ‘hasNoMatch’ which is 1 if no match at all was found against the WoRMS database (0 otherwise), and ‘isFuzzy’ which is 1 if the match was found using a fuzzy search of the database (0 otherwise).The worms dataframe is stored in the out_folder as ‘worms.rda’.  
+
+### prepare_bioconversion
+The bioconversion data and worms dataset are opened. Valid names and taxonomy are added to each entry. A message is produced printing the taxa that did not match to WoRMS and are therefore discarded.  
+
+For each phylum, class, order, family, and genus a mean conversion factor and regression formula is calculated based on all species present in the bioconversion file and the taxonomy added from WoRMS.  
+
+The bioconversion data is split into two subsets: 1) conversion factors and 2) regression formulas. Any double entries created by the calculation of means (i.e. when conversion data for a certain family was already included manually, and is now also calculated automatically) are removed. Then there is again a check for double entries. This was already tested in check_bioconversion_input, but the addition of valid names could have resulted in duplication. For example, there is a conversion factor for species A and species B in the original dataset. The query to WoRMS revealed species A and B are actually the same species C; now we have two different conversion factors for species C. If this is the case an error in thrown, and the bioconversion file needs to be updated manually.  
+
+The prepared conversion data is stored as 'conversion_data.rda' in the out_folder.
+
+### complete_database
+The wrapper function complete_database contains a workflow that uses the existing and externally collected data to perform calculations to generate new data.  
+
+First, the data stored in the previous steps (‘stations_initial.rda’, ‘species_initial.rda’, ‘bathymetry.rda’, ‘worms.rda’, ‘conversion_data.rda’) are loaded.  
+
+Then, additional station data is generated:  
+
+- Track midpoints are calculated from start and stop coordinates using the geosphere::midPoint()function. These are stored in two new columns called ‘Lon_DD_calc’ and ‘Lat_DD_calc’.  
+- Track lengths are calculated from the start and stop coordinates using the geosphere::distGeo() function. This additional track length is stored in a new column called ‘Track_dist_m_GPS’.  
+- Track lengths are also calculated from the Odometer, using the column ‘Odometer_count’ and a default tick_length_m of 2. This additional track length is stored in a new column called ‘Track_dist_m_Odometer’.  
+- Bearings are calculated using the geosphere::bearing() function, stored in a new column 'Bearings'.  
+- Water depth is estimated from the given track midpoints, using the bathymetry collected from NOAA using the marmap::get.depth() function, stored as Water_depth_m_Bathy.  
+- Water depth is also estimated from calculated track midpoints using the NOAA bathymetry, stored as Water_depth_m_Bathy2.  
+
+Then, additional species data is generated:  
+
+- The taxonomy from WoRMS is added to the dataframe, including the information on if the match was fuzzy or if there was not match at all.  
+- Conversion factors and regression formulas are added to the dtaframe, based on valid name, is_Shell_removed, and the Size_dimension.
+- A new column ‘Size_mm’ is created with all reported sizes converted to mm. For 1/2cm classes the conversion is x5+5, for unit cm the conversion is x10, for unit cm2 the conversion is x100 (resulting in mm2), for unit cm3 the conversion is x1000 (resulting in mm3).  
+- A new column ‘WW_g_calc’ is created with estimated wet weights in grams based on the converted ‘Size_mm’ and the attached regression formula IF that formula has the output unit “WW_g”. The regression formula is always assumed to be WW_g = A_factor*Size_mm^B_exponent.  
+- A new column “AFDW_g_calc’ is created with estimated ash-free dry weights in grams based on the converted ‘Size_mm’ and the attached regression formula IF that formula has the output unit “AFDW_g”. The regression formula is always assumed to be AFDW_g = A_factor*Size_mm^B_exponent. If the output unit is not “AFDW_g”, the value in the previously created column WW_g_calc is taken and multiplied by the attached conversion factors to obtain an estimated AFDW_g_calc.  
+- A new column “WW_g_threshold” is created that takes the reported wet weights, but takes half of the reported scale threshold value when the reported wet weight is 0 (so when the scale threshold is 0.5 g, the specimens below the threshold are assumed to on average weight 0.25 g).  
+- A new column “AFDW_g_from_WW” is created by multiplying the wet weights in WW_g_threshold by the attached conversion factors.  
+
+In summary, the originally reported taxa now have a valid name including a full taxonomy, and there are three columns that contain information on ash-free dry weight biomass: 1) a column with measured AFDW called AFDW_g i.e. done by the researchers themselves in the lab, 2) a column with AFDW estimated using regression formulas called "AFDW_g_calc", and 3) a column with AFDW estimated from measured wet weights and conversion factors called "AFDW_g_from_WW".  
+
+Finally, the wrapper function will provide you with some summary information about the dataset:  
+- It checks if the number of rows is not suddenly different than before; if this is the case it means rows have been erroneously removed, added/duplicated.  
+- It will return a list of taxa names that cannot be matched to WoRMS and specify in which CSV files these taxa are reported.  
+- It will provide a list of taxa names (combined with is_Shell_removed) that have no corresponding conversion factor in the bioconversion.csv file.  
+- It will provide a list of taxa names (combined with Size_dimension and is_Shell_removed) for which there is no corresponding regression formula.  
+- It reports the average difference in mean reported water depth and water depth from bathymetry.  
+
+The dataset with additional data is stored in the out_folder as ‘species_additions.rda’ and ‘stations_additions.rda’.  
+
+### finalize_database
+This wrapper function merges similar data from multiple columns to one column, combines the stations and species data, and produces two databases: one with densities and biomasses per taxon per m2 and m3, and one with individual sizes and weights.  
+
+First, the data created in the previous step (‘stations_additions.rda’ and ‘species_additions.rda’) is loaded.  
+
+Then, the species table is cleaned up:  
+
+- Taxa with no match to WoRMS database are discarded.  
+- Taxa with a count of -1 are discarded.  
+- All counts and AFDW columns are upscaled by the reported fraction (e.g. fraction = 0.25 and count = 1 becomes count = 4).  
+- All three AFDW columns are combined into one final column called "AFDW_g_combined". The automatically created column "source_AFDW_g_combined" tells you from which original AFDW column the value came from. Some data manipulation is done in order to allow this merging of the three columns, without going into technical detail this includes: setting all NA weight values to 0 and finding conflicting fields with weight type 'Sample' and set those AFDW values to NA. If AFDW from AFDW_g or AFDW_from_WW is a partial weight (as indicated by is_Partial_WW or is_Partial_AFDW), the value from AFDW_calc is used unles it does not exist.  
+- Finally, two columns are added that identify entries that do not have a count or a biomass and thus may result in an underestimation of final values.  
+
+This cleaned up version of the species table is summarized in two different ways:  
+1) For each taxon at each station the total count and total biomass is calculated. If there was no count (NA) it is assumed at least 1 was seen. Record is kept of which summarized entries are underestimations (i.e. formed using incomplete counts or biomass).  
+2) Size and biomass data of individual specimens (or sometimes small groups of specimens) is extracted. Only entries with valid counts are used and all bulk sample weights are removed (i.e. only entry weights are retained).
+
+Then, the stations table is cleaned up:  
+
+- One new column ‘Lat_DD’ is created that contains the given track midpoint latitudes, and any remaining NA cells are filled with calculated midpoint latitudes. The same is done for a new column ‘Lon_DD’.  
+- One new column ‘Water_depth_m’ is created that contains the measured water depth, and any remaining NA cells are filled with water depth calculated from bathymetry.  
+- One new column ‘Track_length_m’ is created, that contains the given track length, any remaining NA cells are filled with track lengths calculated from the Odometer, and if any NA still remain, those cells are filled with track lengths calculated from track start and stop coordinates.  
+- The total sampled area and volume are calculated for each sampling station based on Track length, blade width and blade depth.  
+
+Finally, the two summarized species tables are merged with the station data using the StationID. The sampled area and volume is used to calculate density (count m-2, and count m-3) and biomass (g AFDW m-2, and g AFDW m-3).
+
+The intermediate cleaned species and station tables are stored as ‘species_final.rda’ and ‘stations_final.rda’ in the out_folder (default ‘data’). 
+
+The final two databases are stored in the working directory as ‘database.rda’ and ‘database_individuals.rda’ and also written as CSV files (is asCSV is TRUE, which is default).
+
+# 4. The Database
+The TripleD package results in two databases: 
+
+1) A database with with density and biomass per square meter and per cubic meter for each reported taxon at each sampling station (and can also be used for presence-absence data).  
+2) A database with sizes and weights of individual specimens, which can be used for e.g. size-weight relationships or studying organism size over time.  
+
+An explanation of each all attributes in the density and biomass database can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_database.csv), and for the individual size and weight database can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_database_individuals.csv).
+Alternatively, you can view the requirements in R:  
+```{r view_att_bioc, eval=FALSE}
+library(TripleD)
+print(att_database)
+print(att_database_individuals)
+```
+
 
 # Bibliography
