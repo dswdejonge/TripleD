@@ -294,7 +294,7 @@ are_species_metadata_consistent <- function(file, file_name){
     dplyr::filter(Count > -1) %>%
     dplyr::select(Species_reported, StationID, Fraction, is_Fraction_assumed) %>%
     dplyr::distinct() %>%
-    dplyr::mutate(mistake_count = n())
+    dplyr::mutate(mistake_count = dplyr::n())
 
   if(dim(n_unique_Expect)[1] != dim(n_unique_Obs)[1]){
     print(dplyr::filter(n_unique_Obs, mistake_count > 1))
@@ -326,7 +326,7 @@ is_biomass_complete <- function(file, file_name){
         dplyr::group_by(StationID, Species_reported) %>%
         dplyr::filter(Weight_type == "Sample") %>%
         dplyr::summarise(
-          nr_rows = n(),
+          nr_rows = dplyr::n(),
           nr_NAs = length(which(is.na(WW_g)))
         ) %>%
         dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
@@ -363,7 +363,7 @@ is_biomass_complete <- function(file, file_name){
         dplyr::group_by(StationID, Species_reported) %>%
         dplyr::filter(Weight_type_AFDW == "Sample") %>%
         dplyr::summarise(
-          nr_rows = n(),
+          nr_rows = dplyr::n(),
           nr_NAs = length(which(is.na(AFDW_g)))
         ) %>%
         dplyr::mutate(incorrect_weight_type = ifelse(nr_NAs < nr_rows, FALSE, TRUE)) %>%
