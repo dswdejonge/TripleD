@@ -348,36 +348,7 @@ Datasets are stored per research cruise. For each dataset you should be able to 
 1) A README text file,  
 2) A stations CSV with station and environmental data,  
 3) A species CSV with biological data (counts, sizes, weights),  
-4) Additional raw data files (scans of labbook, cruise report, ship log, etc.) used to construct the stations and species CSV files.  
-  
-The following files are available:   
-
-| Files                        | Entries (n) |
-| -----                        | ----------- |
-| 2006_ARCA_README.txt         | - |
-| 2006_ARCA_species.csv        | 3218 |
-| 2006_ARCA_stations.csv       | 3 |
-| 2006_Arca_FF.xlsx            | - |
-| 2018_RWS_31135633_README.txt | - |
-| 2018_RWS_31135633_species.csv  | 3447 |
-| 2018_RWS_31135633_stations.csv | 15 |
-| 2018_RWS_31135633_Bodemschaaf FrieseFront | - |
-| 2018_RWS_Database_V7.xlsx                 | - |
-| 2018_2019_RWS_Bijlage 9; RWSV 913.00.B080 | - |
-| Bemonsteringbodemschaaf_V2.pdf            | - |
-| 2019_64PE438_NICO10_README.txt        | - |
-| 2019_64PE438_NICO10_species.csv       | 2375 |
-| 2019_64PE438_NICO10_stations.csv      | 37 |
-| 2019_64PE438_NICO10_Schaafdata.xlsx   | - |
-| 2019_64PE463_README.txt             | - |
-| 2019_64PE463_species.csv            | 4571 |
-| 2019_64PE463_stations.csv           | 44 |
-| 2019_RWS_31144108_README.txt        | - |
-| 2019_RWS_31144108_species.csv       | 47624 |
-| 2019_RWS_31144108_stations.csv      | 187 |
-| 2018_2019_RWS_Bijlage 9; RWSV 913.00.B080 | - |
-| Bemonsteringbodemschaaf_V2.pdf      | - |
-| 2019_RWS_31144108_Definitief-bestand_MZBzout_Bodemschaven_2019_versie03_definitie.._.xlsx | - |
+4) Additional raw data files (scans of labbook, cruise report, ship log, etc.) used to construct the stations and species CSV files.   
 
 ## 3.D. Bioconversion file
 A special CSV input file is the ‘bioconversion.csv’ file. This file contains data that can be used to estimate Ash-Free Dry Weights (AFDW) from sizes and wet weights (WW). Basically, it contains two types of information:  
