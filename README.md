@@ -36,7 +36,7 @@ construct_database(in_folder = "inputfiles")
 check_bioconversion_input()
 
 # Collect bathymetry from NOAA and taxonomy from WoRMS
-collect_from_NOAA() # currently not working - cannot reach NOAA server
+collect_from_NOAA()
 collect_from_WORMS()
 
 # Prepare the bioconversion file to use (add valid taxon

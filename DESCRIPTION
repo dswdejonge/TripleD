@@ -20,6 +20,6 @@ RoxygenNote: 7.0.2
 Imports: 
     dplyr,
     geosphere,
-    marmap,
+    marmap (>= 1.0.4),
     worrms,
     tibble
