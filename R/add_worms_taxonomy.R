@@ -10,8 +10,10 @@
 connect_to_worms <- function(species_names, fuzzy = FALSE){
   worms <- list()
   if(fuzzy){
+    message("Fuzzy matching...")
     func <- worrms::wm_records_taxamatch
   }else{
+    message("Exact matching...")
     func <- worrms::wm_records_names
   }
   i1 <- 1 ; i2 <- 50
