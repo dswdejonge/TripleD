@@ -17,6 +17,7 @@ connect_to_worms <- function(species_names, fuzzy = FALSE){
   i1 <- 1 ; i2 <- 50
   while(i1 <= length(species_names)){
     if(i2 > length(species_names)){i2 <- length(species_names)}
+    print(paste0(i1," of ",length(species_names)))
     collected_data <- func(species_names[i1:i2])
     worms <- c(worms, collected_data)
     i1 <- i1 + 50
@@ -144,7 +145,7 @@ collect_from_WORMS <- function(species = NULL, conversion_data = NULL,
     conversion_data <- read.csv(paste0(input_folder, "/bioconversion.csv"),stringsAsFactors = F)
   }
 
-  all_taxa_names <- unique(as.character(c(conversion_data$Taxon, species$Species_reported)))
+  all_taxa_names <- unique(c(as.character(conversion_data$Taxon), as.character(species$Species_reported)))
   message("Collecting taxonomy from the WoRMS database. This can take a while...")
   worms <- get_valid_names(all_taxa_names)
   save(worms, file = paste0(out_folder,"/worms.rda"))
