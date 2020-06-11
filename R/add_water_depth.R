@@ -54,7 +54,7 @@ collect_from_NOAA <- function(stations = NULL, buffer = 2, resolution = 1,
     resolution = resolution, keep = T)
 
   # Convert to dataframe
-  bathymetry <- marmap::fortify.bathy(bathy)
+  bathymetry <- marmap::fortify.bathy(bathymetry)
 
   #bathymetry <- collect_bathymetry(lats, lons)
   save(bathymetry, file = paste0(out_folder,"/bathymetry.rda"))
