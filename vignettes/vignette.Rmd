@@ -85,15 +85,47 @@ The unit 1/2cm is used a bit differently than the units mm and cm, because it wo
 ## 2.C. Limitations
 - The blade width and blade depth dimension are the intended sampling width and depth. However due to sediment types, objects in the sediment, and unevenness of the sediment, the actual track width and depth may differ somewhat. No study is yet done to quantify these effects.  
 - Polychaetes are caught by the Triple-D, but the Triple-D is not suitable for a quantitative analysis of polychaete abundance.  
-- Amphiura are often broken when processed, therefore the estimated biomass are probably almost always underestimations.
+- Amphiura are often broken when processed, therefore the measured wet weights are probably almost always underestimations.  
+- Species identification might have changed throughout time. For example, species A might have been identified as such, until at a certain moment in time it was recognized species A was in fact two different species, species A and B. It is important to be aware of such historic artefacts when working with and interpreting the data.
 
 # 3. The TripleD R-package
 
-## 3.A. General structure
-The Triple-D R-package and all related files can be found in its GitHub repository: github.com/dswdejonge/TripleD. The general structure of the package, and how files relate to each other, are explained in this cheatsheet:  
+## 3.A. Quick start
+The Triple-D R-package and all related files can be found in its GitHub repository: github.com/dswdejonge/TripleD. Go to the readme file in the repository for guidance on **1) installing the package, 2) seting up your working directory, and 3) running the workflow.**  
+
+### Cheatsheet
+The general structure of the package, and how files relate to each other, are explained in this cheatsheet:  
 
 ![TripleD package cheatsheet](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png)
+
+### Error handling
+If you encounter errors, try the advice below.  
+
+**construct_database() expects double but finds integer**
+You may get an error during the construct_database() function where a double is expected (e.g. 1.00) but an integer (e.g. 1) is found. Open the CSV file in Excel, select all columns that should be doubles, and set the datatype to 'Number' (all vallues should get the format 1.00 instead of 1). Save and try again.  
+
+**Input files invisible characters**  
+CSV files are basically text files where information that should occur in separate columns are separated by a comma (csv = comma separated values). Sometimes, text files can contain invisible characters that will create issues when trying to use it in R. If you suspect such issues might occur (you will probably get errors in the construct_database() function) try the following:  
+
+A. Encoding of File  
+The file encoding tells the computer how it should represent the text so that it is readable. Some issues with reading and using a text file might occur due to differences in file encodings. The file encoding I have used for the CSV files is UTF-8. You can use a free text editor like Notepad++ or SublimeText to reopen and store a file in a certain encoding.  
+
+B. Byte Order Mark (BOM)  
+A Byte Order Mark (BOM) is an invisible character that is sometimes added right at the start of a file. This is done for example by Microsoft Excel. However, R does not like this BOM when reading in a CSV and adds the characters to the first column name (something like “ï»¿StationID”). To avoid this, you can use a text editor to specifically change the encoding of the file to “UTF-8 without BOM”.
+
+C. Spaces  
+Spaces are exactly what the word says: invisible space between words. However, there are multiple characters that create space between words and differ from regular spaces. It might occur, for example, that you accidentally used a tab instead of a space. Also, there are special spaces called ‘non-breaking spaces’ that are the same as a normal space except that they prevent an automatic line break. If a regular space is “_”, a tab is “*” and a non-breaking space is “^” you get the following problem:
+Genus_species is not the same as Genus*species or Genus^species. In other words, on screen the statements appear exactly the same for the user, but the computer sees them as different characters. If you think you might have alternative spaces in your CSV, use a text editor to search and replace tabs and non-breaking spaces with regular spaces.
+
+**Connection time-out**  
+The functions collect_from_NOAA and collect_from_WORMS contain clients that try to connect to the API of external databases. It may occur that, for whatever reason, the connection is lost. You may get an error like this:  
+
+Error in curl::curl_fetch_memory(x\$url\$url, handle = x\$url\$handle) :   
+  Timeout was reached: [www.marinespecies.org] Connection timed out after 10003 milliseconds.  
   
+If this is the case, simply try running the function again, as it might have simply occurred due to a hiccup in your or the server’s internet connection.  
+
+
 ## 3.B. Input files
 The TripleD package can only read in CSV data files - one with sampling station data and one with species data per research cruise - that meet the specified requirements. The attribute files included in the package describe these requirements. This may require cleaning of your raw data files. A description of this cleaning process must be logged in the corresponding readme file.  
 
@@ -610,7 +642,7 @@ The intermediate cleaned species and station tables are stored as ‘species_fin
 
 The final two databases are stored in the working directory as ‘database.rda’ and ‘database_individuals.rda’ and also written as CSV files (is asCSV is TRUE, which is default).
 
-# 4. The Database
+# 4. The database
 The TripleD package results in two databases: 
 
 1) A database with with density and biomass per square meter and per cubic meter for each reported taxon at each sampling station (and can also be used for presence-absence data).  
