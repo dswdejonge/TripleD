@@ -17,15 +17,15 @@ library(TripleD)
 ```
 
 # Short summary
-- The NIOZ Royal Netherlands Institute for Sea Research owns a special dredge called the **Triple-D (Deep Digging Dredge)** to sample megafauna from sedimentary habitats.  
-- **Time series** data collected over the years (so far only from the North Sea) are stored in CSV files (one file per research cruise) in the NIOZ Data Archiving System (DAS).  
-- The goal of the TripleD package is to read the CSV files, and employ pre-written workflows to obtain a database-style table with **presence-absence, density, and biomass data** of benthic megafauna.  
-- The **transparancy and elaborate documentation** allows users of the package to exactly retrace the source of data, how calculations were performed, and which assumptions underly the data in the final database.  
-- This workflow also allows the user to **rewrite (part of) the workflow** to process the original data if they have specific wishes/assumptions they would like to use.  
-- The output of the TripleD package can directly be used in a developed **Shiny app to visually interact with the data**.  
+- The NIOZ Royal Netherlands Institute for Sea Research owns a special dredge called the Triple-D (Deep Digging Dredge) to sample megafauna from sedimentary habitats.  
+- Data collected over the years, so far only from the North Sea, are stored in CSV files in the NIOZ Data Archiving System (DAS).  
+- The goal of the TripleD package is to read the CSV files, and employ pre-written workflows to obtain two database-style tables with 1) presence-absence, density, and biomass data, and 2) individual size and weight data of benthic megafauna.  
+- The transparancy and elaborate documentation allows users of the package to exactly retrace the source of data, how calculations were performed, and which assumptions underly the data in the final database.  
+- This workflow also allows the user to rewrite (part of) the workflow to process the original data if they have specific wishes/assumptions they would like to use.  
+- The output of the TripleD package can directly be used in a developed Shiny app to visually interact with the data.  
 
 # Citation
-Please use the citation specified for each individual dataset.
+Please use the citation specified for each individual dataset.  
 
 # 1. Introduction
 The Triple-D (Deep Digging Dredge) is a dredge designed by NIOZ Royal Netherlands Institute for Sea Research that can easily sample relatively large areas of seabed to quantitatively study the distribution of megafauna that generally occurs in low abundances. So far, the Triple-D is only used in the North Sea, mostly on the Dutch Continental Shelf.  
@@ -71,13 +71,20 @@ If you want to use the TripleD to collect organisms, follow these guidelines to 
 6) Identify and sort the catch. The process will be smoother if the full catch is properly sorted before starting the measurements. You can document who identified the species and if that identification is confident (i.e. no doubt).  
 7) Preferably, each individual is measured and weighed. However, sometimes it is easier to pool some organisms together. For example, if multiple organisms have the same size, you can decide to pool and weigh them together. Report how many specimens are included in each entry (count). Egg masses, and algae batches, and other loose material that you want to document, should be reported with a count of -1. Each entry must have a unique ID. You can start assigning these onboard already. This is especially usefull when you want to store the organisms for later analysis in the lab (e.g. AFDW measurements). Make sure to consistently use this ID! Document if you will preserve certain organisms and where a user of the database may find these specimens in the future.  
 7) For each taxon, measure the size of all organisms. Carefully document the size dimension measured (diagram below), the unit (mm, cm, 1/2cm [note on using 1/2cm units below]), and the value. You can also only process a fraction of the catch, document this accordingly. Below is a diagram that explains for each general morphological group what size dimensions may be measured and what unit is the most appropriate. Hanging this diagram onboard as a large A1 poster, and providing it as laminated hand-out may help your colleagues/studnets/volunteers in the process. Sticking to the defined size dimensions and documenting their names strictly as written on the diagram will ease digitizing your measurements!  
-![TripleD size diagram](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/_morphologies.png)
+
+```{r morphologies, echo=FALSE, fig.cap="", out.width = '100%'}
+knitr::include_graphics("https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/_morphologies.png")
+```
 
 8) For each taxon: weigh the wet weight. You can also only process a fraction of the catch, document this accordingly. Document the threshold of the scale you are using. If the weight of a specimen is below the threshold, record 0. If the weight is not measured at all, record NA. If an organism is broken/missing body parts, write down that the wet weight is an underestimation because it only concerns a partial wet weight. If an organism naturally occurs with a hard external structure, like a shell (also hermit crabs!) or a tube (tube worms), write down if this shell was removed before weighing! If your weight does NOT concern a single entry but is a bulk weight (e.g. all specimens of a certain taxon are weighed together but measured for size seperately), document this accordingly! Eggs should generally not be included in the weight and be weighed seperately, unless it can't be avoided.  
 9) If you decide to take specimens back to the lab (read point 6!) for ash-free dry weight (AFDW) measurements, also document the scale threshold, if the organisms were broken, and if the weight is a bulk weight or not. AFDW is the dry weight (drying of wet tissue in the oven) minus the weight of the ash left after combustion of the tissue, i.e. AFDW and dry weight are not equivalent. Ash-free dry weight only concerns biologically active tissue, so external hard structures like shells are always removed. Make sure you match the AFDW measurement to the right entry (use the unique entry IDs). AFDW is the measurement type used to report final biomasses in the database.  
 
 Following these guidelines should make it easy to digitize your data as required by the TripleD package (see 3.B.).  
-![half cm units](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/half_cm_units.png)
+
+```{r half_cm, echo=FALSE, fig.cap="", out.width = '100%'}
+knitr::include_graphics("https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/half_cm_units.png")
+```
+
 
 **Note on using the 1/2cm unit**:  
 The unit 1/2cm is used a bit differently than the units mm and cm, because it works with ‘classes’. Imagine you have a ruler with tick-marks every 5 mm. So, the first tick mark at 0 mm, the second tick mark at 5 mm, the third tick mark at 10 mm, etc. If the organism is at least 5 mm (so between 5 and 10 mm) it falls in the class 1 ½cm. This means that an organism that is 4 mm falls in the class 0 ½ cm,and an organism of 14 mm will fall in the class 2 ½cm. Understanding this system is especially important if you want to convert ½units to mm or cm.
@@ -96,7 +103,9 @@ The Triple-D R-package and all related files can be found in its GitHub reposito
 ### Cheatsheet
 The general structure of the package, and how files relate to each other, are explained in this cheatsheet:  
 
-![TripleD package cheatsheet](https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png)
+```{r cheat_sheet, echo=FALSE, fig.cap="", out.width = '100%'}
+knitr::include_graphics("https://raw.githubusercontent.com/dswdejonge/TripleD/master/inst/extdata/cheatsheet.png")
+```
 
 ### Error handling
 If you encounter errors, try the advice below.  
@@ -447,11 +456,12 @@ For *Pagurus bernhardus* I found the following regression formulas in literature
 - log10(WW_mg) = 3.2xlog10(Claw_length_mm)-2.1  (WW excluding shell)
 - AFDW_g = 5x(10^-3) x Body_length_cm^2.5
 
-The bioconversion file should be constructed as follows:
-| Taxon | Size_dimension | A_factor | B_exponent | Output_unit | is_Shell_removed |
-| ----- | -------------- | -------- | ---------- | ----------- | ---------------- |
-|*Pagurus bernhardus* | Claw_length | 7.9e-06 | 3.2 | WW_g | 1
-|*Pagurus bernhardus* | Body_length | 1.6e-05 | 2.5 | AFDW_g | NA  
+The bioconversion file should be constructed as follows:  
+
+| Taxon | Size_dimension            | A_factor | B_exponent | Output_unit | is_Shell_removed |
+| ----- | ------------------------- | -------- | ---------- | ----------- | ---------------- |
+|*Pagurus bernhardus* | Claw_length | 7.9e-06  | 3.2        | WW_g        | 1                |
+|*Pagurus bernhardus* | Body_length | 1.6e-05  | 2.5        | AFDW_g      | NA               |  
 
 The first regression first has to first be rewritten into the format Output_unit_g = A_factor x Size_dimension_in_mm ^ B_exponent, and then altered so that the output is not in milligram but in gram. A_factor becomes (10^-2.1)/1000 = 7.9e-06 and B_exponent is 3.2.  
 
@@ -473,7 +483,7 @@ Other examples of how regressions can be rewritten to match the required format 
 
 ## 3.E. Workflows
 The readme file of the TripleD package explains which wrapper functions should be used, and in what order, to fully construct two databases from the input files: database.rda and database_individuals.rda. You can review the workflow in each wrapper function in the GitHub repository (https://github.com/dswdejonge/TripleD/tree/master/R) or in an R session as follows:  
-```{r}
+```{r eval = FALSE}
 library(TripleD)
 construct_database
 check_bioconversion_input
@@ -491,7 +501,8 @@ This function reads in the format requirements and the input files, and subseque
 
 First, a folder is created in the working directory (default name ‘data’), where all generated data will be saved.  
 
-For each stations and each species CSV file, the format is checked. If anything in the file does not fit these requirements, an error message will be thrown containing information on what the problem is and where in the CSV it occurs. You can adjust the CSV input file accordingly and try again. All format checks:  
+For each stations and each species CSV file, the format is checked. If anything in the file does not fit these requirements, an error message will be thrown containing information on what the problem is and where in the CSV it occurs. You can adjust the CSV input file accordingly and try again. All format checks:   
+
 - Empty cells in the CSVs are not allowed. An error message occurs if “NaN” or “” is found in the file, reported the row numbers where the empty cells occur.  
 - If a required attribute is missing from the read-in column names, an error message is given specifying which required attribute is missing in the stations CSV file.   
 - Sometimes, an attribute is required but can be provided in alternative forms (e.g. either the start and end coordinates of a track, or the midpoint of a track). It is checked if at least one of these alternatives is present.  
@@ -505,6 +516,7 @@ For each stations and each species CSV file, the format is checked. If anything 
 - It is checked if all values in a column of a variable with predefined values matches these predefined values. If values occur that are not predefined in the attributes CSV (see the colours example above) an error message is thrown with the column names and row numbers of the cells in the CSV that contains something else than the predefined values (NAs are allowed).  
 
 For stations CSV files, some specific format checks are done:  
+
 - All given StationIDs must be unique. If a StationID is duplicated, an error message is thrown specifying these duplicated StationIDs.  
 - The dates are converted to an R date format. If dates cannot be converted, it means the format in the CSV inputfile is wrong. An error message will be thrown specifying which rows contain a data that cannot be converted.  
 - If the time does not follow a specific format (checked using a regex statement), an error message is thrown specifying which rows contain times in the wrong format.  
@@ -604,6 +616,7 @@ Then, additional species data is generated:
 In summary, the originally reported taxa now have a valid name including a full taxonomy, and there are three columns that contain information on ash-free dry weight biomass: 1) a column with measured AFDW called AFDW_g i.e. done by the researchers themselves in the lab, 2) a column with AFDW estimated using regression formulas called "AFDW_g_calc", and 3) a column with AFDW estimated from measured wet weights and conversion factors called "AFDW_g_from_WW".  
 
 Finally, the wrapper function will provide you with some summary information about the dataset:  
+
 - It checks if the number of rows is not suddenly different than before; if this is the case it means rows have been erroneously removed, added/duplicated.  
 - It will return a list of taxa names that cannot be matched to WoRMS and specify in which CSV files these taxa are reported.  
 - It will provide a list of taxa names (combined with is_Shell_removed) that have no corresponding conversion factor in the bioconversion.csv file.  
@@ -650,7 +663,7 @@ The TripleD package results in two databases:
 
 An explanation of each all attributes in the density and biomass database can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_database.csv), and for the individual size and weight database can be viewed [here](https://github.com/dswdejonge/TripleD/blob/master/inst/extdata/attributes_database_individuals.csv).
 Alternatively, you can view the requirements in R:  
-```{r view_att_bioc, eval=FALSE}
+```{r view_att_database, eval=FALSE}
 library(TripleD)
 print(att_database)
 print(att_database_individuals)
