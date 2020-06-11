@@ -22,4 +22,5 @@ Imports:
     geosphere,
     marmap (>= 1.0.4),
     worrms,
-    tibble
+    tibble,
+    rlang (>= 0.4.6)
