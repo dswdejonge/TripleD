@@ -43,10 +43,10 @@ collect_from_NOAA <- function(stations = NULL, buffer = 2, resolution = 1,
     lons <- unlist(stations[,c("Lon_DD_midpt","Lon_start_DD", "Lon_stop_DD")])
   }
 
-  lon1 <- min(lons, na.rm = T)-buffer
-  lon2 <- max(lons, na.rm = T)+buffer
-  lat1 <- min(lats, na.rm = T)-buffer
-  lat2 <- max(lats, na.rm = T)+buffer
+  lon1 <- round(min(lons, na.rm = T)-buffer,1)
+  lon2 <- round(max(lons, na.rm = T)+buffer,1)
+  lat1 <- round(min(lats, na.rm = T)-buffer,1)
+  lat2 <- round(max(lats, na.rm = T)+buffer,1)
 
   # Contact API
   bathymetry <- marmap::getNOAA.bathy(
